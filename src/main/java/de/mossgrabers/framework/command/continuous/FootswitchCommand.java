@@ -16,6 +16,7 @@ import de.mossgrabers.framework.daw.data.ISlot;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ISlotBank;
 import de.mossgrabers.framework.utils.ButtonEvent;
+import java.time.*;
 
 
 /**
@@ -28,6 +29,10 @@ import de.mossgrabers.framework.utils.ButtonEvent;
  */
 public class FootswitchCommand<S extends IControlSurface<C>, C extends Configuration> extends AbstractTriggerCommand<S, C>
 {
+    
+    private Instant instantUp;
+    private Instant instantDown;
+    
     /**
      * Constructor.
      *
@@ -142,6 +147,10 @@ public class FootswitchCommand<S extends IControlSurface<C>, C extends Configura
                 this.handleLooper (event);
                 break;
 
+            case AbstractConfiguration.FOOTSWITCH_2_LOOPER_CUSTOM:
+                this.handleLooperCustom(event);
+                break;
+
             default:
                 return false;
         }
@@ -191,4 +200,127 @@ public class FootswitchCommand<S extends IControlSurface<C>, C extends Configura
         // Start transport if not already playing
         slot.launch ();
     }
+
+
+    private void handleLooperCustom (final ButtonEvent event)
+    {
+
+        if (event == ButtonEvent.LONG)
+            return;
+
+        this.surface.println(event.toString());
+        final ITrack track = this.model.getSelectedTrack ();
+        if (track == null)
+        {
+            this.surface.getDisplay ().notify ("Please select a track first.");
+            return;
+        }
+        if(!track.isRecArm()){
+            this.surface.getDisplay ().notify ("Rec Arm " + track.getIndex() + " !");
+        }
+
+        final ISlotBank slotBank = track.getSlotBank ();
+        final ISlot selectedSlot = slotBank.getSelectedItem ();
+        boolean noSelectedSlot = selectedSlot == null;
+        ISlot slot = selectedSlot == null ? slotBank.getItem (0) : selectedSlot;
+        if (event == ButtonEvent.DOWN)
+        {
+            instantDown = Instant.now();
+        }else{
+            long delta = -1;
+            if(instantDown != null){ // safegard it could be null if pedal is plugged in pressed maybe
+                instantUp = Instant.now();
+                delta = Duration.between(instantDown, instantUp).toMillis(); 
+                instantDown = null; // reset for next time
+                this.surface.println(delta + " ms");
+            }
+
+            if(delta > 800 && delta < 2400){
+
+                this.surface.println("long press");
+                // oops my loop is not nice, stop it and delete
+                if(slot.isRecording()){
+                    slot.remove();
+                    this.surface.getDisplay ().notify ("Stop this slot and Delete");
+                }else{
+                    // undo button
+                    this.surface.getButton (ButtonID.NUDGE_MINUS).trigger (event);
+                    // ISlot firstEmpty = slotBank.getEmptySlot(0); // not working properly :( maybe i save the previous recorded slot somewhere
+                    // if(firstEmpty != null){
+                    //     firstEmpty.select();
+                    // }
+                    this.surface.getDisplay ().notify ("Undo");
+                }
+            }else if(delta > 2400){
+                this.surface.getDisplay ().notify ("Duplicate with no clip");
+                this.surface.println("very long press");
+                // disable record
+                track.setRecArm(false);
+                track.duplicate(); // pas sur de ça, normalement ça va sur la nouvelle
+                int index = track.getIndex();
+                ITrack newTrack = this.model.getTrackBank().getItem(index +1);
+                newTrack.select();
+                // clear all clip of the cloned track
+                var newTrackSlotBank = newTrack.getSlotBank();
+                for (int i = 0; i < newTrackSlotBank.getPositionOfLastItem() + 1; i++) {
+                    // how to remove the full line and go beyond the bank ?
+                    newTrackSlotBank.getItem(i).remove();
+                }
+
+                newTrackSlotBank.getItem(0).select();
+                newTrack.setRecArm(true);
+                // enable record, you can now jam over your loop !
+            }else{
+                if(track.canHoldNotes() && noSelectedSlot){                   
+                    slot = slotBank.getEmptySlot(0);
+                    if(slot == null){
+                        this.surface.getDisplay ().notify ("No more empty slot in the bank");
+                        return;
+                    }
+                    slot.select();
+                }
+
+                if (slot.hasContent ()){
+                        if(track.canHoldAudioData()){
+                            // create new clip and record
+                            this.surface.getButton (ButtonID.NEW).trigger (ButtonEvent.DOWN);
+                        }else{
+                            // If there is a clip in the selected slot, toggle LauncherOverdub.
+                            this.model.getTransport ().toggleLauncherOverdub();
+                        }
+
+                    // If the clip is recording, launch it and thereby go into a loop
+                    if(slot.isRecording()){
+                        slot.launch();
+                    }
+                }
+                else
+                {
+                    // If there is no clip in the selected slot, start recording into it
+                    slot.record();
+                    slot.launch();
+                    this.model.getTransport ().setLauncherOverdub (false);
+                }
+            }
+        }
+	}
+	
+	/* inspired from https://www.kvraudio.com/forum/viewtopic.php?p=6638994
+	The way the footswitch behaves now is that it starts recording into a selected empty clip in the selected track that you choose. If your clips are not playing yet they will start after the pre-roll and you'll record into the clip. If your clips are already playing, recording will start at the next measure or however you've set it up globally so it will be in time.
+
+	Then when you press the footswitch again, recording will stop at the next measure and the clip will start looping.
+
+    If you press the footswitch again and you have still selected a playing clip : 
+     - if isInstrument : then overdub will be toggled so you can record additional midi notes if you want, 
+     - if isAudio : then new clip for audio, record and select
+
+    If you longPress 1sec
+     - if clip recording, it gets stop and deleted
+     - else undo
+
+    If you very longPress 3sec
+     - current track no more armed, clone current track, new clone is rec armed, but empty of clips, to jam over your previous loop
+	*/
+
+
 }

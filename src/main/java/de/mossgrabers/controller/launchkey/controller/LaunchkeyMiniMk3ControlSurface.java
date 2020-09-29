@@ -155,7 +155,7 @@ public class LaunchkeyMiniMk3ControlSurface extends AbstractControlSurface<Launc
         else if (this.lastPrgChange == 0 && data1 == 127)
             isInc = false;
         this.lastPrgChange = data1;
-        this.pageAdjuster.execute (isInc ? 1 : -1);
+        this.pageAdjuster.execute (isInc ? -1 : 1);
     }
 
 

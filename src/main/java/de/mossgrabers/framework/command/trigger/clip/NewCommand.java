@@ -73,8 +73,13 @@ public class NewCommand<S extends IControlSurface<C>, C extends Configuration> e
             return;
         }
 
-        final int lengthInBeats = this.getNewClipLenghthInBeats (this.model.getTransport ().getQuartersPerMeasure ());
-        this.model.createNoteClip (track, slot, lengthInBeats, enableOverdub);
+		if(track.canHoldAudioData()){
+            slot.record();
+            slot.select();
+		}else{
+			final int lengthInBeats = this.getNewClipLenghthInBeats (this.model.getTransport ().getQuartersPerMeasure ());
+			this.model.createNoteClip (track, slot, lengthInBeats, enableOverdub);
+		}
     }
 
 

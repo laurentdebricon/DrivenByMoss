@@ -55,5 +55,7 @@ public class APCConfiguration extends AbstractConfiguration
         this.activateBehaviourOnStopSetting (globalSettings);
         this.activateSelectClipOnLaunchSetting (globalSettings);
         this.activateNewClipLengthSetting (globalSettings);
+
+        this.activateFootswitchSetting (globalSettings);
     }
 }

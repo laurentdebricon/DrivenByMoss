@@ -156,6 +156,7 @@ public abstract class AbstractConfiguration implements Configuration
     /** Use footswitch 2 to quantize the selected clip. */
     public static final int          FOOTSWITCH_2_QUANTIZE             = 14;
     // Note: There are controllers who extend this list!
+    public static final int          FOOTSWITCH_2_LOOPER_CUSTOM    	   = 15;
 
     protected static final String [] OPTIONS_MIDI_CHANNEL              = new String [16];
     protected static final String [] KNOB_SENSITIVITY                  = new String [201];
@@ -250,7 +251,8 @@ public abstract class AbstractConfiguration implements Configuration
         "Add instrument track",
         "Add audio track",
         "Add effect track",
-        "Quantize"
+        "Quantize",
+        "Looper Custom"
     };
 
     private static final String []                    BROWSER_FILTER_COLUMN_NAMES =
