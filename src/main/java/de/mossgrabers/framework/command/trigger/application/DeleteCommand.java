@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger.application;
@@ -38,7 +38,7 @@ public class DeleteCommand<S extends IControlSurface<C>, C extends Configuration
     public void executeNormal (final ButtonEvent event)
     {
         // Update for key combinations
-        this.surface.getViewManager ().getActiveView ().updateNoteMapping ();
+        this.surface.getViewManager ().getActive ().updateNoteMapping ();
 
         if (event == ButtonEvent.UP)
             this.model.getApplication ().deleteSelection ();

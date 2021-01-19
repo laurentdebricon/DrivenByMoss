@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.maschine.view;
@@ -12,7 +12,7 @@ import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
 import de.mossgrabers.framework.daw.data.IParameter;
 import de.mossgrabers.framework.daw.data.bank.IParameterBank;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.mode.device.SelectedDeviceMode;
 
@@ -88,7 +88,7 @@ public class ParameterView extends BaseView
         // Flip row 2 and 1 to look the same as in the Bitwig device display
         final int selectedParameter = padIndex < 4 ? padIndex + 4 : padIndex - 4;
 
-        ((SelectedDeviceMode<?, ?>) this.surface.getModeManager ().getMode (Modes.DEVICE_PARAMS)).selectParameter (selectedParameter);
+        ((SelectedDeviceMode<?, ?>) this.surface.getModeManager ().get (Modes.DEVICE_PARAMS)).selectParameter (selectedParameter);
         this.model.getHost ().scheduleTask ( () -> {
 
             final StringBuilder message = new StringBuilder ();
@@ -117,7 +117,7 @@ public class ParameterView extends BaseView
         final IPadGrid padGrid = this.surface.getPadGrid ();
 
         for (int i = 8; i < 12; i++)
-            padGrid.lightEx (i % 4, 3 - i / 4, AbstractMode.BUTTON_COLOR_OFF);
+            padGrid.lightEx (i % 4, 3 - i / 4, AbstractFeatureGroup.BUTTON_COLOR_OFF);
 
         final ICursorDevice cursorDevice = this.model.getCursorDevice ();
         final boolean doesExist = cursorDevice.doesExist ();
@@ -128,7 +128,7 @@ public class ParameterView extends BaseView
         padGrid.lightEx (2, 0, doesExist && parameterBank.canScrollBackwards () ? MaschineColorManager.COLOR_SKIN : MaschineColorManager.COLOR_BLACK);
         padGrid.lightEx (3, 0, doesExist && parameterBank.canScrollForwards () ? MaschineColorManager.COLOR_SKIN : MaschineColorManager.COLOR_BLACK);
 
-        final SelectedDeviceMode<?, ?> deviceMode = (SelectedDeviceMode<?, ?>) this.surface.getModeManager ().getMode (Modes.DEVICE_PARAMS);
+        final SelectedDeviceMode<?, ?> deviceMode = (SelectedDeviceMode<?, ?>) this.surface.getModeManager ().get (Modes.DEVICE_PARAMS);
         for (int i = 0; i < 8; i++)
         {
             final int x = i % 4;
@@ -143,7 +143,7 @@ public class ParameterView extends BaseView
                     padGrid.lightEx (x, y, PARAM_COLORS[i]);
             }
             else
-                padGrid.lightEx (x, y, AbstractMode.BUTTON_COLOR_OFF);
+                padGrid.lightEx (x, y, AbstractFeatureGroup.BUTTON_COLOR_OFF);
         }
     }
 }

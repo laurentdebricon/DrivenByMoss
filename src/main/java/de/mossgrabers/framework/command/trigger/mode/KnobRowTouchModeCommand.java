@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger.mode;
@@ -8,7 +8,7 @@ import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.configuration.Configuration;
 import de.mossgrabers.framework.controller.IControlSurface;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.Mode;
+import de.mossgrabers.framework.featuregroup.IMode;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
 
@@ -43,7 +43,7 @@ public class KnobRowTouchModeCommand<S extends IControlSurface<C>, C extends Con
     @Override
     public void execute (final ButtonEvent event, final int velocity)
     {
-        final Mode m = this.surface.getModeManager ().getActiveOrTempMode ();
+        final IMode m = this.surface.getModeManager ().getActive ();
         if (m != null && event != ButtonEvent.LONG)
             m.onKnobTouch (this.index, event == ButtonEvent.DOWN);
     }

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.hardware;
@@ -21,6 +21,7 @@ import de.mossgrabers.framework.controller.hardware.IHwSurfaceFactory;
 import de.mossgrabers.framework.controller.hardware.IHwTextDisplay;
 import de.mossgrabers.framework.controller.valuechanger.RelativeEncoding;
 import de.mossgrabers.framework.graphics.IBitmap;
+import de.mossgrabers.framework.utils.OperatingSystem;
 
 import com.bitwig.extension.api.Color;
 import com.bitwig.extension.controller.api.HardwareButton;
@@ -47,6 +48,8 @@ public class HwSurfaceFactoryImpl implements IHwSurfaceFactory
     private final HardwareSurface hardwareSurface;
 
     private int                   lightCounter = 0;
+    private long                  startup      = System.currentTimeMillis ();
+    private boolean               startupDone  = false;
 
 
     /**
@@ -82,8 +85,8 @@ public class HwSurfaceFactoryImpl implements IHwSurfaceFactory
         final String id = createID (surfaceID, outputID == null ? "LIGHT" + this.lightCounter : outputID.name ());
 
         final MultiStateHardwareLight hardwareLight = this.hardwareSurface.createMultiStateHardwareLight (id);
-        final Supplier<? extends InternalHardwareLightState> valueSupplier = () -> new RawColorLightState (supplier.get ());
-        final Consumer<? extends InternalHardwareLightState> hardwareUpdater = state -> {
+        final Supplier<InternalHardwareLightState> valueSupplier = () -> new RawColorLightState (supplier.get ());
+        final Consumer<InternalHardwareLightState> hardwareUpdater = state -> {
             final HardwareLightVisualState visualState = state == null ? null : state.getVisualState ();
             final Color c = visualState == null ? Color.blackColor () : visualState.getColor ();
             sendValueConsumer.accept (new ColorEx (c.getRed (), c.getGreen (), c.getBlue ()));
@@ -101,8 +104,8 @@ public class HwSurfaceFactoryImpl implements IHwSurfaceFactory
 
         final MultiStateHardwareLight hardwareLight = this.hardwareSurface.createMultiStateHardwareLight (id);
 
-        final Supplier<? extends InternalHardwareLightState> valueSupplier = () -> new EncodedColorLightState (supplier.getAsInt (), stateToColorFunction);
-        final Consumer<? extends InternalHardwareLightState> hardwareUpdater = state -> {
+        final Supplier<InternalHardwareLightState> valueSupplier = () -> new EncodedColorLightState (supplier.getAsInt (), stateToColorFunction);
+        final Consumer<InternalHardwareLightState> hardwareUpdater = state -> {
             final HardwareLightVisualState visualState = state == null ? null : state.getVisualState ();
             final int encodedColorState = visualState == null ? 0 : supplier.getAsInt ();
             sendValueConsumer.accept (encodedColorState);
@@ -185,6 +188,13 @@ public class HwSurfaceFactoryImpl implements IHwSurfaceFactory
     @Override
     public void flush ()
     {
+        // Workaround for state not updated on first startup on Macos 11
+        if (OperatingSystem.get () == OperatingSystem.MAC && !this.startupDone && System.currentTimeMillis () - this.startup > 10000)
+        {
+            this.hardwareSurface.invalidateHardwareOutputState ();
+            this.startupDone = true;
+        }
+
         this.hardwareSurface.updateHardware ();
     }
 

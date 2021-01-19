@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.maschine.view;
@@ -37,7 +37,7 @@ public class ShiftView extends BaseView
     protected void executeFunction (final int padIndex)
     {
         final IDisplay display = this.surface.getDisplay ();
-        final IClip clip = this.model.getClip ();
+        final IClip clip = this.model.getCursorClip ();
 
         this.surface.setStopConsumed ();
 
@@ -150,7 +150,7 @@ public class ShiftView extends BaseView
     {
         final IPadGrid padGrid = this.surface.getPadGrid ();
 
-        final IClip clip = this.model.getClip ();
+        final IClip clip = this.model.getCursorClip ();
         final boolean exists = clip.doesExist () && clip instanceof INoteClip;
 
         padGrid.lightEx (0, 0, exists ? MaschineColorManager.COLOR_TURQUOISE : MaschineColorManager.COLOR_BLACK);

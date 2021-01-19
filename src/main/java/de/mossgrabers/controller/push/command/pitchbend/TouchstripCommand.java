@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.pitchbend;
@@ -40,7 +40,7 @@ public class TouchstripCommand extends AbstractPitchbendCommand<PushControlSurfa
     @Override
     public void onPitchbend (final int data1, final int data2)
     {
-        if (this.surface.getViewManager ().isActiveView (Views.SESSION))
+        if (this.surface.getViewManager ().isActive (Views.SESSION))
         {
             final int value = this.surface.isShiftPressed () ? 63 : data2;
             this.model.getTransport ().setCrossfade (this.model.getValueChanger ().toDAWValue (value));
@@ -106,9 +106,7 @@ public class TouchstripCommand extends AbstractPitchbendCommand<PushControlSurfa
                 break;
 
             case PushConfiguration.RIBBON_MODE_FADER:
-                final ITrack selTrack = this.model.getSelectedTrack ();
-                if (selTrack != null)
-                    selTrack.setVolume (this.model.getValueChanger ().toDAWValue (data2));
+                this.model.getCursorTrack ().setVolume (this.model.getValueChanger ().toDAWValue (data2));
                 return;
 
             default:
@@ -124,7 +122,7 @@ public class TouchstripCommand extends AbstractPitchbendCommand<PushControlSurfa
     @Override
     public void updateValue ()
     {
-        if (this.surface.getViewManager ().isActiveView (Views.SESSION))
+        if (this.surface.getViewManager ().isActive (Views.SESSION))
         {
             this.surface.setRibbonValue (this.model.getValueChanger ().toMidiValue (this.model.getTransport ().getCrossfade ()));
             return;
@@ -151,8 +149,8 @@ public class TouchstripCommand extends AbstractPitchbendCommand<PushControlSurfa
                 break;
 
             case PushConfiguration.RIBBON_MODE_FADER:
-                final ITrack t = this.model.getSelectedTrack ();
-                this.surface.setRibbonValue (t == null ? 0 : this.model.getValueChanger ().toMidiValue (t.getVolume ()));
+                final ITrack t = this.model.getCursorTrack ();
+                this.surface.setRibbonValue (this.model.getValueChanger ().toMidiValue (t.getVolume ()));
                 break;
 
             default:

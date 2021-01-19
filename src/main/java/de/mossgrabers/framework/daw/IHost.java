@@ -1,11 +1,11 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.daw;
 
 import de.mossgrabers.framework.controller.hardware.IHwSurfaceFactory;
-import de.mossgrabers.framework.daw.constants.EditCapability;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.graphics.IBitmap;
 import de.mossgrabers.framework.graphics.IImage;
 import de.mossgrabers.framework.osc.IOpenSoundControlCallback;
@@ -34,44 +34,12 @@ public interface IHost
 
 
     /**
-     * Returns true if the DAW supports track/device pinning.
-     *
-     * @return True if the DAW supports track/device pinning
-     */
-    boolean hasPinning ();
-
-
-    /**
-     * Returns true if the DAW supports a crossfader.
-     *
-     * @return True if the DAW supports a crossfader
-     */
-    boolean hasCrossfader ();
-
-
-    /**
-     * Returns true if the DAW supports Drum Device options.
-     *
-     * @return True if the DAW supports Drum Device options
-     */
-    boolean hasDrumDevice ();
-
-
-    /**
-     * Check if devices have addition slot chains.
-     *
-     * @return True if supported
-     */
-    boolean hasSlotChains ();
-
-
-    /**
      * Returns true if the DAW supports editing a specific property.
      *
      * @param capability The capability to check
      * @return True if the DAW supports editing
      */
-    boolean canEdit (EditCapability capability);
+    boolean supports (Capability capability);
 
 
     /**

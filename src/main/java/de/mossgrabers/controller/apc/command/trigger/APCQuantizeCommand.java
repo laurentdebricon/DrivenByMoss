@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.apc.command.trigger;
@@ -9,6 +9,7 @@ import de.mossgrabers.controller.apc.controller.APCControlSurface;
 import de.mossgrabers.framework.command.trigger.clip.QuantizeCommand;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
+import de.mossgrabers.framework.daw.data.ICursorTrack;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
 
@@ -37,13 +38,14 @@ public class APCQuantizeCommand extends QuantizeCommand<APCControlSurface, APCCo
     {
         if (event != ButtonEvent.DOWN)
             return;
+        final ICursorTrack cursorTrack = this.model.getCursorTrack ();
         final ICursorDevice cursorDevice = this.model.getCursorDevice ();
-        if (!cursorDevice.doesExist ())
+        if (!cursorTrack.doesExist () || !cursorDevice.doesExist ())
             return;
         final boolean pinned = cursorDevice.isPinned ();
         cursorDevice.togglePinned ();
-        final boolean cursorTrackPinned = this.model.isCursorTrackPinned ();
+        final boolean cursorTrackPinned = cursorTrack.isPinned ();
         if (pinned == cursorTrackPinned)
-            this.model.toggleCursorTrackPinned ();
+            cursorTrack.togglePinned ();
     }
 }

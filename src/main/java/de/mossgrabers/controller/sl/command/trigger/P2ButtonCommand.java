@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.sl.command.trigger;
@@ -32,6 +32,7 @@ public class P2ButtonCommand extends AbstractTriggerCommand<SLControlSurface, SL
     public P2ButtonCommand (final boolean isUp, final IModel model, final SLControlSurface surface)
     {
         super (model, surface);
+
         this.isUp = isUp;
     }
 

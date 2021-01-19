@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.sl.command.trigger;
@@ -9,11 +9,10 @@ import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.configuration.Configuration;
 import de.mossgrabers.framework.controller.IControlSurface;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.Mode;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.IView;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.View;
 
 
 /**
@@ -39,6 +38,7 @@ public class ButtonRowSelectCommand<S extends IControlSurface<C>, C extends Conf
     public ButtonRowSelectCommand (final int row, final IModel model, final S surface)
     {
         super (model, surface);
+
         this.row = row;
     }
 
@@ -50,9 +50,11 @@ public class ButtonRowSelectCommand<S extends IControlSurface<C>, C extends Conf
         if (event != ButtonEvent.DOWN)
             return;
 
-        final View view = this.surface.getViewManager ().getActiveView ();
+        final IView view = this.surface.getViewManager ().getActive ();
         if (view == null)
             return;
+
+        final ModeManager modeManager = this.surface.getModeManager ();
 
         switch (this.row)
         {
@@ -61,7 +63,7 @@ public class ButtonRowSelectCommand<S extends IControlSurface<C>, C extends Conf
                 break;
 
             case 1:
-                this.surface.getModeManager ().setActiveMode (Modes.DEVICE_PARAMS);
+                modeManager.setActive (Modes.DEVICE_PARAMS);
                 this.model.getHost ().showNotification ("Device Parameters");
                 break;
 
@@ -70,93 +72,23 @@ public class ButtonRowSelectCommand<S extends IControlSurface<C>, C extends Conf
                 break;
 
             case 3:
-                this.onKnobRow2Select ();
+                modeManager.setActive (Modes.TRACK);
+                this.model.getHost ().showNotification ("Track");
                 break;
 
             case 4:
                 break;
 
             case 5:
-                this.onSliderRowSelect ();
-                break;
-
             case 6:
             case 7:
-                this.onSliderRowSelect ();
+                modeManager.setActive (Modes.VOLUME);
+                this.model.getHost ().showNotification ("Volume");
                 break;
 
             default:
                 // Intentionally empty
                 break;
         }
-    }
-
-
-    private void onKnobRow2Select ()
-    {
-        final ModeManager modeManager = this.surface.getModeManager ();
-
-        if (modeManager.isActiveOrTempMode (Modes.MASTER))
-        {
-            this.activateTrackMode (true, false);
-            return;
-        }
-
-        if (modeManager.isActiveOrTempMode (Modes.TRACK))
-        {
-            if (this.model.isEffectTrackBankActive ())
-                this.activateMasterMode (true);
-            else
-                this.activateTrackMode (true, true);
-            return;
-        }
-
-        this.activateTrackMode (true, this.model.isEffectTrackBankActive ());
-    }
-
-
-    private void activateTrackMode (final boolean activateMode, final boolean isEffect)
-    {
-        final boolean isEffectTrackBankActive = this.model.isEffectTrackBankActive ();
-        if (isEffect != isEffectTrackBankActive)
-            this.model.toggleCurrentTrackBank ();
-        final ModeManager modeManager = this.surface.getModeManager ();
-        if (activateMode)
-            modeManager.setActiveMode (Modes.TRACK);
-        this.model.getHost ().showNotification (isEffect ? "Effects" : "Tracks");
-        if (this.model.getSelectedTrack () != null)
-            return;
-        final Mode activeMode = modeManager.getActiveOrTempMode ();
-        if (activeMode != null)
-            activeMode.selectItem (0);
-    }
-
-
-    private void activateMasterMode (final boolean activateMode)
-    {
-        this.model.getMasterTrack ().select ();
-        if (activateMode)
-            this.surface.getModeManager ().setActiveMode (Modes.MASTER);
-        this.model.getHost ().showNotification ("Master");
-    }
-
-
-    private void onSliderRowSelect ()
-    {
-        final ModeManager modeManager = this.surface.getModeManager ();
-
-        if (!modeManager.isActiveOrTempMode (Modes.VOLUME))
-        {
-            modeManager.setActiveMode (Modes.VOLUME);
-            this.activateTrackMode (false, false);
-            return;
-        }
-
-        if (this.model.getMasterTrack ().isSelected ())
-            this.activateTrackMode (false, false);
-        else if (this.model.isEffectTrackBankActive ())
-            this.activateMasterMode (false);
-        else
-            this.activateTrackMode (false, true);
     }
 }

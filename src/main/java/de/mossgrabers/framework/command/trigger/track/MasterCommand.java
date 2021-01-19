@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger.track;
@@ -8,7 +8,7 @@ import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.configuration.Configuration;
 import de.mossgrabers.framework.controller.IControlSurface;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -55,13 +55,13 @@ public class MasterCommand<S extends IControlSurface<C>, C extends Configuration
         {
             // No Sends on effect tracks
             final ModeManager modeManager = this.surface.getModeManager ();
-            final int mode = modeManager.getActiveOrTempModeId ().ordinal ();
+            final int mode = modeManager.getActiveID ().ordinal ();
             if (mode >= Modes.SEND1.ordinal () && mode <= Modes.SEND8.ordinal ())
-                modeManager.setActiveMode (Modes.PAN);
+                modeManager.setActive (Modes.PAN);
         }
 
         // Make sure that a track is selected
-        if (this.model.getSelectedTrack () == null)
+        if (!this.model.getCursorTrack ().doesExist ())
             this.model.getCurrentTrackBank ().getItem (0).select ();
     }
 }

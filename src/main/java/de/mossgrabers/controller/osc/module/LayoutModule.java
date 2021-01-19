@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.osc.module;
@@ -15,6 +15,7 @@ import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.osc.IOpenSoundControlWriter;
 
 import java.util.LinkedList;
+import java.util.Locale;
 
 
 /**
@@ -58,7 +59,7 @@ public class LayoutModule extends AbstractModule
         switch (command)
         {
             case "layout":
-                this.model.getApplication ().setPanelLayout (toString (value).toUpperCase ());
+                this.model.getApplication ().setPanelLayout (toString (value).toUpperCase (Locale.US));
                 break;
 
             case "panel":
@@ -156,7 +157,7 @@ public class LayoutModule extends AbstractModule
     public void flush (final boolean dump)
     {
         final IApplication app = this.model.getApplication ();
-        this.writer.sendOSC ("/layout", app.getPanelLayout ().toLowerCase (), dump);
+        this.writer.sendOSC ("/layout", app.getPanelLayout ().toLowerCase (Locale.US), dump);
 
         final IArranger arrange = this.model.getArranger ();
         this.writer.sendOSC ("/arranger/cueMarkerVisibility", arrange.areCueMarkersVisible (), dump);

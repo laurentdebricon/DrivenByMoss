@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.slmkiii.mode;
@@ -32,8 +32,6 @@ public class OptionsMode extends BaseMode
     public OptionsMode (final SLMkIIIControlSurface surface, final IModel model)
     {
         super ("Options", surface, model);
-
-        this.isTemporary = true;
     }
 
 
@@ -119,7 +117,7 @@ public class OptionsMode extends BaseMode
                 this.model.getApplication ().toggleEngineActive ();
                 break;
             case 7:
-                final IClip clip = this.model.getClip ();
+                final IClip clip = this.model.getCursorClip ();
                 if (clip.doesExist ())
                     clip.quantize (this.surface.getConfiguration ().getQuantizeAmount () / 100.0);
                 break;

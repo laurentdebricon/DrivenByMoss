@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.configuration;
@@ -12,11 +12,9 @@ import com.bitwig.extension.controller.api.Setting;
 /**
  * Abstract base class for all Bitwig settings.
  *
- * @param <T> The type of the settings value
- *
  * @author J&uuml;rgen Mo&szlig;graber
  */
-public abstract class AbstractSetting<T> implements ISetting<T>
+public abstract class AbstractSetting implements ISetting
 {
     protected Setting setting;
 

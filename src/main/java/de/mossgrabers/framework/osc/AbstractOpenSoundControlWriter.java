@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.osc;
@@ -55,10 +55,31 @@ public abstract class AbstractOpenSoundControlWriter implements IOpenSoundContro
      */
     public void flush ()
     {
+        this.flush (null);
+    }
+
+
+    /**
+     * Send all collected messages.
+     *
+     * @param updateAddress If this is not null it is sent before and after the flush with a value
+     *            of 1 before and 0 after
+     */
+    public void flush (final String updateAddress)
+    {
+        if (this.messages.isEmpty ())
+            return;
+
         synchronized (this.messages)
         {
             try
             {
+                if (updateAddress != null)
+                {
+                    this.messages.add (0, this.host.createOSCMessage (updateAddress, Collections.singletonList (Integer.valueOf (1))));
+                    this.messages.add (this.host.createOSCMessage (updateAddress, Collections.singletonList (Integer.valueOf (0))));
+                }
+
                 this.logMessages (this.messages);
                 this.oscClient.sendBundle (this.messages);
             }

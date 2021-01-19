@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode;
@@ -10,10 +10,11 @@ import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.display.IGraphicDisplay;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.daw.constants.EditCapability;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.daw.data.IMarker;
 import de.mossgrabers.framework.daw.data.bank.IMarkerBank;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.utils.StringUtils;
 
@@ -51,7 +52,7 @@ public class MarkerMode extends BaseMode
     {
         super ("Marker", surface, model, model.getMarkerBank ());
 
-        this.canEditMarkers = model.getHost ().canEdit (EditCapability.MARKERS);
+        this.canEditMarkers = model.getHost ().supports (Capability.MARKERS);
     }
 
 
@@ -142,12 +143,12 @@ public class MarkerMode extends BaseMode
     {
         int index = this.isButtonRow (0, buttonID);
         if (index >= 0)
-            return this.bank.getItem (index).doesExist () ? AbstractMode.BUTTON_COLOR_ON : AbstractMode.BUTTON_COLOR_OFF;
+            return this.bank.getItem (index).doesExist () ? AbstractFeatureGroup.BUTTON_COLOR_ON : AbstractFeatureGroup.BUTTON_COLOR_OFF;
 
         index = this.isButtonRow (1, buttonID);
         if (index >= 0)
-            return (this.canEditMarkers || index > 0) && !EDIT_MENU[index].isEmpty () ? AbstractMode.BUTTON_COLOR2_ON : AbstractMode.BUTTON_COLOR_OFF;
+            return (this.canEditMarkers || index > 0) && !EDIT_MENU[index].isEmpty () ? AbstractMode.BUTTON_COLOR2_ON : AbstractFeatureGroup.BUTTON_COLOR_OFF;
 
-        return AbstractMode.BUTTON_COLOR_OFF;
+        return AbstractFeatureGroup.BUTTON_COLOR_OFF;
     }
 }

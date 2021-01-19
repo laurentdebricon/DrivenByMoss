@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.mcu.controller;
@@ -366,6 +366,17 @@ public class MCUControlSurface extends AbstractControlSurface<MCUConfiguration>
             if (surface.isSinglePressed (buttonID))
                 return true;
         return false;
+    }
+
+
+    /**
+     * Returns true if this is the 'most right device'.
+     *
+     * @return True if this is the 'most right device'
+     */
+    public boolean isLastDevice ()
+    {
+        return this.surfaceID == this.surfaces.size () - 1;
     }
 
 

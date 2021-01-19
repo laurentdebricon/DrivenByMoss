@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.daw.data;
@@ -57,6 +57,14 @@ public abstract class AbstractDeviceChainImpl<T extends DeviceChain> extends Abs
     public void addNameObserver (final IValueObserver<String> observer)
     {
         this.deviceChain.name ().addValueObserver (observer::update);
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void setName (final String name)
+    {
+        this.deviceChain.name ().set (name);
     }
 
 

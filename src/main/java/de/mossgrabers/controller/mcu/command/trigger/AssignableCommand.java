@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.mcu.command.trigger;
@@ -10,8 +10,8 @@ import de.mossgrabers.framework.command.continuous.FootswitchCommand;
 import de.mossgrabers.framework.configuration.AbstractConfiguration;
 import de.mossgrabers.framework.daw.IApplication;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.Mode;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.IMode;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -23,8 +23,9 @@ import de.mossgrabers.framework.utils.ButtonEvent;
  */
 public class AssignableCommand extends FootswitchCommand<MCUControlSurface, MCUConfiguration>
 {
-    private final int          index;
-    private final ModeSwitcher switcher;
+    private final int            index;
+    private final ModeSwitcher   switcher;
+    private final MCUFlipCommand flipCommand;
 
 
     /**
@@ -37,8 +38,10 @@ public class AssignableCommand extends FootswitchCommand<MCUControlSurface, MCUC
     public AssignableCommand (final int index, final IModel model, final MCUControlSurface surface)
     {
         super (model, surface);
+
         this.index = index;
         this.switcher = new ModeSwitcher (surface);
+        this.flipCommand = new MCUFlipCommand (model, surface);
     }
 
 
@@ -62,22 +65,17 @@ public class AssignableCommand extends FootswitchCommand<MCUControlSurface, MCUC
                 if (event != ButtonEvent.DOWN)
                     return;
                 final ModeManager modeManager = this.surface.getModeManager ();
-                if (modeManager.isActiveOrTempMode (Modes.MARKERS))
-                    modeManager.restoreMode ();
+                if (modeManager.isActive (Modes.MARKERS))
+                    modeManager.restore ();
                 else
-                    modeManager.setActiveMode (Modes.MARKERS);
-                final Mode mode = modeManager.getActiveOrTempMode ();
+                    modeManager.setActive (Modes.MARKERS);
+                final IMode mode = modeManager.getActive ();
                 if (mode != null)
                     this.surface.getDisplay ().notify (mode.getName ());
                 break;
 
             case MCUConfiguration.FOOTSWITCH_2_USE_FADERS_LIKE_EDIT_KNOBS:
-                if (event == ButtonEvent.DOWN)
-                {
-                    final MCUConfiguration configuration = this.surface.getConfiguration ();
-                    configuration.toggleUseFadersAsKnobs ();
-                    this.mvHelper.delayDisplay ( () -> "Use faders as knobs: " + (configuration.useFadersAsKnobs () ? "On" : "Off"));
-                }
+                this.flipCommand.executeNormal (event);
                 break;
 
             case MCUConfiguration.FOOTSWITCH_2_ACTION:
@@ -131,7 +129,7 @@ public class AssignableCommand extends FootswitchCommand<MCUControlSurface, MCUC
                 return IApplication.PANEL_LAYOUT_EDIT.equals (this.model.getApplication ().getPanelLayout ());
 
             case MCUConfiguration.FOOTSWITCH_2_SHOW_MARKER_MODE:
-                return this.surface.getModeManager ().isActiveOrTempMode (Modes.MARKERS);
+                return this.surface.getModeManager ().isActive (Modes.MARKERS);
 
             case MCUConfiguration.FOOTSWITCH_2_USE_FADERS_LIKE_EDIT_KNOBS:
                 return this.surface.getConfiguration ().useFadersAsKnobs ();

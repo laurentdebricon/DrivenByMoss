@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.apc.command.trigger;
@@ -10,7 +10,7 @@ import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -65,7 +65,7 @@ public class SendModeCommand extends AbstractTriggerCommand<APCControlSurface, A
             return;
 
         final ModeManager modeManager = this.surface.getModeManager ();
-        modeManager.setActiveMode (Modes.get (Modes.SEND1, index));
+        modeManager.setActive (Modes.get (Modes.SEND1, index));
 
         String modeName = "Send " + (index + 1) + ": ";
         final ITrackBank trackBank = this.model.getTrackBank ();

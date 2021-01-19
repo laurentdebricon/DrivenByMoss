@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.continuous;
@@ -90,7 +90,7 @@ public class FootswitchCommand<S extends IControlSurface<C>, C extends Configura
                 break;
 
             case AbstractConfiguration.FOOTSWITCH_2_QUANTIZE:
-                final IClip clip = this.model.getClip ();
+                final IClip clip = this.model.getCursorClip ();
                 if (clip.doesExist ())
                     clip.quantize (this.surface.getConfiguration ().getQuantizeAmount () / 100.0);
                 break;
@@ -165,14 +165,14 @@ public class FootswitchCommand<S extends IControlSurface<C>, C extends Configura
      */
     private void handleLooper (final ButtonEvent event)
     {
-        final ITrack track = this.model.getSelectedTrack ();
-        if (track == null)
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (!cursorTrack.doesExist ())
         {
             this.surface.getDisplay ().notify ("Please select an Instrument track first.");
             return;
         }
 
-        final ISlotBank slotBank = track.getSlotBank ();
+        final ISlotBank slotBank = cursorTrack.getSlotBank ();
         final ISlot selectedSlot = slotBank.getSelectedItem ();
         final ISlot slot = selectedSlot == null ? slotBank.getItem (0) : selectedSlot;
         if (event == ButtonEvent.DOWN)

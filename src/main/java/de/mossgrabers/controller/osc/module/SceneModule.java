@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.osc.module;
@@ -111,7 +111,7 @@ public class SceneModule extends AbstractModule
             final IScene scene = sceneBank.getItem (i);
             final String sceneAddress = "/scene/" + (i + 1) + "/";
             this.writer.sendOSC (sceneAddress + TAG_EXISTS, scene.doesExist (), dump);
-            this.writer.sendOSC (sceneAddress + "name", scene.getName (), dump);
+            this.writer.sendOSC (sceneAddress + TAG_NAME, scene.getName (), dump);
             this.writer.sendOSC (sceneAddress + TAG_SELECTED, scene.isSelected (), dump);
         }
     }

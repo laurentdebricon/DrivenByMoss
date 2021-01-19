@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.sl.mode;
@@ -8,8 +8,7 @@ import de.mossgrabers.controller.sl.SLConfiguration;
 import de.mossgrabers.controller.sl.controller.SLControlSurface;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.AbstractMode;
-import de.mossgrabers.framework.utils.ButtonEvent;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
 
 
 /**
@@ -28,7 +27,6 @@ public class PlayOptionsMode extends AbstractMode<SLControlSurface, SLConfigurat
     public PlayOptionsMode (final SLControlSurface surface, final IModel model)
     {
         super ("Play options", surface, model);
-        this.isTemporary = false;
     }
 
 
@@ -36,15 +34,9 @@ public class PlayOptionsMode extends AbstractMode<SLControlSurface, SLConfigurat
     @Override
     public void updateDisplay ()
     {
-        final ITextDisplay d = this.surface.getTextDisplay ();
-        d.clearRow (2).setCell (2, 0, "Oct Down").setCell (2, 1, " Oct Up").setCell (2, 2, "Res Down").setCell (2, 3, " Res Up").setCell (2, 4, "  Left").setCell (2, 5, "  Right").setCell (2, 7, "Play/Seq").clearRow (0).done (0).done (2);
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public void onButton (final int row, final int index, final ButtonEvent event)
-    {
-        // Intentionally empty
+        final ITextDisplay d = this.surface.getTextDisplay ().clearRow (0).clearRow (1);
+        d.setCell (1, 0, "Oct Down").setCell (1, 1, " Oct Up").setCell (1, 2, "Res Down").setCell (1, 3, " Res Up");
+        d.setCell (1, 4, "  Left").setCell (1, 5, "  Right").setCell (1, 7, "Play/Seq");
+        d.done (0).done (1);
     }
 }

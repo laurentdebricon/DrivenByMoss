@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.slmkiii.mode.device;
@@ -12,7 +12,7 @@ import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.IItem;
 import de.mossgrabers.framework.daw.data.bank.IBank;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 
 
@@ -47,8 +47,6 @@ public abstract class AbstractParametersMode extends BaseMode
     public AbstractParametersMode (final String name, final SLMkIIIControlSurface surface, final IModel model, final IBank<? extends IItem> bank)
     {
         super (name, surface, model, bank);
-
-        this.isTemporary = false;
     }
 
 
@@ -58,17 +56,17 @@ public abstract class AbstractParametersMode extends BaseMode
         switch (index)
         {
             case 0:
-                this.surface.getModeManager ().setActiveMode (Modes.DEVICE_PARAMS);
-                ((ParametersMode) modeManager.getMode (Modes.DEVICE_PARAMS)).setShowDevices (true);
+                this.surface.getModeManager ().setActive (Modes.DEVICE_PARAMS);
+                ((ParametersMode) modeManager.get (Modes.DEVICE_PARAMS)).setShowDevices (true);
                 break;
 
             case 1:
-                this.surface.getModeManager ().setActiveMode (Modes.DEVICE_PARAMS);
-                ((ParametersMode) modeManager.getMode (Modes.DEVICE_PARAMS)).setShowDevices (false);
+                this.surface.getModeManager ().setActive (Modes.DEVICE_PARAMS);
+                ((ParametersMode) modeManager.get (Modes.DEVICE_PARAMS)).setShowDevices (false);
                 break;
 
             case 7:
-                this.surface.getModeManager ().setActiveMode (Modes.USER);
+                this.surface.getModeManager ().setActive (Modes.USER);
                 break;
 
             default:
@@ -83,21 +81,21 @@ public abstract class AbstractParametersMode extends BaseMode
     protected int getButtonColorArrowUp (final ButtonID buttonID)
     {
         final ModeManager modeManager = this.surface.getModeManager ();
-        final boolean isDeviceParams = modeManager.isActiveOrTempMode (Modes.DEVICE_PARAMS);
+        final boolean isDeviceParams = modeManager.isActive (Modes.DEVICE_PARAMS);
         switch (buttonID)
         {
             case ROW1_1:
-                if (isDeviceParams && ((ParametersMode) modeManager.getMode (Modes.DEVICE_PARAMS)).isShowDevices ())
+                if (isDeviceParams && ((ParametersMode) modeManager.get (Modes.DEVICE_PARAMS)).isShowDevices ())
                     return SLMkIIIColorManager.SLMKIII_MINT;
                 return SLMkIIIColorManager.SLMKIII_MINT_HALF;
 
             case ROW1_2:
-                if (isDeviceParams && !((ParametersMode) modeManager.getMode (Modes.DEVICE_PARAMS)).isShowDevices ())
+                if (isDeviceParams && !((ParametersMode) modeManager.get (Modes.DEVICE_PARAMS)).isShowDevices ())
                     return SLMkIIIColorManager.SLMKIII_PURPLE;
                 return SLMkIIIColorManager.SLMKIII_PURPLE_HALF;
 
             case ROW1_8:
-                return modeManager.isActiveOrTempMode (Modes.USER) ? SLMkIIIColorManager.SLMKIII_WHITE : SLMkIIIColorManager.SLMKIII_WHITE_HALF;
+                return modeManager.isActive (Modes.USER) ? SLMkIIIColorManager.SLMKIII_WHITE : SLMkIIIColorManager.SLMKIII_WHITE_HALF;
 
             default:
                 return SLMkIIIColorManager.SLMKIII_BLACK;
@@ -120,23 +118,23 @@ public abstract class AbstractParametersMode extends BaseMode
             boolean isActive = false;
             int color = SLMkIIIColorManager.SLMKIII_BLACK;
 
-            final boolean isDeviceParams = modeManager.isActiveOrTempMode (Modes.DEVICE_PARAMS);
+            final boolean isDeviceParams = modeManager.isActive (Modes.DEVICE_PARAMS);
             switch (i)
             {
                 case 0:
-                    if (isDeviceParams && ((ParametersMode) modeManager.getMode (Modes.DEVICE_PARAMS)).isShowDevices ())
+                    if (isDeviceParams && ((ParametersMode) modeManager.get (Modes.DEVICE_PARAMS)).isShowDevices ())
                         isActive = true;
                     color = SLMkIIIColorManager.SLMKIII_MINT;
                     break;
 
                 case 1:
-                    if (isDeviceParams && !((ParametersMode) modeManager.getMode (Modes.DEVICE_PARAMS)).isShowDevices ())
+                    if (isDeviceParams && !((ParametersMode) modeManager.get (Modes.DEVICE_PARAMS)).isShowDevices ())
                         isActive = true;
                     color = SLMkIIIColorManager.SLMKIII_PURPLE;
                     break;
 
                 case 7:
-                    isActive = modeManager.isActiveOrTempMode (Modes.USER);
+                    isActive = modeManager.isActive (Modes.USER);
                     color = SLMkIIIColorManager.SLMKIII_WHITE;
                     break;
 

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.slmkiii.view;
@@ -14,7 +14,7 @@ import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.INoteClip;
 import de.mossgrabers.framework.daw.data.IChannel;
 import de.mossgrabers.framework.daw.data.IDrumDevice;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.view.AbstractDrumView;
@@ -82,7 +82,7 @@ public class DrumView extends AbstractDrumView<SLMkIIIControlSurface, SLMkIIICon
     @Override
     public void drawGrid ()
     {
-        ((SessionView) this.surface.getViewManager ().getView (Views.SESSION)).drawLightGuide (this.surface.getLightGuide ());
+        ((SessionView) this.surface.getViewManager ().get (Views.SESSION)).drawLightGuide (this.surface.getLightGuide ());
 
         final IPadGrid padGrid = this.surface.getPadGrid ();
         final IDrumDevice primary = this.model.getDrumDevice ();
@@ -169,10 +169,10 @@ public class DrumView extends AbstractDrumView<SLMkIIIControlSurface, SLMkIIICon
             if (!this.isActive ())
                 return;
             final ModeManager modeManager = this.surface.getModeManager ();
-            if (modeManager.isActiveOrTempMode (Modes.GROOVE))
-                modeManager.restoreMode ();
+            if (modeManager.isActive (Modes.GROOVE))
+                modeManager.restore ();
             else
-                modeManager.setActiveMode (Modes.GROOVE);
+                modeManager.setActive (Modes.GROOVE);
         }
     }
 
@@ -199,7 +199,7 @@ public class DrumView extends AbstractDrumView<SLMkIIIControlSurface, SLMkIIICon
         {
             if (!this.isActive ())
                 return SLMkIIIColorManager.SLMKIII_BLACK;
-            return this.surface.getModeManager ().isActiveOrTempMode (Modes.GROOVE) ? SLMkIIIColorManager.SLMKIII_PINK : SLMkIIIColorManager.SLMKIII_DARK_GREY;
+            return this.surface.getModeManager ().isActive (Modes.GROOVE) ? SLMkIIIColorManager.SLMKIII_PINK : SLMkIIIColorManager.SLMKIII_DARK_GREY;
         }
 
         return super.getButtonColor (buttonID);

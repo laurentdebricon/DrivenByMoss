@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.sl.mode;
@@ -11,7 +11,6 @@ import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.mode.track.AbstractTrackMode;
-import de.mossgrabers.framework.utils.ButtonEvent;
 
 
 /**
@@ -41,37 +40,29 @@ public class TrackTogglesMode extends AbstractTrackMode<SLControlSurface, SLConf
     @Override
     public void updateDisplay ()
     {
-        final ITrack t = this.model.getSelectedTrack ();
-        final ITextDisplay d = this.surface.getTextDisplay ();
-        if (t == null)
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        final ITextDisplay d = this.surface.getTextDisplay ().clearRow (0).clearRow (1);
+        if (!cursorTrack.doesExist ())
         {
-            d.setRow (0, "                        Please select a track...                       ").done (0).clearRow (2).done (2);
+            d.setRow (0, "                        Please select a track...                       ").done (0).done (1);
+            return;
         }
-        else
-        {
-            final ICursorDevice device = this.model.getCursorDevice ();
-            d.setCell (0, 0, "  Mute");
-            d.setCell (2, 0, t.isMute () ? ON : OFF);
-            d.setCell (0, 1, "  Solo");
-            d.setCell (2, 1, t.isSolo () ? ON : OFF);
-            d.setCell (0, 2, "Rec Arm");
-            d.setCell (2, 2, t.isRecArm () ? ON : OFF);
-            d.setCell (0, 3, " Write");
-            d.setCell (2, 3, this.model.getTransport ().isWritingArrangerAutomation () ? ON : OFF);
-            d.setCell (0, 4, " Browse");
-            d.setCell (2, 4, "");
-            d.setCell (0, 5, device.doesExist () ? device.getName (8) : "None");
-            d.setCell (2, 5, device.isEnabled () ? "Enabled" : "Disabled");
-            d.setCell (0, 6, "<<Device").setCell (2, 6, "");
-            d.setCell (0, 7, "Device>>").setCell (2, 7, "").done (0).done (2);
-        }
-    }
 
-
-    /** {@inheritDoc} */
-    @Override
-    public void onButton (final int row, final int index, final ButtonEvent event)
-    {
-        // Intentionally empty
+        final ICursorDevice device = this.model.getCursorDevice ();
+        d.setCell (0, 0, "  Mute");
+        d.setCell (1, 0, cursorTrack.isMute () ? ON : OFF);
+        d.setCell (0, 1, "  Solo");
+        d.setCell (1, 1, cursorTrack.isSolo () ? ON : OFF);
+        d.setCell (0, 2, "Rec Arm");
+        d.setCell (1, 2, cursorTrack.isRecArm () ? ON : OFF);
+        d.setCell (0, 3, " Write");
+        d.setCell (1, 3, this.model.getTransport ().isWritingArrangerAutomation () ? ON : OFF);
+        d.setCell (0, 4, " Browse");
+        d.setCell (1, 4, "");
+        d.setCell (0, 5, device.doesExist () ? device.getName (8) : "None");
+        d.setCell (1, 5, device.isEnabled () ? "Enabled" : "Disabled");
+        d.setCell (0, 6, "<<Device").setCell (2, 6, "");
+        d.setCell (0, 7, "Device>>").setCell (2, 7, "").done (0).done (2);
+        d.done (0).done (1);
     }
 }

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push;
@@ -13,6 +13,7 @@ import de.mossgrabers.framework.configuration.ISettingsUI;
 import de.mossgrabers.framework.controller.color.ColorEx;
 import de.mossgrabers.framework.controller.valuechanger.IValueChanger;
 import de.mossgrabers.framework.daw.IHost;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.daw.midi.ArpeggiatorMode;
 import de.mossgrabers.framework.graphics.IGraphicsConfiguration;
 import de.mossgrabers.framework.mode.Modes;
@@ -284,6 +285,8 @@ public class PushConfiguration extends AbstractConfiguration implements IGraphic
         super (host, valueChanger, arpeggiatorModes);
 
         this.isPush2 = isPush2;
+
+        this.dontNotifyAll.add (DEBUG_WINDOW);
     }
 
 
@@ -328,7 +331,7 @@ public class PushConfiguration extends AbstractConfiguration implements IGraphic
 
         ///////////////////////////
         // Drum Sequencer
-        if (this.host.hasDrumDevice ())
+        if (this.host.supports (Capability.HAS_DRUM_DEVICE))
         {
             this.activateAutoSelectDrumSetting (globalSettings);
             this.activateTurnOffEmptyDrumPadsSetting (globalSettings);
@@ -1244,7 +1247,7 @@ public class PushConfiguration extends AbstractConfiguration implements IGraphic
         if (!this.isPush2)
             return;
 
-        settingsUI.getSignalSetting ("Reset colors to default", CATEGORY_COLORS, "Reset").addValueObserver (value -> {
+        settingsUI.getSignalSetting ("Reset colors to default", CATEGORY_COLORS, "Reset").addSignalObserver (value -> {
             this.colorBackgroundSetting.set (DEFAULT_COLOR_BACKGROUND);
             this.colorBackgroundDarkerSetting.set (DEFAULT_COLOR_BACKGROUND_DARKER);
             this.colorBackgroundLighterSetting.set (DEFAULT_COLOR_BACKGROUND_LIGHTER);
@@ -1357,6 +1360,6 @@ public class PushConfiguration extends AbstractConfiguration implements IGraphic
         if (!this.isPush2)
             return;
 
-        settingsUI.getSignalSetting (" ", CATEGORY_DEBUG, "Display window").addValueObserver (value -> this.notifyObservers (DEBUG_WINDOW));
+        settingsUI.getSignalSetting (" ", CATEGORY_DEBUG, "Display window").addSignalObserver (value -> this.notifyObservers (DEBUG_WINDOW));
     }
 }

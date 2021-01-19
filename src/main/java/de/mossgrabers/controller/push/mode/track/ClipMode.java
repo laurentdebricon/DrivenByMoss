@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode.track;
@@ -14,13 +14,14 @@ import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IClip;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.INoteClip;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
+import de.mossgrabers.framework.featuregroup.IView;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.utils.StringUtils;
 import de.mossgrabers.framework.view.AbstractSequencerView;
-import de.mossgrabers.framework.view.View;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -58,7 +59,7 @@ public class ClipMode extends AbstractTrackMode
         if (index == 7 && isTouched && this.surface.isDeletePressed ())
         {
             this.surface.setTriggerConsumed (ButtonID.DELETE);
-            final IClip clip = this.model.getClip ();
+            final IClip clip = this.model.getCursorClip ();
             if (clip.doesExist ())
                 clip.resetAccent ();
         }
@@ -72,7 +73,7 @@ public class ClipMode extends AbstractTrackMode
         if (!this.increaseKnobMovement ())
             return;
 
-        final IClip clip = this.model.getClip ();
+        final IClip clip = this.model.getCursorClip ();
         if (!clip.doesExist ())
             return;
 
@@ -110,7 +111,7 @@ public class ClipMode extends AbstractTrackMode
     @Override
     public void updateDisplay1 (final ITextDisplay display)
     {
-        final IClip clip = this.model.getClip ();
+        final IClip clip = this.model.getCursorClip ();
         if (!clip.doesExist ())
         {
             display.notify (PLEASE_SELECT_A_CLIP_PUSH1);
@@ -134,7 +135,7 @@ public class ClipMode extends AbstractTrackMode
     {
         if (this.displayMidiNotes)
         {
-            final View activeView = this.surface.getViewManager ().getActiveView ();
+            final IView activeView = this.surface.getViewManager ().getActive ();
             INoteClip clip;
             if (activeView instanceof AbstractSequencerView)
                 clip = ((AbstractSequencerView<?, ?>) activeView).getClip ();
@@ -151,7 +152,7 @@ public class ClipMode extends AbstractTrackMode
             return;
         }
 
-        final IClip clip = this.model.getClip ();
+        final IClip clip = this.model.getCursorClip ();
         if (!clip.doesExist ())
         {
             display.addEmptyElement ();
@@ -169,7 +170,10 @@ public class ClipMode extends AbstractTrackMode
         final ITrack t6 = tb.getItem (6);
         final ITrack t7 = tb.getItem (7);
 
-        display.addParameterElement ("", false, t0.getName (), t0.getType (), t0.getColor (), t0.isSelected (), "Play Start", -1, this.formatMeasures (clip.getPlayStart (), 1), this.isKnobTouched[0], -1);
+        final boolean canPin = this.model.getHost ().supports (Capability.HAS_PINNING);
+        final boolean isPinned = canPin && clip instanceof INoteClip && ((INoteClip) clip).isPinned ();
+
+        display.addParameterElement (canPin ? "Pin clip" : "", isPinned, t0.getName (), t0.getType (), t0.getColor (), t0.isSelected (), "Play Start", -1, this.formatMeasures (clip.getPlayStart (), 1), this.isKnobTouched[0], -1);
         display.addParameterElement ("", false, t1.getName (), t1.getType (), t1.getColor (), t1.isSelected (), "Play End", -1, this.formatMeasures (clip.getPlayEnd (), 1), this.isKnobTouched[1], -1);
         display.addParameterElement ("", false, t2.getName (), t2.getType (), t2.getColor (), t2.isSelected (), "Loop Start", -1, this.formatMeasures (clip.getLoopStart (), 1), this.isKnobTouched[2], -1);
         display.addParameterElement ("", false, t3.getName (), t3.getType (), t3.getColor (), t3.isSelected (), "Loop Lngth", -1, this.formatMeasures (clip.getLoopLength (), 0), this.isKnobTouched[3], -1);
@@ -193,11 +197,19 @@ public class ClipMode extends AbstractTrackMode
             return;
         }
 
+        if (index == 0)
+        {
+            final IClip clip = this.model.getCursorClip ();
+            if (clip instanceof INoteClip)
+                ((INoteClip) clip).togglePinned ();
+            return;
+        }
+
         if (index == 7)
         {
             final ViewManager viewManager = this.surface.getViewManager ();
-            ((ColorView) viewManager.getView (Views.COLOR)).setMode (SelectMode.MODE_CLIP);
-            viewManager.setActiveView (Views.COLOR);
+            ((ColorView) viewManager.get (Views.COLOR)).setMode (SelectMode.MODE_CLIP);
+            viewManager.setActive (Views.COLOR);
         }
     }
 
@@ -209,6 +221,14 @@ public class ClipMode extends AbstractTrackMode
         final int index = this.isButtonRow (1, buttonID);
         if (index >= 0)
         {
+            if (index == 0)
+            {
+                if (!this.model.getHost ().supports (Capability.HAS_PINNING))
+                    return PushColorManager.PUSH2_COLOR2_BLACK;
+                final IClip clip = this.model.getCursorClip ();
+                final boolean isPinned = clip instanceof INoteClip && ((INoteClip) clip).isPinned ();
+                return isPinned ? PushColorManager.PUSH2_COLOR2_GREEN : PushColorManager.PUSH2_COLOR2_WHITE;
+            }
             if (index == 7)
                 return this.displayMidiNotes ? PushColorManager.PUSH2_COLOR_BLACK : PushColorManager.PUSH2_COLOR2_WHITE;
             return PushColorManager.PUSH2_COLOR_BLACK;

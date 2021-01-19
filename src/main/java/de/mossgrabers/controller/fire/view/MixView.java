@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.fire.view;
@@ -14,8 +14,8 @@ import de.mossgrabers.framework.daw.DAWColor;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
+import de.mossgrabers.framework.featuregroup.AbstractView;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.AbstractView;
 
 
 /**
@@ -89,7 +89,19 @@ public class MixView extends AbstractView<FireControlSurface, FireConfiguration>
         switch (what)
         {
             case 3:
-                track.select ();
+                final FireConfiguration configuration = this.surface.getConfiguration ();
+                if (configuration.isDeleteModeActive ())
+                {
+                    configuration.toggleDeleteModeActive ();
+                    track.remove ();
+                }
+                else if (configuration.isDuplicateModeActive ())
+                {
+                    configuration.toggleDuplicateModeActive ();
+                    track.duplicate ();
+                }
+                else
+                    track.select ();
                 break;
 
             case 2:

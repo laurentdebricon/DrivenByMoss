@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode.device;
@@ -12,6 +12,7 @@ import de.mossgrabers.framework.controller.display.IGraphicDisplay;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.DAWColor;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
@@ -68,7 +69,7 @@ public class DeviceChainsMode extends DeviceParamsMode
             if (index >= slotChains.length)
                 return;
             cd.selectSlotChain (slotChains[index]);
-            this.surface.getModeManager ().setActiveMode (Modes.DEVICE_PARAMS);
+            this.surface.getModeManager ().setActive (Modes.DEVICE_PARAMS);
             return;
         }
 
@@ -124,7 +125,7 @@ public class DeviceChainsMode extends DeviceParamsMode
 
         final String color = this.model.getCurrentTrackBank ().getSelectedChannelColorEntry ();
         final ColorEx bottomMenuColor = DAWColor.getColorEntry (color);
-        final boolean hasPinning = this.model.getHost ().hasPinning ();
+        final boolean hasPinning = this.model.getHost ().supports (Capability.HAS_PINNING);
         final String [] slotChains = cd.getSlotChains ();
         for (int i = 0; i < 8; i++)
         {

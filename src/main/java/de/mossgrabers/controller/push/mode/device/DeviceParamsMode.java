@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode.device;
@@ -16,6 +16,7 @@ import de.mossgrabers.framework.controller.valuechanger.IValueChanger;
 import de.mossgrabers.framework.daw.DAWColor;
 import de.mossgrabers.framework.daw.IHost;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.daw.data.IChannel;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
 import de.mossgrabers.framework.daw.data.IDevice;
@@ -23,7 +24,7 @@ import de.mossgrabers.framework.daw.data.IParameter;
 import de.mossgrabers.framework.daw.data.bank.IDeviceBank;
 import de.mossgrabers.framework.daw.data.bank.IParameterBank;
 import de.mossgrabers.framework.daw.data.bank.IParameterPageBank;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.parameterprovider.BankParameterProvider;
 import de.mossgrabers.framework.utils.ButtonEvent;
@@ -63,17 +64,15 @@ public class DeviceParamsMode extends BaseMode
     {
         super ("Parameters", surface, model, model.getCursorDevice ().getParameterBank ());
 
-        this.isTemporary = false;
-
         this.setParameters (new BankParameterProvider (this.model.getCursorDevice ().getParameterBank ()));
 
         this.setShowDevices (true);
 
         System.arraycopy (MENU, 0, this.hostMenu, 0, MENU.length);
         final IHost host = this.model.getHost ();
-        if (!host.hasPinning ())
+        if (!host.supports (Capability.HAS_PINNING))
             this.hostMenu[5] = "";
-        if (!host.hasSlotChains ())
+        if (!host.supports (Capability.HAS_SLOT_CHAINS))
             this.hostMenu[3] = "";
     }
 
@@ -165,7 +164,7 @@ public class DeviceParamsMode extends BaseMode
             final ModeManager modeManager = this.surface.getModeManager ();
             if (!cd.hasLayers ())
             {
-                ((DeviceParamsMode) modeManager.getMode (Modes.DEVICE_PARAMS)).setShowDevices (false);
+                ((DeviceParamsMode) modeManager.get (Modes.DEVICE_PARAMS)).setShowDevices (false);
                 return;
             }
 
@@ -173,7 +172,7 @@ public class DeviceParamsMode extends BaseMode
             final IChannel layer = cd.getLayerOrDrumPadBank ().getSelectedItem ();
             if (layer == null)
                 cd.getLayerOrDrumPadBank ().getItem (0).select ();
-            modeManager.setActiveMode (this.surface.getConfiguration ().getCurrentLayerMixMode ());
+            modeManager.setActive (this.surface.getConfiguration ().getCurrentLayerMixMode ());
 
             return;
         }
@@ -190,9 +189,9 @@ public class DeviceParamsMode extends BaseMode
     protected void moveUp ()
     {
         final ModeManager modeManager = this.surface.getModeManager ();
-        if (modeManager.isActiveOrTempMode (Modes.DEVICE_CHAINS))
+        if (modeManager.isActive (Modes.DEVICE_CHAINS))
         {
-            modeManager.setActiveMode (Modes.DEVICE_PARAMS);
+            modeManager.setActive (Modes.DEVICE_PARAMS);
             return;
         }
 
@@ -205,7 +204,7 @@ public class DeviceParamsMode extends BaseMode
         }
 
         // Parameter banks are shown -> show devices
-        final DeviceParamsMode deviceParamsMode = (DeviceParamsMode) modeManager.getMode (Modes.DEVICE_PARAMS);
+        final DeviceParamsMode deviceParamsMode = (DeviceParamsMode) modeManager.get (Modes.DEVICE_PARAMS);
         if (!deviceParamsMode.isShowDevices ())
         {
             deviceParamsMode.setShowDevices (true);
@@ -218,9 +217,9 @@ public class DeviceParamsMode extends BaseMode
             cd.selectParent ();
             this.model.getHost ().scheduleTask ( () -> {
                 if (cd.hasLayers ())
-                    modeManager.setActiveMode (this.surface.getConfiguration ().getCurrentLayerMixMode ());
+                    modeManager.setActive (this.surface.getConfiguration ().getCurrentLayerMixMode ());
                 else
-                    modeManager.setActiveMode (Modes.DEVICE_PARAMS);
+                    modeManager.setActive (Modes.DEVICE_PARAMS);
                 deviceParamsMode.setShowDevices (false);
                 cd.selectChannel ();
             }, 300);
@@ -283,11 +282,11 @@ public class DeviceParamsMode extends BaseMode
                 case 2:
                     return cd.isExpanded () ? orange : white;
                 case 3:
-                    return this.surface.getModeManager ().isActiveOrTempMode (Modes.DEVICE_CHAINS) ? orange : white;
+                    return this.surface.getModeManager ().isActive (Modes.DEVICE_CHAINS) ? orange : white;
                 case 4:
                     return this.showDevices ? white : orange;
                 case 5:
-                    return this.model.getHost ().hasPinning () ? cd.isPinned () ? turquoise : grey : off;
+                    return this.model.getHost ().supports (Capability.HAS_PINNING) ? cd.isPinned () ? turquoise : grey : off;
                 case 6:
                     return cd.isWindowOpen () ? turquoise : grey;
                 default:
@@ -323,18 +322,18 @@ public class DeviceParamsMode extends BaseMode
                     device.toggleExpanded ();
                 break;
             case 3:
-                if (!this.model.getHost ().hasSlotChains ())
+                if (!this.model.getHost ().supports (Capability.HAS_SLOT_CHAINS))
                     return;
-                if (modeManager.isActiveOrTempMode (Modes.DEVICE_CHAINS))
-                    modeManager.setActiveMode (Modes.DEVICE_PARAMS);
+                if (modeManager.isActive (Modes.DEVICE_CHAINS))
+                    modeManager.setActive (Modes.DEVICE_PARAMS);
                 else
-                    modeManager.setActiveMode (Modes.DEVICE_CHAINS);
+                    modeManager.setActive (Modes.DEVICE_CHAINS);
                 break;
             case 4:
                 if (!device.doesExist ())
                     return;
-                if (!modeManager.isActiveOrTempMode (Modes.DEVICE_PARAMS))
-                    modeManager.setActiveMode (Modes.DEVICE_PARAMS);
+                if (!modeManager.isActive (Modes.DEVICE_PARAMS))
+                    modeManager.setActive (Modes.DEVICE_PARAMS);
                 this.setShowDevices (!this.showDevices);
                 break;
             case 5:
@@ -417,7 +416,7 @@ public class DeviceParamsMode extends BaseMode
         final IParameterBank parameterBank = cd.getParameterBank ();
         final IParameterPageBank parameterPageBank = cd.getParameterPageBank ();
         final int selectedPage = parameterPageBank.getSelectedItemIndex ();
-        final boolean hasPinning = this.model.getHost ().hasPinning ();
+        final boolean hasPinning = this.model.getHost ().supports (Capability.HAS_PINNING);
         final IValueChanger valueChanger = this.model.getValueChanger ();
         for (int i = 0; i < parameterBank.getPageSize (); i++)
         {
@@ -566,9 +565,9 @@ public class DeviceParamsMode extends BaseMode
             case 2:
                 return cd.isExpanded ();
             case 3:
-                return this.surface.getModeManager ().isActiveOrTempMode (Modes.DEVICE_CHAINS);
+                return this.surface.getModeManager ().isActive (Modes.DEVICE_CHAINS);
             case 4:
-                return !this.surface.getModeManager ().isActiveOrTempMode (Modes.DEVICE_CHAINS) && !this.showDevices;
+                return !this.surface.getModeManager ().isActive (Modes.DEVICE_CHAINS) && !this.showDevices;
             case 5:
                 return hasPinning && cd.isPinned ();
             case 6:

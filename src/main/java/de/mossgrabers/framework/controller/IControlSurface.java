@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.controller;
@@ -23,9 +23,10 @@ import de.mossgrabers.framework.controller.valuechanger.ISensitivityCallback;
 import de.mossgrabers.framework.controller.valuechanger.RelativeEncoding;
 import de.mossgrabers.framework.daw.midi.IMidiInput;
 import de.mossgrabers.framework.daw.midi.IMidiOutput;
-import de.mossgrabers.framework.mode.ModeManager;
-import de.mossgrabers.framework.view.ViewManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -281,16 +282,6 @@ public interface IControlSurface<C extends Configuration>
 
 
     /**
-     * Update the lighting of a trigger (if the trigger has light), sending on the default midi
-     * channel.
-     *
-     * @param cc The trigger
-     * @param colorID A registered color ID of the color / brightness depending on the controller
-     */
-    void setTrigger (int cc, String colorID);
-
-
-    /**
      * Update the lighting of a trigger (if the trigger has light).
      *
      * @param channel The midi channel to use
@@ -298,16 +289,6 @@ public interface IControlSurface<C extends Configuration>
      * @param value The color / brightness depending on the controller
      */
     void setTrigger (int channel, int cc, int value);
-
-
-    /**
-     * Update the lighting of a trigger (if the trigger has light).
-     *
-     * @param channel The midi channel to use
-     * @param cc The trigger
-     * @param colorID A registered color ID of the color / brightness depending on the controller
-     */
-    void setTrigger (int channel, int cc, String colorID);
 
 
     /**
@@ -347,7 +328,7 @@ public interface IControlSurface<C extends Configuration>
 
 
     /**
-     * Get a button the was created with the given ID.
+     * Get a button that was created with the given ID.
      *
      * @param buttonID The button ID
      * @return The button or null if not created
@@ -356,12 +337,20 @@ public interface IControlSurface<C extends Configuration>
 
 
     /**
-     * Get a light the was created with the given ID.
+     * Get a light that was created with the given ID.
      *
      * @param outputID The output ID
      * @return The light or null if not created
      */
     IHwLight getLight (OutputID outputID);
+
+
+    /**
+     * Get all lights.
+     *
+     * @return The lights
+     */
+    Collection<IHwLight> getLights ();
 
 
     /**
@@ -493,6 +482,12 @@ public interface IControlSurface<C extends Configuration>
      * Flush all displays and grids.
      */
     void flush ();
+
+
+    /**
+     * Forces to resend all output states to the device.
+     */
+    void forceFlush ();
 
 
     /**

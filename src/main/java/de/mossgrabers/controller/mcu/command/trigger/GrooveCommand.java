@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.mcu.command.trigger;
@@ -7,6 +7,7 @@ package de.mossgrabers.controller.mcu.command.trigger;
 import de.mossgrabers.controller.mcu.MCUConfiguration;
 import de.mossgrabers.controller.mcu.controller.MCUControlSurface;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
+import de.mossgrabers.framework.daw.GrooveParameterID;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.IParameter;
 import de.mossgrabers.framework.utils.ButtonEvent;
@@ -38,7 +39,7 @@ public class GrooveCommand extends AbstractTriggerCommand<MCUControlSurface, MCU
         if (event != ButtonEvent.DOWN)
             return;
 
-        final IParameter parameter = this.model.getGroove ().getParameters ()[0];
+        final IParameter parameter = this.model.getGroove ().getParameter (GrooveParameterID.ENABLED);
         parameter.setValue (parameter.getValue () == 0 ? this.model.getValueChanger ().getUpperBound () - 1 : 0);
     }
 }

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.kontrol.mkii.command.trigger;
@@ -44,7 +44,7 @@ public class StartClipOrSceneCommand extends AbstractTriggerCommand<KontrolProto
     @Override
     public void execute (final ButtonEvent event, final int velocity)
     {
-        if (this.surface.getModeManager ().isActiveMode (Modes.VOLUME))
+        if (this.surface.getModeManager ().isActive (Modes.VOLUME))
         {
             if (this.surface.getConfiguration ().isFlipClipSceneNavigation ())
                 this.sceneCommand.execute (event, velocity);

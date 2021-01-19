@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.continuous;
@@ -8,7 +8,7 @@ import de.mossgrabers.controller.push.PushConfiguration;
 import de.mossgrabers.controller.push.controller.PushControlSurface;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -39,7 +39,7 @@ public class ConfigurePitchbendCommand extends AbstractTriggerCommand<PushContro
         if (event != ButtonEvent.DOWN)
             return;
         final ModeManager modeManager = this.surface.getModeManager ();
-        if (!modeManager.isActiveOrTempMode (Modes.RIBBON))
-            modeManager.setActiveMode (Modes.RIBBON);
+        if (!modeManager.isActive (Modes.RIBBON))
+            modeManager.setTemporary (Modes.RIBBON);
     }
 }

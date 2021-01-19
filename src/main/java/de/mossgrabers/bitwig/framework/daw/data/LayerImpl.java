@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.daw.data;
@@ -27,7 +27,7 @@ public class LayerImpl extends ChannelImpl implements ILayer
 
     /**
      * Constructor.
-     * 
+     *
      * @param channelBank The related channel bank
      * @param host The DAW host
      * @param valueChanger The valueChanger
@@ -36,7 +36,7 @@ public class LayerImpl extends ChannelImpl implements ILayer
      * @param numSends The number of sends of a bank
      * @param numDevices The number of devices of a bank
      */
-    public LayerImpl (AbstractChannelBankImpl<?, ?> channelBank, final IHost host, final IValueChanger valueChanger, final Channel layer, final int index, final int numSends, final int numDevices)
+    public LayerImpl (final AbstractChannelBankImpl<?, ?> channelBank, final IHost host, final IValueChanger valueChanger, final Channel layer, final int index, final int numSends, final int numDevices)
     {
         super (channelBank, host, valueChanger, layer, index, numSends);
 

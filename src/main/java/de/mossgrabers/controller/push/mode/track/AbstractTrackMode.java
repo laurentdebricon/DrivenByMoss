@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode.track;
@@ -14,9 +14,10 @@ import de.mossgrabers.framework.controller.display.IGraphicDisplay;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.controller.valuechanger.IValueChanger;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.utils.Pair;
@@ -48,8 +49,6 @@ public abstract class AbstractTrackMode extends BaseMode
         super (name, surface, model, model.getCurrentTrackBank ());
 
         model.addTrackBankObserver (this::switchBanks);
-
-        this.isTemporary = false;
 
         for (int i = 0; i < 8; i++)
             this.menu.add (new Pair<> (" ", Boolean.FALSE));
@@ -149,32 +148,32 @@ public abstract class AbstractTrackMode extends BaseMode
         switch (index)
         {
             case 0:
-                if (modeManager.isActiveOrTempMode (Modes.VOLUME))
-                    modeManager.setActiveMode (Modes.TRACK);
+                if (modeManager.isActive (Modes.VOLUME))
+                    modeManager.setActive (Modes.TRACK);
                 else
-                    modeManager.setActiveMode (Modes.VOLUME);
+                    modeManager.setActive (Modes.VOLUME);
                 break;
 
             case 1:
-                if (modeManager.isActiveOrTempMode (Modes.PAN))
-                    modeManager.setActiveMode (Modes.TRACK);
+                if (modeManager.isActive (Modes.PAN))
+                    modeManager.setActive (Modes.TRACK);
                 else
-                    modeManager.setActiveMode (Modes.PAN);
+                    modeManager.setActive (Modes.PAN);
                 break;
 
             case 2:
-                if (modeManager.isActiveOrTempMode (Modes.CROSSFADER))
-                    modeManager.setActiveMode (Modes.TRACK);
+                if (modeManager.isActive (Modes.CROSSFADER))
+                    modeManager.setActive (Modes.TRACK);
                 else
-                    modeManager.setActiveMode (Modes.CROSSFADER);
+                    modeManager.setActive (Modes.CROSSFADER);
                 break;
 
             case 3:
                 if (!this.model.isEffectTrackBankActive ())
                 {
                     config.setSendsAreToggled (!config.isSendsAreToggled ());
-                    if (!modeManager.isActiveOrTempMode (Modes.TRACK))
-                        modeManager.setActiveMode (Modes.get (Modes.SEND1, config.isSendsAreToggled () ? 4 : 0));
+                    if (!modeManager.isActive (Modes.TRACK))
+                        modeManager.setActive (Modes.get (Modes.SEND1, config.isSendsAreToggled () ? 4 : 0));
                 }
                 break;
 
@@ -193,7 +192,7 @@ public abstract class AbstractTrackMode extends BaseMode
                 break;
         }
 
-        config.setDebugMode (modeManager.getActiveOrTempModeId ());
+        config.setDebugMode (modeManager.getActiveID ());
     }
 
 
@@ -209,7 +208,7 @@ public abstract class AbstractTrackMode extends BaseMode
             return;
         final Modes si = Modes.get (Modes.SEND1, sendIndex);
         final ModeManager modeManager = this.surface.getModeManager ();
-        modeManager.setActiveMode (modeManager.isActiveOrTempMode (si) ? Modes.TRACK : si);
+        modeManager.setActive (modeManager.isActive (si) ? Modes.TRACK : si);
     }
 
 
@@ -227,8 +226,8 @@ public abstract class AbstractTrackMode extends BaseMode
             if (!track.doesExist () || !track.isActivated ())
                 return this.isPush2 ? PushColorManager.PUSH2_COLOR_BLACK : PushColorManager.PUSH1_COLOR_BLACK;
 
-            final ITrack selTrack = this.model.getSelectedTrack ();
-            final int selIndex = selTrack == null ? -1 : selTrack.getIndex ();
+            final ITrack cursorTrack = this.model.getCursorTrack ();
+            final int selIndex = cursorTrack.doesExist () ? cursorTrack.getIndex () : -1;
             final boolean isSel = track.getIndex () == selIndex;
 
             if (track.isRecArm ())
@@ -258,25 +257,25 @@ public abstract class AbstractTrackMode extends BaseMode
                 switch (index)
                 {
                     case 0:
-                        return modeManager.isActiveOrTempMode (Modes.VOLUME) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (Modes.VOLUME) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     case 1:
-                        return modeManager.isActiveOrTempMode (Modes.PAN) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (Modes.PAN) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     case 2:
-                        return modeManager.isActiveOrTempMode (Modes.CROSSFADER) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (Modes.CROSSFADER) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     case 4:
                         final Modes sendMode1 = sendsAreToggled ? Modes.SEND5 : Modes.SEND1;
-                        return modeManager.isActiveOrTempMode (sendMode1) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (sendMode1) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     case 5:
                         final Modes sendMode2 = sendsAreToggled ? Modes.SEND6 : Modes.SEND2;
-                        return modeManager.isActiveOrTempMode (sendMode2) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (sendMode2) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     case 6:
                         final Modes sendMode3 = sendsAreToggled ? Modes.SEND7 : Modes.SEND3;
-                        return modeManager.isActiveOrTempMode (sendMode3) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (sendMode3) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     case 7:
                         if (this.lastSendIsAccessible ())
                         {
                             final Modes sendMode4 = sendsAreToggled ? Modes.SEND8 : Modes.SEND4;
-                            return modeManager.isActiveOrTempMode (sendMode4) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                            return modeManager.isActive (sendMode4) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                         }
                         return tb.hasParent () ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     default:
@@ -342,7 +341,7 @@ public abstract class AbstractTrackMode extends BaseMode
         final IValueChanger valueChanger = this.model.getValueChanger ();
         final ITrackBank tb = this.model.getCurrentTrackBank ();
         final PushConfiguration config = this.surface.getConfiguration ();
-        final boolean displayCrossfader = this.model.getHost ().hasCrossfader ();
+        final boolean displayCrossfader = this.model.getHost ().supports (Capability.HAS_CROSSFADER);
         for (int i = 0; i < 8; i++)
         {
             final ITrack t = tb.getItem (i);
@@ -414,7 +413,7 @@ public abstract class AbstractTrackMode extends BaseMode
 
         this.menu.get (0).set ("Volume", Boolean.valueOf (selectedMenu - 1 == 0));
         this.menu.get (1).set ("Pan", Boolean.valueOf (selectedMenu - 1 == 1));
-        this.menu.get (2).set (this.model.getHost ().hasCrossfader () ? "Crossfader" : " ", Boolean.valueOf (selectedMenu - 1 == 2));
+        this.menu.get (2).set (this.model.getHost ().supports (Capability.HAS_CROSSFADER) ? "Crossfader" : " ", Boolean.valueOf (selectedMenu - 1 == 2));
 
         if (this.model.isEffectTrackBankActive ())
         {

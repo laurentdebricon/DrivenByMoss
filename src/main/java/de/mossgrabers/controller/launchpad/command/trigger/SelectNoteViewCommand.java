@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.launchpad.command.trigger;
@@ -9,8 +9,8 @@ import de.mossgrabers.controller.launchpad.controller.LaunchpadControlSurface;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ITrack;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -42,33 +42,33 @@ public class SelectNoteViewCommand extends AbstractTriggerCommand<LaunchpadContr
 
         final ViewManager viewManager = this.surface.getViewManager ();
 
-        if (viewManager.isActiveView (Views.CONTROL))
+        if (viewManager.isActive (Views.CONTROL))
         {
-            viewManager.restoreView ();
-            this.surface.getDisplay ().notify (viewManager.getActiveView ().getName ());
+            viewManager.restore ();
+            this.surface.getDisplay ().notify (viewManager.getActive ().getName ());
             return;
         }
 
-        Views viewID = viewManager.getActiveViewId ();
+        Views viewID = viewManager.getActiveID ();
         if (Views.isNoteView (viewID) || Views.isSequencerView (viewID))
         {
-            viewManager.setActiveView (Views.CONTROL);
+            viewManager.setActive (Views.CONTROL);
             this.surface.getDisplay ().notify ("Note / sequencer mode selection");
             return;
         }
 
-        final ITrack sel = this.model.getSelectedTrack ();
-        if (sel == null)
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (!cursorTrack.doesExist ())
         {
-            viewManager.setActiveView (Views.SESSION);
+            viewManager.setActive (Views.SESSION);
             this.surface.getDisplay ().notify ("Session");
             return;
         }
 
-        viewID = viewManager.getPreferredView (sel.getPosition ());
+        viewID = viewManager.getPreferredView (cursorTrack.getPosition ());
         if (viewID == null)
             viewID = Views.PLAY;
-        viewManager.setActiveView (viewID);
-        this.surface.getDisplay ().notify (viewManager.getView (viewID).getName ());
+        viewManager.setActive (viewID);
+        this.surface.getDisplay ().notify (viewManager.get (viewID).getName ());
     }
 }

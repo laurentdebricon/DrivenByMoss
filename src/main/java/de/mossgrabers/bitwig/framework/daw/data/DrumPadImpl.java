@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.daw.data;
@@ -24,7 +24,7 @@ public class DrumPadImpl extends LayerImpl implements IDrumPad
 
     /**
      * Constructor.
-     * 
+     *
      * @param drumPadBankImpl The bank to which this drum pad belongs
      * @param host The DAW host
      * @param valueChanger The valueChanger

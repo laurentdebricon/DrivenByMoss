@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.fire.command.trigger;
@@ -46,7 +46,7 @@ public class FireStopCommand extends StopCommand<FireControlSurface, FireConfigu
     @Override
     public void executeShifted (final ButtonEvent event)
     {
-        if (event == ButtonEvent.DOWN)
+        if (event == ButtonEvent.UP)
             this.model.getTransport ().toggleWriteClipLauncherAutomation ();
     }
 
@@ -58,7 +58,7 @@ public class FireStopCommand extends StopCommand<FireControlSurface, FireConfigu
      */
     public void executeAlt (final ButtonEvent event)
     {
-        if (event == ButtonEvent.DOWN)
+        if (event == ButtonEvent.UP)
             this.model.getTransport ().toggleWriteArrangerAutomation ();
     }
 }

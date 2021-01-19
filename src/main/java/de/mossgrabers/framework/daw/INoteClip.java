@@ -1,15 +1,18 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.daw;
+
+import de.mossgrabers.framework.daw.data.IPinnable;
+
 
 /**
  * Interface to a clip, which contains note data.
  *
  * @author J&uuml;rgen Mo&szlig;graber
  */
-public interface INoteClip extends IClip
+public interface INoteClip extends IClip, IPinnable
 {
     /**
      * Get the row of notes.

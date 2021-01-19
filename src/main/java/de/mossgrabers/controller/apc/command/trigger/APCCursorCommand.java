@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.apc.command.trigger;
@@ -37,7 +37,7 @@ public class APCCursorCommand extends CursorCommand<APCControlSurface, APCConfig
     @Override
     protected void scrollUp ()
     {
-        if (this.surface.getModeManager ().isActiveMode (Modes.BROWSER))
+        if (this.surface.getModeManager ().isActive (Modes.BROWSER))
         {
             this.model.getBrowser ().selectPreviousResult ();
             return;
@@ -52,7 +52,7 @@ public class APCCursorCommand extends CursorCommand<APCControlSurface, APCConfig
     @Override
     protected void scrollDown ()
     {
-        if (this.surface.getModeManager ().isActiveMode (Modes.BROWSER))
+        if (this.surface.getModeManager ().isActive (Modes.BROWSER))
         {
             this.model.getBrowser ().selectNextResult ();
             return;

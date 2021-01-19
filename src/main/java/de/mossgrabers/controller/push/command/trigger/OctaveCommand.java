@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -8,9 +8,9 @@ import de.mossgrabers.controller.push.PushConfiguration;
 import de.mossgrabers.controller.push.controller.PushControlSurface;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.featuregroup.IView;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.view.TransposeView;
-import de.mossgrabers.framework.view.View;
 
 
 /**
@@ -41,7 +41,7 @@ public class OctaveCommand extends AbstractTriggerCommand<PushControlSurface, Pu
     @Override
     public void execute (final ButtonEvent event, final int velocity)
     {
-        final View activeView = this.surface.getViewManager ().getActiveView ();
+        final IView activeView = this.surface.getViewManager ().getActive ();
         if (!(activeView instanceof TransposeView))
             return;
 

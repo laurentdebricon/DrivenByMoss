@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.fire.mode;
@@ -53,7 +53,7 @@ public class FireTrackMode extends TrackMode<FireControlSurface, FireConfigurati
      */
     public FireTrackMode (final FireControlSurface surface, final IModel model)
     {
-        super ("Mixer", surface, model, false);
+        super ("Mixer", surface, model, false, null);
 
         this.setControls (ContinuousID.createSequentialList (ContinuousID.KNOB1, 4));
 

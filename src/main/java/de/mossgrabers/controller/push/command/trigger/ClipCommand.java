@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -9,7 +9,7 @@ import de.mossgrabers.controller.push.controller.PushControlSurface;
 import de.mossgrabers.controller.push.mode.track.ClipMode;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -41,14 +41,14 @@ public class ClipCommand extends AbstractTriggerCommand<PushControlSurface, Push
             return;
 
         final ModeManager modeManager = this.surface.getModeManager ();
-        if (modeManager.isActiveOrTempMode (Modes.CLIP))
+        if (modeManager.isActive (Modes.CLIP))
         {
             if (this.surface.getConfiguration ().isPush2 ())
-                ((ClipMode) modeManager.getMode (Modes.CLIP)).togglePianoRoll ();
+                ((ClipMode) modeManager.get (Modes.CLIP)).togglePianoRoll ();
             else
-                modeManager.restoreMode ();
+                modeManager.restore ();
         }
         else
-            modeManager.setActiveMode (Modes.CLIP);
+            modeManager.setActive (Modes.CLIP);
     }
 }

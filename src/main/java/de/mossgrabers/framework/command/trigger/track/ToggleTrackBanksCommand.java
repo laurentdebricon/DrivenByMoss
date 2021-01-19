@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger.track;
@@ -36,7 +36,7 @@ public class ToggleTrackBanksCommand<S extends IControlSurface<C>, C extends Con
 
     /** {@inheritDoc} */
     @Override
-    public void execute (final ButtonEvent event, final int velocity)
+    public void executeNormal (final ButtonEvent event)
     {
         if (event != ButtonEvent.DOWN)
             return;

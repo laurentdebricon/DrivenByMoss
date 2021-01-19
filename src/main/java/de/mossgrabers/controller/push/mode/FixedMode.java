@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode;
@@ -13,7 +13,8 @@ import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.display.IGraphicDisplay;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
 
@@ -33,7 +34,6 @@ public class FixedMode extends BaseMode
     public FixedMode (final PushControlSurface surface, final IModel model)
     {
         super ("Fixed", surface, model);
-        this.isTemporary = false;
     }
 
 
@@ -44,7 +44,7 @@ public class FixedMode extends BaseMode
         if (event != ButtonEvent.UP)
             return;
         this.surface.getConfiguration ().setNewClipLength (index);
-        this.surface.getModeManager ().restoreMode ();
+        this.surface.getModeManager ().restore ();
     }
 
 
@@ -55,7 +55,7 @@ public class FixedMode extends BaseMode
         if (event != ButtonEvent.UP)
             return;
         new TemporaryNewCommand<> (index, this.model, this.surface).execute (ButtonEvent.DOWN, 127);
-        this.surface.getModeManager ().restoreMode ();
+        this.surface.getModeManager ().restore ();
     }
 
 
@@ -67,10 +67,10 @@ public class FixedMode extends BaseMode
         if (index >= 0)
         {
             final Configuration configuration = this.surface.getConfiguration ();
-            return this.colorManager.getColorIndex (configuration.getNewClipLength () == index ? AbstractMode.BUTTON_COLOR_HI : AbstractMode.BUTTON_COLOR_ON);
+            return this.colorManager.getColorIndex (configuration.getNewClipLength () == index ? AbstractMode.BUTTON_COLOR_HI : AbstractFeatureGroup.BUTTON_COLOR_ON);
         }
 
-        return this.colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_ON);
+        return this.colorManager.getColorIndex (AbstractFeatureGroup.BUTTON_COLOR_ON);
     }
 
 

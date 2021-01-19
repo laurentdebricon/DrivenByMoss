@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.mcu;
@@ -11,6 +11,7 @@ import de.mossgrabers.framework.configuration.IEnumSetting;
 import de.mossgrabers.framework.configuration.ISettingsUI;
 import de.mossgrabers.framework.controller.valuechanger.IValueChanger;
 import de.mossgrabers.framework.daw.IHost;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.daw.midi.ArpeggiatorMode;
 
 import java.util.Arrays;
@@ -48,9 +49,11 @@ public class MCUConfiguration extends AbstractConfiguration
     /** Use the faders like the editing knobs. */
     public static final Integer       USE_FADERS_AS_KNOBS                     = Integer.valueOf (61);
     /** Select the channel when touching it's fader. */
-    private static final Integer      TOUCH_CHANNEL                           = Integer.valueOf (62);
+    public static final Integer       TOUCH_CHANNEL                           = Integer.valueOf (62);
     /** iCON specific Master VU meter. */
-    private static final Integer      MASTER_VU_METER                         = Integer.valueOf (63);
+    public static final Integer       MASTER_VU_METER                         = Integer.valueOf (63);
+    /** Pin FX tracks to last controller. */
+    public static final Integer       PIN_FXTRACKS_TO_LAST_CONTROLLER         = Integer.valueOf (64);
 
     /** Use a Function button to switch to previous mode. */
     public static final int           FOOTSWITCH_2_PREV_MODE                  = 15;
@@ -355,54 +358,63 @@ public class MCUConfiguration extends AbstractConfiguration
             this.hasDisplay1 = "On".equals (value);
             this.notifyObservers (HAS_DISPLAY1);
         });
+        this.isSettingActive.add (HAS_DISPLAY1);
 
         this.hasDisplay2Setting = settingsUI.getEnumSetting ("Has a second display", CATEGORY_HARDWARE_SETUP, ON_OFF_OPTIONS, ON_OFF_OPTIONS[1]);
         this.hasDisplay2Setting.addValueObserver (value -> {
             this.hasDisplay2 = "On".equals (value);
             this.notifyObservers (HAS_DISPLAY2);
         });
+        this.isSettingActive.add (HAS_DISPLAY2);
 
         this.hasSegmentDisplaySetting = settingsUI.getEnumSetting ("Has a segment display", CATEGORY_HARDWARE_SETUP, ON_OFF_OPTIONS, ON_OFF_OPTIONS[1]);
         this.hasSegmentDisplaySetting.addValueObserver (value -> {
             this.hasSegmentDisplay = "On".equals (value);
             this.notifyObservers (HAS_SEGMENT_DISPLAY);
         });
+        this.isSettingActive.add (HAS_SEGMENT_DISPLAY);
 
         this.hasAssignmentDisplaySetting = settingsUI.getEnumSetting ("Has an assignment display", CATEGORY_HARDWARE_SETUP, ON_OFF_OPTIONS, ON_OFF_OPTIONS[1]);
         this.hasAssignmentDisplaySetting.addValueObserver (value -> {
             this.hasAssignmentDisplay = "On".equals (value);
             this.notifyObservers (HAS_ASSIGNMENT_DISPLAY);
         });
+        this.isSettingActive.add (HAS_ASSIGNMENT_DISPLAY);
 
         this.hasMotorFadersSetting = settingsUI.getEnumSetting ("Has motor faders", CATEGORY_HARDWARE_SETUP, ON_OFF_OPTIONS, ON_OFF_OPTIONS[1]);
         this.hasMotorFadersSetting.addValueObserver (value -> {
             this.hasMotorFaders = "On".equals (value);
             this.notifyObservers (HAS_MOTOR_FADERS);
         });
+        this.isSettingActive.add (HAS_MOTOR_FADERS);
 
         this.hasOnly1FaderSetting = settingsUI.getEnumSetting ("Has only 1 fader", CATEGORY_HARDWARE_SETUP, ON_OFF_OPTIONS, ON_OFF_OPTIONS[0]);
         this.hasOnly1FaderSetting.addValueObserver (value -> {
             this.hasOnly1Fader = "On".equals (value);
             this.notifyObservers (HAS_ONLY_1_FADER);
         });
+        this.isSettingActive.add (HAS_ONLY_1_FADER);
 
         this.displayTrackNamesSetting = settingsUI.getEnumSetting ("Display track names in 1st display", CATEGORY_HARDWARE_SETUP, ON_OFF_OPTIONS, ON_OFF_OPTIONS[0]);
         this.displayTrackNamesSetting.addValueObserver (value -> {
             this.displayTrackNames = "On".equals (value);
             this.notifyObservers (DISPLAY_TRACK_NAMES);
         });
+        this.isSettingActive.add (DISPLAY_TRACK_NAMES);
 
         this.useVertZoomForModesSetting = settingsUI.getEnumSetting ("Use vertical zoom to change tracks", CATEGORY_HARDWARE_SETUP, ON_OFF_OPTIONS, ON_OFF_OPTIONS[0]);
         this.useVertZoomForModesSetting.addValueObserver (value -> {
             this.useVertZoomForModes = "On".equals (value);
             this.notifyObservers (USE_VERT_ZOOM_FOR_MODES);
         });
+        this.isSettingActive.add (USE_VERT_ZOOM_FOR_MODES);
 
         this.useFadersAsKnobsSetting = settingsUI.getEnumSetting ("Use faders like editing knobs", CATEGORY_HARDWARE_SETUP, ON_OFF_OPTIONS, ON_OFF_OPTIONS[0]);
         this.useFadersAsKnobsSetting.addValueObserver (value -> {
             this.useFadersAsKnobs = "On".equals (value);
             this.notifyObservers (USE_FADERS_AS_KNOBS);
         });
+        this.isSettingActive.add (USE_FADERS_AS_KNOBS);
 
         this.activateEnableVUMetersSetting (settingsUI, CATEGORY_HARDWARE_SETUP);
 
@@ -411,6 +423,7 @@ public class MCUConfiguration extends AbstractConfiguration
             this.masterVuMeter = "On".equals (value);
             this.notifyObservers (MASTER_VU_METER);
         });
+        this.isSettingActive.add (MASTER_VU_METER);
     }
 
 
@@ -438,12 +451,14 @@ public class MCUConfiguration extends AbstractConfiguration
             this.displayTime = TIME_OR_BEATS_OPTIONS[0].equals (value);
             this.notifyObservers (DISPLAY_MODE_TIME_OR_BEATS);
         });
+        this.isSettingActive.add (DISPLAY_MODE_TIME_OR_BEATS);
 
         this.tempoOrTicksSetting = settingsUI.getEnumSetting ("Display tempo or ticks/milliseconds", CATEGORY_SEGMENT_DISPLAY, TEMPO_OR_TICKS_OPTIONS, TEMPO_OR_TICKS_OPTIONS[0]);
         this.tempoOrTicksSetting.addValueObserver (value -> {
             this.displayTicks = TEMPO_OR_TICKS_OPTIONS[0].equals (value);
             this.notifyObservers (DISPLAY_MODE_TICKS_OR_TEMPO);
         });
+        this.isSettingActive.add (DISPLAY_MODE_TICKS_OR_TEMPO);
     }
 
 
@@ -452,10 +467,14 @@ public class MCUConfiguration extends AbstractConfiguration
         final IEnumSetting includeFXTracksSetting = settingsUI.getEnumSetting ("Include FX and master tracks in track bank", CATEGORY_TRACKS, ON_OFF_OPTIONS, ON_OFF_OPTIONS[0]);
         this.includeFXTracksInTrackBank = "On".equals (includeFXTracksSetting.get ());
 
-        if (this.deviceTyes.length > 1)
+        if (this.deviceTyes.length > 1 && this.host.supports (Capability.HAS_EFFECT_BANK))
         {
             final IEnumSetting pinFXTracksToLastControllerSetting = settingsUI.getEnumSetting ("Pin FX tracks to last device", CATEGORY_TRACKS, ON_OFF_OPTIONS, ON_OFF_OPTIONS[0]);
-            pinFXTracksToLastControllerSetting.addValueObserver (value -> this.pinFXTracksToLastController = "On".equals (value));
+            pinFXTracksToLastControllerSetting.addValueObserver (value -> {
+                this.pinFXTracksToLastController = "On".equals (value);
+                this.notifyObservers (PIN_FXTRACKS_TO_LAST_CONTROLLER);
+            });
+            this.isSettingActive.add (PIN_FXTRACKS_TO_LAST_CONTROLLER);
         }
     }
 
@@ -486,6 +505,7 @@ public class MCUConfiguration extends AbstractConfiguration
             this.zoomState = "On".equals (value);
             this.notifyObservers (ZOOM_STATE);
         });
+        this.isSettingActive.add (ZOOM_STATE);
     }
 
 
@@ -501,6 +521,7 @@ public class MCUConfiguration extends AbstractConfiguration
             this.touchChannel = "On".equals (value);
             this.notifyObservers (TOUCH_CHANNEL);
         });
+        this.isSettingActive.add (TOUCH_CHANNEL);
     }
 
 

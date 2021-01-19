@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.beatstep.command.trigger;
@@ -40,6 +40,6 @@ public class StepCommand extends AbstractTriggerCommand<BeatstepControlSurface, 
     @Override
     public void execute (final ButtonEvent event, final int velocity)
     {
-        this.surface.getViewManager ().getView (Views.SHIFT).onGridNote (36 + this.step, event == ButtonEvent.DOWN ? 127 : 0);
+        this.surface.getViewManager ().get (Views.SHIFT).onGridNote (36 + this.step, event == ButtonEvent.DOWN ? 127 : 0);
     }
 }

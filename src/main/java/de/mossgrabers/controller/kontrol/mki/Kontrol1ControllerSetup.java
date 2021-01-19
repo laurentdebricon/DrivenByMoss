@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.kontrol.mki;
@@ -44,19 +44,15 @@ import de.mossgrabers.framework.controller.valuechanger.DefaultValueChanger;
 import de.mossgrabers.framework.daw.IHost;
 import de.mossgrabers.framework.daw.ITransport;
 import de.mossgrabers.framework.daw.ModelSetup;
-import de.mossgrabers.framework.daw.data.ICursorDevice;
 import de.mossgrabers.framework.daw.data.IDrumDevice;
-import de.mossgrabers.framework.daw.data.ITrack;
-import de.mossgrabers.framework.daw.data.bank.IParameterBank;
-import de.mossgrabers.framework.daw.data.bank.ISendBank;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
 import de.mossgrabers.framework.daw.midi.IMidiAccess;
 import de.mossgrabers.framework.daw.midi.IMidiInput;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.IView;
+import de.mossgrabers.framework.featuregroup.ModeManager;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.scale.Scales;
-import de.mossgrabers.framework.view.View;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -128,7 +124,7 @@ public class Kontrol1ControllerSetup extends AbstractControllerSetup<Kontrol1Con
         final Kontrol1Display display = new Kontrol1Display (this.host, this.valueChanger.getUpperBound (), this.configuration, usbDevice);
         surface.addTextDisplay (display);
 
-        surface.getModeManager ().setDefaultMode (Modes.TRACK);
+        surface.getModeManager ().setDefaultID (Modes.TRACK);
     }
 
 
@@ -139,12 +135,12 @@ public class Kontrol1ControllerSetup extends AbstractControllerSetup<Kontrol1Con
         final Kontrol1ControlSurface surface = this.getSurface ();
         final ModeManager modeManager = surface.getModeManager ();
 
-        modeManager.registerMode (Modes.TRACK, new TrackMode (surface, this.model));
-        modeManager.registerMode (Modes.VOLUME, new VolumeMode (surface, this.model));
-        modeManager.registerMode (Modes.DEVICE_PARAMS, new ParamsMode (surface, this.model));
-        modeManager.registerMode (Modes.BROWSER, new BrowseMode (surface, this.model));
+        modeManager.register (Modes.TRACK, new TrackMode (surface, this.model));
+        modeManager.register (Modes.VOLUME, new VolumeMode (surface, this.model));
+        modeManager.register (Modes.DEVICE_PARAMS, new ParamsMode (surface, this.model));
+        modeManager.register (Modes.BROWSER, new BrowseMode (surface, this.model));
 
-        modeManager.registerMode (Modes.SCALES, new ScaleMode (surface, this.model));
+        modeManager.register (Modes.SCALES, new ScaleMode (surface, this.model));
     }
 
 
@@ -154,7 +150,7 @@ public class Kontrol1ControllerSetup extends AbstractControllerSetup<Kontrol1Con
     {
         final Kontrol1ControlSurface surface = this.getSurface ();
         final ViewManager viewManager = surface.getViewManager ();
-        viewManager.registerView (Views.CONTROL, new ControlView (surface, this.model));
+        viewManager.register (Views.CONTROL, new ControlView (surface, this.model));
     }
 
 
@@ -166,8 +162,6 @@ public class Kontrol1ControllerSetup extends AbstractControllerSetup<Kontrol1Con
 
         this.createScaleObservers (this.configuration);
         this.configuration.addSettingObserver (Kontrol1Configuration.SCALE_IS_ACTIVE, this::updateViewNoteMapping);
-
-        this.getSurface ().getModeManager ().addModeListener ( (oldMode, newMode) -> this.updateIndication (newMode));
 
         final ITrackBank trackBank = this.model.getTrackBank ();
         trackBank.addSelectionObserver ( (index, isSelected) -> this.handleTrackChange (isSelected));
@@ -189,7 +183,7 @@ public class Kontrol1ControllerSetup extends AbstractControllerSetup<Kontrol1Con
         final ITransport t = this.model.getTransport ();
 
         this.addButton (ButtonID.SCALES, "Scales", new ScaleButtonCommand (this.model, surface), Kontrol1ControlSurface.BUTTON_SCALE, this.configuration::isScaleIsActive);
-        this.addButton (ButtonID.METRONOME, "Metronome", new MetronomeCommand<> (this.model, surface), Kontrol1ControlSurface.BUTTON_ARP, () -> surface.isShiftPressed () && t.isMetronomeTicksOn () || !surface.isShiftPressed () && t.isMetronomeOn ());
+        this.addButton (ButtonID.METRONOME, "Metronome", new MetronomeCommand<> (this.model, surface, false), Kontrol1ControlSurface.BUTTON_ARP, () -> surface.isShiftPressed () && t.isMetronomeTicksOn () || !surface.isShiftPressed () && t.isMetronomeOn ());
 
         this.addButton (ButtonID.PLAY, "PLAY", new Kontrol1PlayCommand (this.model, surface), Kontrol1ControlSurface.BUTTON_PLAY, t::isPlaying);
         this.addButton (ButtonID.RECORD, "REC", new RecordCommand<> (this.model, surface), Kontrol1ControlSurface.BUTTON_REC, t::isRecording);
@@ -232,6 +226,7 @@ public class Kontrol1ControllerSetup extends AbstractControllerSetup<Kontrol1Con
         {
             final IHwRelativeKnob knob = this.addRelativeKnob (ContinuousID.get (ContinuousID.KNOB1, i), "Knob " + (i + 1), new KnobRowModeCommand<> (i, this.model, surface), Kontrol1ControlSurface.ENCODER_1 + i);
             knob.bindTouch (new KnobRowTouchModeCommand<> (i, this.model, surface), input, BindType.CC, 0, Kontrol1ControlSurface.TOUCH_ENCODER_1 + i);
+            knob.setIndexInGroup (i);
         }
 
         this.addRelativeKnob (ContinuousID.MASTER_KNOB, "Master", new MainEncoderCommand (this.model, surface), Kontrol1ControlSurface.MAIN_ENCODER);
@@ -245,8 +240,8 @@ public class Kontrol1ControllerSetup extends AbstractControllerSetup<Kontrol1Con
     public void startup ()
     {
         final Kontrol1ControlSurface surface = this.getSurface ();
-        surface.getViewManager ().setActiveView (Views.CONTROL);
-        surface.getModeManager ().setActiveMode (Modes.TRACK);
+        surface.getViewManager ().setActive (Views.CONTROL);
+        surface.getModeManager ().setActive (Modes.TRACK);
     }
 
 
@@ -262,8 +257,7 @@ public class Kontrol1ControllerSetup extends AbstractControllerSetup<Kontrol1Con
 
         this.host.scheduleTask ( () -> {
             final Kontrol1ControlSurface surface = this.getSurface ();
-            this.updateIndication (surface.getModeManager ().getActiveModeId ());
-            final View activeView = surface.getViewManager ().getActiveView ();
+            final IView activeView = surface.getViewManager ().getActive ();
             if (activeView != null)
             {
                 activeView.updateNoteMapping ();
@@ -277,50 +271,6 @@ public class Kontrol1ControllerSetup extends AbstractControllerSetup<Kontrol1Con
                     primary.getDrumPadBank ().scrollTo (0);
             }
         }, 100);
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    protected void updateIndication (final Modes mode)
-    {
-        if (this.currentMode != null && this.currentMode.equals (mode))
-            return;
-        this.currentMode = mode;
-
-        final ITrackBank tb = this.model.getTrackBank ();
-        final ITrackBank tbe = this.model.getEffectTrackBank ();
-        final boolean isEffect = this.model.isEffectTrackBankActive ();
-
-        final boolean isVolume = Modes.VOLUME.equals (mode);
-        final boolean isDevice = Modes.DEVICE_PARAMS.equals (mode);
-
-        tb.setIndication (isVolume);
-        if (tbe != null)
-            tbe.setIndication (isEffect && isVolume);
-
-        final ICursorDevice cursorDevice = this.model.getCursorDevice ();
-        final ITrack selectedTrack = tb.getSelectedItem ();
-        final IParameterBank parameterBank = cursorDevice.getParameterBank ();
-        for (int i = 0; i < tb.getPageSize (); i++)
-        {
-            final boolean hasTrackSel = selectedTrack != null && selectedTrack.getIndex () == i && Modes.TRACK.equals (mode);
-            final ITrack track = tb.getItem (i);
-            track.setVolumeIndication (!isEffect && (isVolume || hasTrackSel));
-            track.setPanIndication (!isEffect && hasTrackSel);
-
-            final ISendBank sendBank = track.getSendBank ();
-            for (int j = 0; j < 6; j++)
-                sendBank.getItem (j).setIndication (!isEffect && hasTrackSel);
-
-            if (tbe != null)
-            {
-                final ITrack fxTrack = tbe.getItem (i);
-                fxTrack.setVolumeIndication (isEffect);
-            }
-
-            parameterBank.getItem (i).setIndication (isDevice);
-        }
     }
 
 

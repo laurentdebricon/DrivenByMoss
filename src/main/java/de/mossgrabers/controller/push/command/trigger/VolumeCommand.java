@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -8,7 +8,8 @@ import de.mossgrabers.controller.push.PushConfiguration;
 import de.mossgrabers.controller.push.controller.PushControlSurface;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.daw.constants.Capability;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -40,22 +41,22 @@ public class VolumeCommand extends AbstractTriggerCommand<PushControlSurface, Pu
             return;
 
         final ModeManager modeManager = this.surface.getModeManager ();
-        final Modes currentMode = modeManager.getActiveOrTempModeId ();
+        final Modes currentMode = modeManager.getActiveID ();
 
         // Layer mode selection for Push 1
         final PushConfiguration config = this.surface.getConfiguration ();
         if (!config.isPush2 () && this.surface.isSelectPressed () && Modes.isLayerMode (currentMode))
         {
-            modeManager.setActiveMode (Modes.DEVICE_LAYER_VOLUME);
+            modeManager.setActive (Modes.DEVICE_LAYER_VOLUME);
             return;
         }
 
         if (Modes.VOLUME.equals (currentMode))
         {
-            if (this.model.getHost ().hasCrossfader ())
-                modeManager.setActiveMode (Modes.CROSSFADER);
+            if (this.model.getHost ().supports (Capability.HAS_CROSSFADER))
+                modeManager.setActive (Modes.CROSSFADER);
         }
         else
-            modeManager.setActiveMode (Modes.VOLUME);
+            modeManager.setActive (Modes.VOLUME);
     }
 }

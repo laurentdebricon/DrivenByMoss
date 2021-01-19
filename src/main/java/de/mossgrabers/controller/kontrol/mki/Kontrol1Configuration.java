@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.kontrol.mki;
@@ -51,6 +51,7 @@ public class Kontrol1Configuration extends AbstractConfiguration
             this.scaleIsActive = "On".equals (value);
             this.notifyObservers (SCALE_IS_ACTIVE);
         });
+        this.isSettingActive.add (SCALE_IS_ACTIVE);
 
         this.activateScaleSetting (documentSettings);
         this.activateScaleBaseSetting (documentSettings);

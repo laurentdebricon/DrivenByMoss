@@ -1,8 +1,12 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.daw.data;
+
+import de.mossgrabers.framework.observer.IValueObserver;
+import de.mossgrabers.framework.utils.StringUtils;
+
 
 /**
  * An item.
@@ -12,7 +16,16 @@ package de.mossgrabers.framework.daw.data;
 public abstract class AbstractItemImpl implements IItem
 {
     protected final int index;
-    private boolean     selected;
+    private boolean     selected = false;
+
+
+    /**
+     * Constructor.
+     */
+    public AbstractItemImpl ()
+    {
+        this (-1);
+    }
 
 
     /**
@@ -23,6 +36,14 @@ public abstract class AbstractItemImpl implements IItem
     public AbstractItemImpl (final int index)
     {
         this.index = index;
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean doesExist ()
+    {
+        return false;
     }
 
 
@@ -39,6 +60,30 @@ public abstract class AbstractItemImpl implements IItem
     public int getPosition ()
     {
         throw new UnsupportedOperationException ();
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public String getName ()
+    {
+        return "";
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public String getName (final int limit)
+    {
+        return StringUtils.optimizeName (this.getName (), limit);
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void setName (final String name)
+    {
+        // Intentionally empty
     }
 
 
@@ -62,7 +107,15 @@ public abstract class AbstractItemImpl implements IItem
     @Override
     public void select ()
     {
-        throw new UnsupportedOperationException ();
+        // Cannot be selected but should also not crash
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void addNameObserver (final IValueObserver<String> observer)
+    {
+        // Intentionally empty
     }
 
 
@@ -70,6 +123,6 @@ public abstract class AbstractItemImpl implements IItem
     @Override
     public void enableObservers (final boolean enable)
     {
-        // Not supported
+        // Intentionally empty
     }
 }

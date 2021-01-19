@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.mcu.command.trigger;
@@ -8,7 +8,7 @@ import de.mossgrabers.controller.mcu.MCUConfiguration;
 import de.mossgrabers.controller.mcu.controller.MCUControlSurface;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -58,20 +58,20 @@ public class KeyCommand extends AbstractTriggerCommand<MCUControlSurface, MCUCon
         switch (this.key)
         {
             case ENTER:
-                if (modeManager.isActiveOrTempMode (Modes.BROWSER))
+                if (modeManager.isActive (Modes.BROWSER))
                 {
                     this.model.getBrowser ().stopBrowsing (true);
-                    modeManager.restoreMode ();
+                    modeManager.restore ();
                 }
                 else
                     this.model.getApplication ().enter ();
                 break;
 
             case ESCAPE:
-                if (modeManager.isActiveOrTempMode (Modes.BROWSER))
+                if (modeManager.isActive (Modes.BROWSER))
                 {
                     this.model.getBrowser ().stopBrowsing (false);
-                    modeManager.restoreMode ();
+                    modeManager.restore ();
                 }
                 else
                     this.model.getApplication ().escape ();

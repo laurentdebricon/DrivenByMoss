@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.apc.view;
@@ -13,10 +13,10 @@ import de.mossgrabers.framework.controller.color.ColorManager;
 import de.mossgrabers.framework.controller.grid.IPadGrid;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ITrack;
+import de.mossgrabers.framework.featuregroup.AbstractView;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.scale.Scales;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.AbstractView;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -152,7 +152,7 @@ public class ShiftView extends AbstractView<APCControlSurface, APCConfiguration>
         this.model.getScales ().setScaleOffset (pos);
         this.surface.getConfiguration ().setScaleBase (Scales.BASES[pos]);
         this.surface.getDisplay ().notify (Scales.BASES[pos]);
-        this.surface.getViewManager ().getActiveView ().updateNoteMapping ();
+        this.surface.getViewManager ().getActive ().updateNoteMapping ();
     }
 
 
@@ -166,15 +166,15 @@ public class ShiftView extends AbstractView<APCControlSurface, APCConfiguration>
         final int index = buttonID.ordinal () - ButtonID.SCENE1.ordinal ();
 
         final ViewManager viewManager = this.surface.getViewManager ();
-        viewManager.setPreviousView (VIEW_IDS[index]);
-        this.surface.getDisplay ().notify (viewManager.getView (VIEW_IDS[index]).getName ());
+        viewManager.setActive (VIEW_IDS[index]);
+        this.surface.getDisplay ().notify (viewManager.get (VIEW_IDS[index]).getName ());
 
         if (Views.SESSION.equals (VIEW_IDS[index]))
             return;
 
-        final ITrack selectedTrack = this.model.getSelectedTrack ();
-        if (selectedTrack != null)
-            viewManager.setPreferredView (selectedTrack.getPosition (), VIEW_IDS[index]);
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (cursorTrack.doesExist ())
+            viewManager.setPreferredView (cursorTrack.getPosition (), VIEW_IDS[index]);
     }
 
 
@@ -182,7 +182,7 @@ public class ShiftView extends AbstractView<APCControlSurface, APCConfiguration>
     @Override
     public String getButtonColorID (final ButtonID buttonID)
     {
-        final Views previousViewId = this.surface.getViewManager ().getPreviousViewId ();
+        final Views previousViewId = this.surface.getViewManager ().getActiveIDIgnoreTemporary ();
         if (buttonID == ButtonID.SCENE1)
             return Views.SESSION.equals (previousViewId) ? APCColorManager.COLOR_VIEW_SELECTED : APCColorManager.COLOR_VIEW_UNSELECTED;
         if (buttonID == ButtonID.SCENE2)

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.daw.data;
@@ -21,6 +21,7 @@ import com.bitwig.extension.controller.api.Track;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 
@@ -147,7 +148,7 @@ public class TrackImpl extends ChannelImpl implements ITrack
     public ChannelType getType ()
     {
         final String typeID = this.track.trackType ().get ();
-        return typeID.isEmpty () ? ChannelType.UNKNOWN : ChannelType.valueOf (typeID.toUpperCase ());
+        return typeID.isEmpty () ? ChannelType.UNKNOWN : ChannelType.valueOf (typeID.toUpperCase (Locale.US));
     }
 
 

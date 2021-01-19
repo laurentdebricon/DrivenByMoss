@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.view;
@@ -8,6 +8,7 @@ import de.mossgrabers.framework.configuration.Configuration;
 import de.mossgrabers.framework.controller.IControlSurface;
 import de.mossgrabers.framework.controller.grid.IPadGrid;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.featuregroup.AbstractView;
 
 
 /**
@@ -216,7 +217,7 @@ public abstract class AbstractNumberDisplayView<S extends IControlSurface<C>, C 
 
     // @formatter:on
 
-    private final IPadGrid                padGrid;
+    protected final IPadGrid              padGrid;
     private final int                     textColor1;
     private final int                     textColor2;
     private final int                     backgroundColor;
@@ -279,7 +280,15 @@ public abstract class AbstractNumberDisplayView<S extends IControlSurface<C>, C 
                 this.padGrid.lightEx (5 + x, y, third[y][x] ? this.textColor1 : this.backgroundColor);
         }
 
-        // Fill the rest of the grid with the background color
+        this.fillBottom ();
+    }
+
+
+    /**
+     * Fill the rest of the grid with the background color. Overwrite for additional features.
+     */
+    protected void fillBottom ()
+    {
         for (int x = 0; x < this.padGrid.getCols (); x++)
         {
             for (int y = 5; y < this.padGrid.getRows (); y++)
@@ -293,14 +302,14 @@ public abstract class AbstractNumberDisplayView<S extends IControlSurface<C>, C 
     public void onGridNote (final int note, final int velocity)
     {
         if (velocity == 0)
-            this.surface.getViewManager ().restoreView ();
+            this.surface.getViewManager ().restore ();
     }
 
 
     /**
      * Get the number to display.
      *
-     * @return THe number in the range of 0 to 999
+     * @return The number in the range of 0 to 999
      */
     protected abstract int getNumber ();
 }

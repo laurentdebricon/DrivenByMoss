@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.mcu.command.trigger;
@@ -13,7 +13,7 @@ import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -66,7 +66,7 @@ public class SelectCommand extends AbstractTriggerCommand<MCUControlSurface, MCU
             final ITrackBank effectTrackBank = this.model.getEffectTrackBank ();
             if (effectTrackBank != null && effectTrackBank.getItem (this.channel).doesExist ())
             {
-                modeManager.setActiveMode (Modes.get (Modes.SEND1, this.index));
+                modeManager.setActive (Modes.get (Modes.SEND1, this.index));
                 display.notify ("Send channel " + (this.channel + 1) + " selected.");
             }
             else
@@ -85,14 +85,14 @@ public class SelectCommand extends AbstractTriggerCommand<MCUControlSurface, MCU
         if (this.surface.getConfiguration ().hasOnly1Fader ())
         {
             // Select marker if marker mode is active
-            if (modeManager.isActiveOrTempMode (Modes.MARKERS))
+            if (modeManager.isActive (Modes.MARKERS))
             {
                 this.model.getMarkerBank ().getItem (this.channel).select ();
                 return;
             }
 
             // Select parameter if device mode is active
-            if (modeManager.isActiveOrTempMode (Modes.DEVICE_PARAMS))
+            if (modeManager.isActive (Modes.DEVICE_PARAMS))
             {
                 final ICursorDevice cursorDevice = this.model.getCursorDevice ();
                 if (cursorDevice.doesExist ())

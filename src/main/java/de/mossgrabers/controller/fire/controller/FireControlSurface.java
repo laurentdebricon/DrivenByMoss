@@ -1,16 +1,16 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.fire.controller;
 
 import de.mossgrabers.controller.fire.FireConfiguration;
 import de.mossgrabers.framework.controller.AbstractControlSurface;
+import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.color.ColorManager;
 import de.mossgrabers.framework.daw.IHost;
 import de.mossgrabers.framework.daw.midi.IMidiInput;
 import de.mossgrabers.framework.daw.midi.IMidiOutput;
-import de.mossgrabers.framework.utils.StringUtils;
 
 
 /**
@@ -113,7 +113,7 @@ public class FireControlSurface extends AbstractControlSurface<FireConfiguration
     {
         super.flushHardware ();
 
-        ((FirePadGrid) this.pads).flush ();
+        ((FirePadGrid) this.padGrid).flush ();
     }
 
 
@@ -121,17 +121,22 @@ public class FireControlSurface extends AbstractControlSurface<FireConfiguration
     @Override
     public FirePadGrid getPadGrid ()
     {
-        return (FirePadGrid) this.pads;
+        return (FirePadGrid) this.padGrid;
     }
 
 
     /**
-     * Send SysEx to the Fire.
-     *
-     * @param parameters The parameters to send
+     * Update the LEDs brightness and saturation settings on the device.
      */
-    public void sendFireSysEx (final int [] parameters)
+    public void configureLEDs ()
     {
-        this.output.sendSysex ("F0 47 7F 43 " + StringUtils.toHexStr (parameters) + "F7");
+        // Scale to [0..1]. Brightness is in the range of [0.1..1]
+        final double padBrightness = Math.max (0.1, Math.min (1, 0.1 + 0.9 * this.configuration.getPadBrightness () / 100.0));
+        final double padSaturation = this.configuration.getPadSaturation () / 100.0;
+        final FirePadGrid padGrid = this.getPadGrid ();
+        padGrid.configureLEDs (padBrightness, padSaturation);
+
+        for (int i = 0; i < this.padGrid.getRows () * this.padGrid.getCols (); i++)
+            this.getButton (ButtonID.get (ButtonID.PAD1, i)).getLight ().forceFlush ();
     }
 }

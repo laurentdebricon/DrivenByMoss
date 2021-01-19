@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.hardware;
@@ -25,17 +25,18 @@ import com.bitwig.extension.controller.api.HardwareBindable;
  * Implementation of a proxy to an absolute knob on a hardware controller.
  *
  * @param <T> The type of the absolute hardware control
- * 
+ *
  * @author J&uuml;rgen Mo&szlig;graber
  */
 public abstract class AbstractHwAbsoluteControl<T extends AbsoluteHardwareControl> extends AbstractHwContinuousControl implements IHwAbsoluteControl
 {
-    protected final ControllerHost           controllerHost;
-    protected final T                        hardwareControl;
+    protected final ControllerHost         controllerHost;
+    protected final T                      hardwareControl;
 
-    protected AbsoluteHardwarControlBindable defaultAction;
-    protected AbsoluteHardwareControlBinding binding;
-    protected ParameterImpl                  parameterImpl;
+    private AbsoluteHardwarControlBindable defaultAction;
+    private AbsoluteHardwarControlBindable defaultSimpleParameterAction;
+    private AbsoluteHardwareControlBinding binding;
+    private IParameter                     parameter;
 
 
     /**
@@ -55,6 +56,17 @@ public abstract class AbstractHwAbsoluteControl<T extends AbsoluteHardwareContro
         this.hardwareControl.setLabel (label);
 
         HwUtils.markInterested (this.hardwareControl);
+
+        this.defaultAction = this.controllerHost.createAbsoluteHardwareControlAdjustmentTarget (this::handleValue);
+        this.defaultSimpleParameterAction = this.controllerHost.createAbsoluteHardwareControlAdjustmentTarget (this::handleSimpleParameterValue);
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void setIndexInGroup (final int index)
+    {
+        this.hardwareControl.setIndexInGroup (index);
     }
 
 
@@ -72,7 +84,6 @@ public abstract class AbstractHwAbsoluteControl<T extends AbsoluteHardwareContro
     {
         super.bind (command);
 
-        this.defaultAction = this.controllerHost.createAbsoluteHardwareControlAdjustmentTarget (this::handleValue);
         this.binding = this.hardwareControl.setBinding (this.defaultAction);
     }
 
@@ -93,19 +104,30 @@ public abstract class AbstractHwAbsoluteControl<T extends AbsoluteHardwareContro
         if (this.binding != null)
             this.binding.removeBinding ();
 
+        // Remove the previously bound Bitwig parameter
+        if (this.parameter instanceof ParameterImpl)
+            HwUtils.enableObservers (false, this.hardwareControl, (ParameterImpl) this.parameter);
+
         HardwareBindable target = null;
         if (parameter == null)
         {
-            HwUtils.enableObservers (false, this.hardwareControl, this.parameterImpl);
+            // No Bitwig parameter, use the default action
             target = this.defaultAction;
         }
-        else if (parameter instanceof ParameterImpl)
+        else
         {
-            this.parameterImpl = (ParameterImpl) parameter;
-            target = this.parameterImpl.getParameter ();
-            HwUtils.enableObservers (true, this.hardwareControl, this.parameterImpl);
+            // Is parameter a real Bitwig parameter? If yes, map it.
+            if (parameter instanceof ParameterImpl)
+            {
+                final ParameterImpl parameterImpl = (ParameterImpl) parameter;
+                target = parameterImpl.getParameter ();
+                HwUtils.enableObservers (true, this.hardwareControl, parameterImpl);
+            }
+            else
+                target = this.defaultSimpleParameterAction;
         }
 
+        this.parameter = parameter;
         this.binding = target == null ? null : this.hardwareControl.setBinding (target);
     }
 
@@ -135,6 +157,13 @@ public abstract class AbstractHwAbsoluteControl<T extends AbsoluteHardwareContro
             final int data2 = (int) Math.min (127, Math.round (v / 128.0));
             this.pitchbendCommand.onPitchbend (data1, data2);
         }
+    }
+
+
+    private void handleSimpleParameterValue (final double value)
+    {
+        if (this.parameter != null)
+            this.parameter.setNormalizedValue (value);
     }
 
 

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.mcu.command.trigger;
@@ -39,7 +39,7 @@ public class TracksCommand extends ModeMultiSelectCommand<MCUControlSurface, MCU
         if (this.surface.isPressed (ButtonID.SELECT))
         {
             if (event == ButtonEvent.DOWN)
-                this.model.toggleCursorTrackPinned ();
+                this.model.getCursorTrack ().togglePinned ();
             return;
         }
 

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode;
@@ -18,7 +18,8 @@ import de.mossgrabers.framework.daw.data.ISlot;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ISceneBank;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.utils.Pair;
 import de.mossgrabers.framework.utils.StringUtils;
@@ -58,7 +59,6 @@ public class SessionMode extends AbstractTrackMode
     {
         super ("Session", surface, model);
 
-        this.isTemporary = false;
         this.sceneBank = sceneBank;
 
         this.rowDisplayMode = this.isPush2 ? RowDisplayMode.ALL : RowDisplayMode.UPPER;
@@ -125,11 +125,11 @@ public class SessionMode extends AbstractTrackMode
         if (index >= 0)
         {
             if (index == 0)
-                return this.colorManager.getColorIndex (this.rowDisplayMode == RowDisplayMode.UPPER ? AbstractMode.BUTTON_COLOR_HI : AbstractMode.BUTTON_COLOR_ON);
+                return this.colorManager.getColorIndex (this.rowDisplayMode == RowDisplayMode.UPPER ? AbstractMode.BUTTON_COLOR_HI : AbstractFeatureGroup.BUTTON_COLOR_ON);
             if (index == 1)
-                return this.colorManager.getColorIndex (this.rowDisplayMode == RowDisplayMode.LOWER ? AbstractMode.BUTTON_COLOR_HI : AbstractMode.BUTTON_COLOR_ON);
+                return this.colorManager.getColorIndex (this.rowDisplayMode == RowDisplayMode.LOWER ? AbstractMode.BUTTON_COLOR_HI : AbstractFeatureGroup.BUTTON_COLOR_ON);
             if (index < 5)
-                return this.colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_OFF);
+                return this.colorManager.getColorIndex (AbstractFeatureGroup.BUTTON_COLOR_OFF);
 
             final ITrackBank tb = this.model.getCurrentTrackBank ();
             return tb.hasParent () ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
@@ -143,7 +143,7 @@ public class SessionMode extends AbstractTrackMode
     @Override
     public void updateDisplay1 (final ITextDisplay display)
     {
-        if (this.surface.getViewManager ().isActiveView (Views.SESSION))
+        if (this.surface.getViewManager ().isActive (Views.SESSION))
             this.updateDisplay1Clips (display);
         else
             this.updateDisplay1Scenes (display);
@@ -154,7 +154,7 @@ public class SessionMode extends AbstractTrackMode
     @Override
     public void updateDisplay2 (final IGraphicDisplay display)
     {
-        if (this.surface.getViewManager ().isActiveView (Views.SESSION))
+        if (this.surface.getViewManager ().isActive (Views.SESSION))
             this.updateDisplay2Clips (display);
         else
             this.updateDisplay2Scenes (display);

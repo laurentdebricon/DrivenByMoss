@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.fire.command.trigger;
@@ -38,7 +38,7 @@ public class FireViewButtonCommand extends ViewButtonCommand<FireControlSurface,
     @Override
     public void execute (final ButtonEvent event, final int velocity)
     {
-        if (this.surface.getModeManager ().isActiveMode (Modes.BROWSER))
+        if (this.surface.getModeManager ().isActive (Modes.BROWSER))
         {
             if (velocity == 0)
                 return;

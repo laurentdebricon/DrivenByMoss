@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.controller;
@@ -28,13 +28,14 @@ import de.mossgrabers.framework.daw.IHost;
 import de.mossgrabers.framework.daw.midi.IMidiInput;
 import de.mossgrabers.framework.daw.midi.IMidiOutput;
 import de.mossgrabers.framework.daw.midi.INoteInput;
+import de.mossgrabers.framework.featuregroup.IView;
+import de.mossgrabers.framework.featuregroup.ModeManager;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.graphics.IBitmap;
-import de.mossgrabers.framework.mode.ModeManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.View;
-import de.mossgrabers.framework.view.ViewManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -72,14 +73,13 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
 
     protected int                                   defaultMidiChannel       = 0;
 
+    private Map<ContinuousID, IHwContinuousControl> continuous               = new EnumMap<> (ContinuousID.class);
     private Map<ButtonID, IHwButton>                buttons                  = new EnumMap<> (ButtonID.class);
     private Map<OutputID, IHwLight>                 lights                   = new EnumMap<> (OutputID.class);
-    private Map<ContinuousID, IHwContinuousControl> continuous               = new EnumMap<> (ContinuousID.class);
-
     protected List<ITextDisplay>                    textDisplays             = new ArrayList<> (1);
     protected List<IGraphicDisplay>                 graphicsDisplays         = new ArrayList<> (1);
 
-    protected final IPadGrid                        pads;
+    protected final IPadGrid                        padGrid;
     protected ILightGuide                           lightGuide;
 
     private int []                                  keyTranslationTable;
@@ -152,7 +152,7 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
         this.host = host;
         this.configuration = configuration;
         this.colorManager = colorManager;
-        this.pads = padGrid;
+        this.padGrid = padGrid;
         this.lightGuide = lightGuide;
 
         this.surfaceFactory = host.createSurfaceFactory (width, height);
@@ -174,19 +174,19 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
      */
     protected void createPads ()
     {
-        if (this.pads == null)
+        if (this.padGrid == null)
             return;
 
-        final int size = this.pads.getRows () * this.pads.getCols ();
-        final int startNote = this.pads.getStartNote ();
+        final int size = this.padGrid.getRows () * this.padGrid.getCols ();
+        final int startNote = this.padGrid.getStartNote ();
         for (int i = 0; i < size; i++)
         {
             final int note = startNote + i;
 
             final ButtonID buttonID = ButtonID.get (ButtonID.PAD1, i);
             final IHwButton pad = this.createButton (buttonID, "P " + (i + 1));
-            pad.addLight (this.surfaceFactory.createLight (this.surfaceID, null, () -> this.pads.getLightInfo (note).getEncoded (), state -> this.pads.sendState (note), colorIndex -> this.colorManager.getColor (colorIndex, buttonID), pad));
-            final int [] translated = this.pads.translateToController (note);
+            pad.addLight (this.surfaceFactory.createLight (this.surfaceID, null, () -> this.padGrid.getLightInfo (note).getEncoded (), state -> this.padGrid.sendState (note), colorIndex -> this.colorManager.getColor (colorIndex, buttonID), pad));
+            final int [] translated = this.padGrid.translateToController (note);
             pad.bind (this.input, BindType.NOTE, translated[0], translated[1]);
             pad.bind ( (event, velocity) -> this.handleGridNote (event, note, velocity));
         }
@@ -214,14 +214,14 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
     @Override
     public void rebindGrid ()
     {
-        final int size = this.pads.getRows () * this.pads.getCols ();
-        final int startNote = this.pads.getStartNote ();
+        final int size = this.padGrid.getRows () * this.padGrid.getCols ();
+        final int startNote = this.padGrid.getStartNote ();
         for (int i = 0; i < size; i++)
         {
             final int note = startNote + i;
 
             final IHwButton pad = this.getButton (ButtonID.get (ButtonID.PAD1, i));
-            final int [] translated = this.pads.translateToController (note);
+            final int [] translated = this.padGrid.translateToController (note);
             pad.bind (this.input, BindType.NOTE, translated[0], translated[1]);
         }
     }
@@ -231,7 +231,7 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
     @Override
     public void unbindGrid ()
     {
-        final int size = this.pads.getRows () * this.pads.getCols ();
+        final int size = this.padGrid.getRows () * this.padGrid.getCols ();
         for (int i = 0; i < size; i++)
             this.getButton (ButtonID.get (ButtonID.PAD1, i)).unbind (this.input);
     }
@@ -362,7 +362,7 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
     @Override
     public IPadGrid getPadGrid ()
     {
-        return this.pads;
+        return this.padGrid;
     }
 
 
@@ -473,6 +473,14 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
     public IHwLight getLight (final OutputID outputID)
     {
         return this.lights.get (outputID);
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public Collection<IHwLight> getLights ()
+    {
+        return this.lights.values ();
     }
 
 
@@ -616,22 +624,6 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
 
     /** {@inheritDoc} */
     @Override
-    public void setTrigger (final int cc, final String colorID)
-    {
-        this.setTrigger (cc, this.colorManager.getColorIndex (colorID));
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public void setTrigger (final int channel, final int cc, final String colorID)
-    {
-        this.setTrigger (channel, cc, this.colorManager.getColorIndex (colorID));
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
     public void setTrigger (final int channel, final int cc, final int state)
     {
         // Overwrite to support trigger LEDs
@@ -679,6 +671,29 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
             this.updateCounter++;
             this.scheduleTask (this::flushHandler, 1);
         }
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void forceFlush ()
+    {
+        // Flush all text displays. No need for graphics displays since they are refreshed anyway on
+        // an interval
+        this.textDisplays.forEach (ITextDisplay::forceFlush);
+
+        // Refresh all button LEDs, includes pad grid
+        this.buttons.forEach ( (id, button) -> {
+            final IHwLight light = button.getLight ();
+            if (light != null)
+                light.forceFlush ();
+        });
+
+        // Flush additional lights which are not assigned to a button
+        this.lights.forEach ( (outputID, light) -> light.forceFlush ());
+
+        if (this.lightGuide != null)
+            this.lightGuide.forceFlush ();
     }
 
 
@@ -738,8 +753,8 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
     {
         this.turnOffTriggers ();
 
-        if (this.pads != null)
-            this.pads.turnOff ();
+        if (this.padGrid != null)
+            this.padGrid.turnOff ();
 
         this.textDisplays.forEach (IDisplay::shutdown);
         this.graphicsDisplays.forEach (IDisplay::shutdown);
@@ -860,7 +875,7 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
      */
     protected void handleChannelAftertouch (final int data1)
     {
-        final View view = this.viewManager.getActiveView ();
+        final IView view = this.viewManager.getActive ();
         if (view != null)
             view.executeAftertouchCommand (-1, data1);
     }
@@ -874,7 +889,7 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
      */
     protected void handlePolyAftertouch (final int data1, final int data2)
     {
-        final View view = this.viewManager.getActiveView ();
+        final IView view = this.viewManager.getActive ();
         if (view != null)
             view.executeAftertouchCommand (data1, data2);
     }
@@ -977,7 +992,7 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
      */
     protected void handleGridNote (final ButtonEvent event, final int note, final int velocity)
     {
-        final View view = this.viewManager.getActiveView ();
+        final IView view = this.viewManager.getActive ();
         if (view == null)
             return;
         if (event == ButtonEvent.LONG)
@@ -992,7 +1007,7 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
      */
     protected void updateViewControls ()
     {
-        final View view = this.viewManager.getActiveView ();
+        final IView view = this.viewManager.getActive ();
         if (view != null)
             view.updateControlSurface ();
     }
@@ -1003,7 +1018,7 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
      */
     protected void updateGrid ()
     {
-        final View view = this.viewManager.getActiveView ();
+        final IView view = this.viewManager.getActive ();
         if (view != null)
             view.drawGrid ();
     }

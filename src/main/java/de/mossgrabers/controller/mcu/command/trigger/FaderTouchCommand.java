@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.mcu.command.trigger;
@@ -7,7 +7,7 @@ package de.mossgrabers.controller.mcu.command.trigger;
 import de.mossgrabers.controller.mcu.MCUConfiguration;
 import de.mossgrabers.controller.mcu.controller.MCUControlSurface;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -60,10 +60,10 @@ public class FaderTouchCommand extends SelectCommand
         final ModeManager modeManager = this.surface.getModeManager ();
         if (configuration.useFadersAsKnobs ())
         {
-            modeManager.getActiveOrTempMode ().onKnobTouch (this.index, isTouched);
+            modeManager.getActive ().onKnobTouch (this.index, isTouched);
             return;
         }
-        modeManager.getMode (Modes.VOLUME).onKnobTouch (this.index, isTouched);
+        modeManager.get (Modes.VOLUME).onKnobTouch (this.index, isTouched);
 
         final int pos = this.surface.getSurfaceID () * 8 + this.index;
 
@@ -72,10 +72,10 @@ public class FaderTouchCommand extends SelectCommand
         {
             if (!hasTouchedFader ())
             {
-                if (modeManager.isActiveOrTempMode (Modes.VOLUME))
-                    modeManager.setPreviousMode (Modes.VOLUME);
+                if (modeManager.isActive (Modes.VOLUME))
+                    modeManager.setPreviousID (Modes.VOLUME);
                 else
-                    modeManager.setActiveMode (Modes.VOLUME);
+                    modeManager.setActive (Modes.VOLUME);
             }
             isTrackTouched[pos] = true;
         }
@@ -83,7 +83,7 @@ public class FaderTouchCommand extends SelectCommand
         {
             isTrackTouched[pos] = false;
             if (!hasTouchedFader ())
-                modeManager.restoreMode ();
+                modeManager.restore ();
         }
     }
 

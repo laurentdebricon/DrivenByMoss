@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger.clip;
@@ -9,10 +9,10 @@ import de.mossgrabers.framework.configuration.Configuration;
 import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.IControlSurface;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -65,9 +65,9 @@ public class NoteRepeatCommand<S extends IControlSurface<C>, C extends Configura
         if (event == ButtonEvent.LONG || event == ButtonEvent.DOWN && this.surface.isShiftPressed ())
         {
             if (this.isMode)
-                this.surface.getModeManager ().setActiveMode (Modes.REPEAT_NOTE);
+                this.surface.getModeManager ().setTemporary (Modes.REPEAT_NOTE);
             else
-                this.surface.getViewManager ().setActiveView (Views.REPEAT_NOTE);
+                this.surface.getViewManager ().setActive (Views.REPEAT_NOTE);
             this.surface.setTriggerConsumed (ButtonID.REPEAT);
             return true;
         }
@@ -78,18 +78,18 @@ public class NoteRepeatCommand<S extends IControlSurface<C>, C extends Configura
         if (this.isMode)
         {
             final ModeManager modeManager = this.surface.getModeManager ();
-            if (modeManager.isActiveOrTempMode (Modes.REPEAT_NOTE))
+            if (modeManager.isActive (Modes.REPEAT_NOTE))
             {
-                modeManager.restoreMode ();
+                modeManager.restore ();
                 return true;
             }
         }
         else
         {
             final ViewManager viewManager = this.surface.getViewManager ();
-            if (viewManager.isActiveView (Views.REPEAT_NOTE))
+            if (viewManager.isActive (Views.REPEAT_NOTE))
             {
-                viewManager.restoreView ();
+                viewManager.restore ();
                 return true;
             }
         }

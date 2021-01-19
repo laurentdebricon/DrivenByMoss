@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.generic.flexihandler;
@@ -11,8 +11,8 @@ import de.mossgrabers.framework.controller.valuechanger.IValueChanger;
 import de.mossgrabers.framework.daw.IHost;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
-import de.mossgrabers.framework.mode.Mode;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.IMode;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 
 import java.util.ArrayList;
@@ -115,7 +115,7 @@ public class ModesHandler extends AbstractHandler
     @Override
     public int getCommandValue (final FlexiCommand command)
     {
-        final Mode mode = this.modeManager.getActiveOrTempMode ();
+        final IMode mode = this.modeManager.getActive ();
 
         switch (command)
         {
@@ -146,7 +146,7 @@ public class ModesHandler extends AbstractHandler
     @Override
     public void handle (final FlexiCommand command, final int knobMode, final int value)
     {
-        final Mode mode = this.modeManager.getActiveOrTempMode ();
+        final IMode mode = this.modeManager.getActive ();
         if (mode == null)
             return;
 
@@ -280,7 +280,7 @@ public class ModesHandler extends AbstractHandler
 
     private void changeModeValue (final int knobMode, final int knobIndex, final int value)
     {
-        final Mode mode = this.modeManager.getActiveOrTempMode ();
+        final IMode mode = this.modeManager.getActive ();
         if (isAbsolute (knobMode))
             mode.onKnobValue (knobIndex, value);
         else
@@ -295,7 +295,7 @@ public class ModesHandler extends AbstractHandler
     private void selectPreviousMode ()
     {
         final ITrackBank trackBank = this.model.getTrackBank ();
-        final Modes activeModeId = this.modeManager.getActiveModeId ();
+        final Modes activeModeId = this.modeManager.getActiveID ();
         int index = MODE_IDS.indexOf (activeModeId);
         Modes newMode;
         int newModeID;
@@ -316,7 +316,7 @@ public class ModesHandler extends AbstractHandler
     private void selectNextMode ()
     {
         final ITrackBank trackBank = this.model.getTrackBank ();
-        final Modes activeModeId = this.modeManager.getActiveModeId ();
+        final Modes activeModeId = this.modeManager.getActiveID ();
         int index = MODE_IDS.indexOf (activeModeId);
         Modes newMode;
         int newModeID;

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.sl.mode;
@@ -8,7 +8,7 @@ import de.mossgrabers.controller.sl.SLConfiguration;
 import de.mossgrabers.controller.sl.controller.SLControlSurface;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
 
@@ -41,7 +41,6 @@ public class FrameMode extends AbstractMode<SLControlSurface, SLConfiguration>
     public FrameMode (final SLControlSurface surface, final IModel model)
     {
         super ("Frame", surface, model);
-        this.isTemporary = false;
     }
 
 
@@ -97,12 +96,10 @@ public class FrameMode extends AbstractMode<SLControlSurface, SLConfiguration>
     @Override
     public void updateDisplay ()
     {
-        final ITextDisplay d = this.surface.getTextDisplay ();
-
-        d.clear ().setBlock (0, 0, "Layouts:").setCell (0, 3, "Panels:");
-
+        final ITextDisplay d = this.surface.getTextDisplay ().clearRow (0).clearRow (1);
+        d.setBlock (0, 0, "Layouts:").setCell (0, 3, "Panels:");
         for (int i = 0; i < COMMANDS.length; i++)
-            d.setCell (2, i, COMMANDS[i]);
-        d.done (0).done (2);
+            d.setCell (1, i, COMMANDS[i]);
+        d.done (0).done (1);
     }
 }

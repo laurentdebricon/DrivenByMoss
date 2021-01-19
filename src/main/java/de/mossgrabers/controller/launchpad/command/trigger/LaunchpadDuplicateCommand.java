@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.launchpad.command.trigger;
@@ -36,6 +36,6 @@ public class LaunchpadDuplicateCommand extends DuplicateCommand<LaunchpadControl
     public void executeShifted (final ButtonEvent event)
     {
         if (event == ButtonEvent.DOWN)
-            this.model.getClip ().duplicateContent ();
+            this.model.getCursorClip ().duplicateContent ();
     }
 }

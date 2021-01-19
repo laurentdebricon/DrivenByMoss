@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.launchpad.command.trigger;
@@ -12,8 +12,8 @@ import de.mossgrabers.framework.configuration.Configuration;
 import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.display.IDisplay;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -44,25 +44,25 @@ public class SelectSessionViewCommand extends AbstractTriggerCommand<LaunchpadCo
             return;
 
         final ViewManager viewManager = this.surface.getViewManager ();
-        final SessionView sessionView = (SessionView) viewManager.getView (Views.SESSION);
+        final SessionView sessionView = (SessionView) viewManager.get (Views.SESSION);
+        final Configuration configuration = this.surface.getConfiguration ();
 
         if (event == ButtonEvent.UP)
         {
             if (this.surface.isShiftPressed ())
             {
-                viewManager.setActiveView (Views.MIX);
+                viewManager.setActive (Views.MIX);
                 this.notifyViewName (Views.MIX, false, false);
             }
-            else if (viewManager.isActiveView (Views.SESSION))
+            else if (viewManager.isActive (Views.SESSION))
             {
                 if (sessionView.isBirdsEyeActive ())
                 {
                     sessionView.setBirdsEyeActive (false);
-                    this.notifyViewName (Views.SESSION, false, false);
+                    this.notifyViewName (Views.SESSION, false, configuration.isFlipSession ());
                 }
                 else
                 {
-                    final Configuration configuration = this.surface.getConfiguration ();
                     final boolean flipped = !configuration.isFlipSession ();
                     configuration.setFlipSession (flipped);
                     this.notifyViewName (Views.SESSION, false, flipped);
@@ -70,15 +70,15 @@ public class SelectSessionViewCommand extends AbstractTriggerCommand<LaunchpadCo
             }
             else
             {
-                viewManager.setActiveView (Views.SESSION);
-                this.notifyViewName (Views.SESSION, false, false);
+                viewManager.setActive (Views.SESSION);
+                this.notifyViewName (Views.SESSION, false, configuration.isFlipSession ());
             }
         }
         else if (event == ButtonEvent.LONG)
         {
             this.surface.setTriggerConsumed (ButtonID.SESSION);
             sessionView.setBirdsEyeActive (true);
-            this.notifyViewName (Views.SESSION, true, false);
+            this.notifyViewName (Views.SESSION, true, configuration.isFlipSession ());
         }
 
         this.surface.getPadGrid ().forceFlush ();

@@ -1,0 +1,213 @@
+// Written by Jürgen Moßgraber - mossgrabers.de
+// (c) 2017-2021
+// Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
+
+package de.mossgrabers.framework.featuregroup;
+
+import de.mossgrabers.framework.command.core.AftertouchCommand;
+import de.mossgrabers.framework.configuration.Configuration;
+import de.mossgrabers.framework.controller.ButtonID;
+import de.mossgrabers.framework.controller.IControlSurface;
+import de.mossgrabers.framework.daw.DAWColor;
+import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.daw.data.ITrack;
+import de.mossgrabers.framework.scale.Scales;
+import de.mossgrabers.framework.utils.ButtonEvent;
+import de.mossgrabers.framework.utils.KeyManager;
+
+
+/**
+ * Abstract implementation of a view.
+ *
+ * @param <S> The type of the control surface
+ * @param <C> The type of the configuration
+ *
+ * @author J&uuml;rgen Mo&szlig;graber
+ */
+public abstract class AbstractView<S extends IControlSurface<C>, C extends Configuration> extends AbstractFeatureGroup<S, C> implements IView
+{
+    protected static final int [] EMPTY_TABLE = Scales.getEmptyMatrix ();
+
+    protected final Scales        scales;
+    protected final KeyManager    keyManager;
+
+    private AftertouchCommand     aftertouchCommand;
+
+    protected boolean             canScrollLeft;
+    protected boolean             canScrollRight;
+    protected boolean             canScrollUp;
+    protected boolean             canScrollDown;
+
+
+    /**
+     * Constructor.
+     *
+     * @param name The name of the view
+     * @param surface The surface
+     * @param model The model
+     */
+    public AbstractView (final String name, final S surface, final IModel model)
+    {
+        super (name, surface, model);
+
+        this.scales = model.getScales ();
+        this.keyManager = new KeyManager (model, this.scales, surface.getPadGrid ());
+
+        this.canScrollLeft = true;
+        this.canScrollRight = true;
+        this.canScrollUp = true;
+        this.canScrollDown = true;
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void onActivate ()
+    {
+        this.updateNoteMapping ();
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void onDeactivate ()
+    {
+        // Intentionally empty
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void selectTrack (final int index)
+    {
+        this.model.getCurrentTrackBank ().getItem (index).select ();
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void updateControlSurface ()
+    {
+        final IMode m = this.surface.getModeManager ().getActive ();
+        if (m != null)
+            m.updateDisplay ();
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void registerAftertouchCommand (final AftertouchCommand command)
+    {
+        this.aftertouchCommand = command;
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void executeAftertouchCommand (final int note, final int value)
+    {
+        if (this.aftertouchCommand == null)
+            return;
+        if (note == -1)
+            this.aftertouchCommand.onChannelAftertouch (value);
+        else
+            this.aftertouchCommand.onPolyAftertouch (note, value);
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void onGridNoteLongPress (final int note)
+    {
+        // Intentionally empty
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void onButton (final ButtonID buttonID, final ButtonEvent event, final int velocity)
+    {
+        // Intentionally empty
+    }
+
+
+    /**
+     * Get the ID of the color to use for a pad with respect to the current scale settings.
+     *
+     * @param pad The midi note of the pad
+     * @param track A track to use the track color for coloring the octave notes, set to null to use
+     *            the default color
+     * @return The color ID
+     */
+    protected String getPadColor (final int pad, final ITrack track)
+    {
+        return replaceOctaveColorWithTrackColor (track, this.keyManager.getColor (pad));
+    }
+
+
+    /**
+     * If the given color ID is the octave color ID it will be replaced with the track color ID.
+     *
+     * @param track A track to use the track color for coloring the octave notes, set to null to use
+     *            the default color
+     * @param colorID
+     * @return The color ID
+     */
+    public static String replaceOctaveColorWithTrackColor (final ITrack track, final String colorID)
+    {
+        if (Scales.SCALE_COLOR_OCTAVE.equals (colorID))
+        {
+            if (track == null)
+                return Scales.SCALE_COLOR_OCTAVE;
+            final String c = DAWColor.getColorIndex (track.getColor ());
+            return c == null ? Scales.SCALE_COLOR_OCTAVE : c;
+        }
+        return colorID;
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void updateNoteMapping ()
+    {
+        this.delayedUpdateNoteMapping (EMPTY_TABLE);
+    }
+
+
+    protected void delayedUpdateNoteMapping (final int [] matrix)
+    {
+        this.surface.scheduleTask ( () -> {
+            this.keyManager.setNoteMatrix (matrix);
+            if (matrix.length == 128)
+                this.surface.setKeyTranslationTable (this.scales.translateMatrixToGrid (matrix));
+        }, 6);
+    }
+
+
+    /**
+     * Get the key manager.
+     *
+     * @return The key manager
+     */
+    public KeyManager getKeyManager ()
+    {
+        return this.keyManager;
+    }
+
+
+    /**
+     * Tests if the button is pressed. If yes, the button UP event is consumed.
+     *
+     * @param buttonID The button to test
+     * @return True if button is pressed
+     */
+    protected boolean isButtonCombination (final ButtonID buttonID)
+    {
+        if (this.surface.isPressed (buttonID))
+        {
+            this.surface.setTriggerConsumed (buttonID);
+            return true;
+        }
+        return false;
+    }
+}

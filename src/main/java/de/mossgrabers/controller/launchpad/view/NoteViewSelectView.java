@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.launchpad.view;
@@ -11,8 +11,8 @@ import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.grid.IPadGrid;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ITrack;
-import de.mossgrabers.framework.view.AbstractView;
-import de.mossgrabers.framework.view.ViewManager;
+import de.mossgrabers.framework.featuregroup.AbstractView;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -40,7 +40,7 @@ public class NoteViewSelectView extends AbstractView<LaunchpadControlSurface, La
     public void drawGrid ()
     {
         final ViewManager viewManager = this.surface.getViewManager ();
-        final Views previousViewId = viewManager.getPreviousViewId ();
+        final Views previousViewId = viewManager.getPreviousID ();
 
         final IPadGrid padGrid = this.surface.getPadGrid ();
 
@@ -116,13 +116,13 @@ public class NoteViewSelectView extends AbstractView<LaunchpadControlSurface, La
     private void setView (final Views viewID)
     {
         final ViewManager viewManager = this.surface.getViewManager ();
-        viewManager.setActiveView (viewID);
+        viewManager.setActive (viewID);
 
-        final ITrack sel = this.model.getSelectedTrack ();
-        if (sel != null)
-            viewManager.setPreferredView (sel.getPosition (), viewID);
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (cursorTrack.doesExist ())
+            viewManager.setPreferredView (cursorTrack.getPosition (), viewID);
 
-        this.surface.getDisplay ().notify (viewManager.getView (viewID).getName ());
+        this.surface.getDisplay ().notify (viewManager.get (viewID).getName ());
     }
 
 

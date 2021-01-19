@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.beatstep.command.continuous;
@@ -9,7 +9,7 @@ import de.mossgrabers.controller.beatstep.controller.BeatstepControlSurface;
 import de.mossgrabers.controller.beatstep.view.BeatstepView;
 import de.mossgrabers.framework.command.core.AbstractContinuousCommand;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.view.View;
+import de.mossgrabers.framework.featuregroup.IView;
 
 
 /**
@@ -40,7 +40,7 @@ public class KnobRowViewCommand extends AbstractContinuousCommand<BeatstepContro
     @Override
     public void execute (final int value)
     {
-        final View v = this.surface.getViewManager ().getActiveView ();
+        final IView v = this.surface.getViewManager ().getActive ();
         if (v == null)
             return;
         // Ignore centered messages of Beatstep Pro, which are sent before each real knob movement

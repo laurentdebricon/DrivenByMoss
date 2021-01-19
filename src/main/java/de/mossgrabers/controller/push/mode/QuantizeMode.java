@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode;
@@ -11,11 +11,12 @@ import de.mossgrabers.framework.controller.display.Format;
 import de.mossgrabers.framework.controller.display.IGraphicDisplay;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.daw.constants.EditCapability;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.daw.constants.RecordQuantization;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.resource.ChannelType;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -81,18 +82,18 @@ public class QuantizeMode extends BaseMode
         display.setCell (0, 0, Push1Display.SELECT_ARROW + "Quantize");
         display.setCell (0, 1, "Groove");
 
-        final ITrack track = this.model.getSelectedTrack ();
-        final RecordQuantization recQuant = track == null ? RecordQuantization.RES_OFF : track.getRecordQuantizationGrid ();
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        final RecordQuantization recQuant = cursorTrack.doesExist () ? cursorTrack.getRecordQuantizationGrid () : RecordQuantization.RES_OFF;
         final RecordQuantization [] values = RecordQuantization.values ();
         display.setBlock (2, 0, "Record Quantize:");
         for (int i = 0; i < values.length; i++)
             display.setCell (3, i, (values[i] == recQuant ? Push1Display.SELECT_ARROW : "") + values[i].getName ());
 
-        if (this.model.getHost ().canEdit (EditCapability.QUANTIZE_INPUT_NOTE_LENGTH))
+        if (this.model.getHost ().supports (Capability.QUANTIZE_INPUT_NOTE_LENGTH))
         {
             display.setBlock (2, 2, "       Quant Note");
             display.setCell (2, 6, "Length:");
-            display.setCell (3, 6, track != null && track.isRecordQuantizationNoteLength () ? "On" : "Off");
+            display.setCell (3, 6, cursorTrack.doesExist () && cursorTrack.isRecordQuantizationNoteLength () ? "On" : "Off");
         }
 
         final int quantizeAmount = this.surface.getConfiguration ().getQuantizeAmount ();
@@ -104,16 +105,16 @@ public class QuantizeMode extends BaseMode
     @Override
     public void updateDisplay2 (final IGraphicDisplay display)
     {
-        final ITrack track = this.model.getSelectedTrack ();
-        final RecordQuantization recQuant = track == null ? RecordQuantization.RES_OFF : track.getRecordQuantizationGrid ();
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        final RecordQuantization recQuant = cursorTrack.doesExist () ? cursorTrack.getRecordQuantizationGrid () : RecordQuantization.RES_OFF;
         final RecordQuantization [] values = RecordQuantization.values ();
         for (int i = 0; i < values.length; i++)
             display.addOptionElement ("", MENU[i], i == 0, i == 0 ? "Record Quantization" : "", values[i].getName (), values[i] == recQuant, true);
 
-        if (this.model.getHost ().canEdit (EditCapability.QUANTIZE_INPUT_NOTE_LENGTH))
+        if (this.model.getHost ().supports (Capability.QUANTIZE_INPUT_NOTE_LENGTH))
         {
             display.addOptionElement ("", " ", false, null, "Quantize Note Length", "", false, null, true);
-            final boolean isQuantLength = track != null && track.isRecordQuantizationNoteLength ();
+            final boolean isQuantLength = cursorTrack.doesExist () && cursorTrack.isRecordQuantizationNoteLength ();
             display.addOptionElement ("", " ", false, "", isQuantLength ? "On" : "Off", isQuantLength, true);
         }
         else
@@ -122,7 +123,7 @@ public class QuantizeMode extends BaseMode
             display.addEmptyElement (true);
         }
 
-        if (this.model.getHost ().canEdit (EditCapability.QUANTIZE_AMOUNT))
+        if (this.model.getHost ().supports (Capability.QUANTIZE_AMOUNT))
         {
             final int quantizeAmount = this.surface.getConfiguration ().getQuantizeAmount ();
             display.addParameterElement (" ", false, "", (ChannelType) null, null, false, "Qunt Amnt", quantizeAmount * 1023 / 100, quantizeAmount + "%", this.isKnobTouched[0], -1);
@@ -139,8 +140,8 @@ public class QuantizeMode extends BaseMode
         if (event != ButtonEvent.UP)
             return;
 
-        final ITrack track = this.model.getSelectedTrack ();
-        if (track == null)
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (!cursorTrack.doesExist ())
             return;
 
         switch (index)
@@ -150,11 +151,11 @@ public class QuantizeMode extends BaseMode
             case 2:
             case 3:
             case 4:
-                track.setRecordQuantizationGrid (RecordQuantization.values ()[index]);
+                cursorTrack.setRecordQuantizationGrid (RecordQuantization.values ()[index]);
                 break;
 
             case 6:
-                track.toggleRecordQuantizationNoteLength ();
+                cursorTrack.toggleRecordQuantizationNoteLength ();
                 break;
 
             default:
@@ -172,7 +173,7 @@ public class QuantizeMode extends BaseMode
             return;
 
         if (index == 1)
-            this.surface.getModeManager ().setActiveMode (Modes.GROOVE);
+            this.surface.getModeManager ().setTemporary (Modes.GROOVE);
     }
 
 
@@ -184,13 +185,13 @@ public class QuantizeMode extends BaseMode
         if (index >= 0)
         {
             final RecordQuantization [] values = RecordQuantization.values ();
-            final ITrack track = this.model.getSelectedTrack ();
-            final RecordQuantization recQuant = track == null ? RecordQuantization.RES_OFF : track.getRecordQuantizationGrid ();
+            final ITrack cursorTrack = this.model.getCursorTrack ();
+            final RecordQuantization recQuant = cursorTrack.doesExist () ? cursorTrack.getRecordQuantizationGrid () : RecordQuantization.RES_OFF;
             if (index < values.length)
-                return values[index] == recQuant ? AbstractMode.BUTTON_COLOR_HI : AbstractMode.BUTTON_COLOR_ON;
+                return values[index] == recQuant ? AbstractMode.BUTTON_COLOR_HI : AbstractFeatureGroup.BUTTON_COLOR_ON;
             if (index == 6)
-                return track != null && track.isRecordQuantizationNoteLength () ? AbstractMode.BUTTON_COLOR_HI : AbstractMode.BUTTON_COLOR_ON;
-            return AbstractMode.BUTTON_COLOR_OFF;
+                return cursorTrack.isRecordQuantizationNoteLength () ? AbstractMode.BUTTON_COLOR_HI : AbstractFeatureGroup.BUTTON_COLOR_ON;
+            return AbstractFeatureGroup.BUTTON_COLOR_OFF;
         }
 
         index = this.isButtonRow (1, buttonID);
@@ -199,10 +200,10 @@ public class QuantizeMode extends BaseMode
             if (index == 0)
                 return AbstractMode.BUTTON_COLOR_HI;
             if (index == 1)
-                return AbstractMode.BUTTON_COLOR_ON;
-            return AbstractMode.BUTTON_COLOR_OFF;
+                return AbstractFeatureGroup.BUTTON_COLOR_ON;
+            return AbstractFeatureGroup.BUTTON_COLOR_OFF;
         }
 
-        return AbstractMode.BUTTON_COLOR_OFF;
+        return AbstractFeatureGroup.BUTTON_COLOR_OFF;
     }
 }

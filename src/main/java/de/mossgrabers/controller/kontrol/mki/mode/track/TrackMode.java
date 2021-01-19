@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.kontrol.mki.mode.track;
@@ -15,6 +15,8 @@ import de.mossgrabers.framework.daw.data.bank.ISendBank;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
 import de.mossgrabers.framework.parameterprovider.ChannelParameterProvider;
 import de.mossgrabers.framework.utils.StringUtils;
+
+import java.util.Locale;
 
 
 /**
@@ -62,7 +64,7 @@ public class TrackMode extends AbstractKontrol1Mode
 
         final boolean isEffectTrackBankActive = this.model.isEffectTrackBankActive ();
 
-        d.setCell (0, 0, (isEffectTrackBankActive ? "TR-FX " : "TRACK ") + (t.getPosition () + 1)).setCell (1, 0, StringUtils.shortenAndFixASCII (t.getName (), 8).toUpperCase ());
+        d.setCell (0, 0, (isEffectTrackBankActive ? "TR-FX " : "TRACK ") + (t.getPosition () + 1)).setCell (1, 0, StringUtils.shortenAndFixASCII (t.getName (), 8).toUpperCase (Locale.US));
 
         d.setCell (0, 1, "VOLUME").setCell (1, 1, getSecondLineText (t)).setCell (0, 2, "PAN").setCell (1, 2, t.getPanStr (8));
         d.setBar (1, this.surface.getContinuous (ContinuousID.KNOB1).isTouched (), t.getVolume ());
@@ -75,7 +77,7 @@ public class TrackMode extends AbstractKontrol1Mode
             {
                 final int pos = 3 + i;
                 final ISend sendData = sendBank.getItem (i);
-                d.setCell (0, pos, StringUtils.shortenAndFixASCII (sendData.getName (8), 8).toUpperCase ()).setCell (1, pos, sendData.getDisplayedValue (8));
+                d.setCell (0, pos, StringUtils.shortenAndFixASCII (sendData.getName (8), 8).toUpperCase (Locale.US)).setCell (1, pos, sendData.getDisplayedValue (8));
                 d.setBar (pos, this.surface.getContinuous (ContinuousID.get (ContinuousID.KNOB3, i)).isTouched () && sendData.doesExist (), sendData.getValue ());
             }
         }

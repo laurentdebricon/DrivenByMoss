@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.sl.command.trigger;
@@ -8,7 +8,7 @@ import de.mossgrabers.controller.sl.SLConfiguration;
 import de.mossgrabers.controller.sl.controller.SLControlSurface;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -42,9 +42,9 @@ public class TransportButtonCommand extends AbstractTriggerCommand<SLControlSurf
 
         // Toggle transport
         final ModeManager modeManager = this.surface.getModeManager ();
-        if (modeManager.isActiveOrTempMode (Modes.VIEW_SELECT) || event == ButtonEvent.UP)
-            modeManager.restoreMode ();
+        if (modeManager.isActive (Modes.VIEW_SELECT) || event == ButtonEvent.UP)
+            modeManager.restore ();
         else
-            modeManager.setActiveMode (Modes.VIEW_SELECT);
+            modeManager.setTemporary (Modes.VIEW_SELECT);
     }
 }

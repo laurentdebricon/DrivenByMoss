@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger.view;
@@ -9,12 +9,13 @@ import de.mossgrabers.framework.configuration.Configuration;
 import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.IControlSurface;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.featuregroup.IView;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.View;
 
 
 /**
- * Command to relay a button event to the active view.
+ * Command to relay a button event to the active view. Use in combination with a
+ * {@link FeatureGroupButtonColorSupplier}.
  *
  * @param <S> The type of the control surface
  * @param <C> The type of the configuration
@@ -57,7 +58,7 @@ public class ViewButtonCommand<S extends IControlSurface<C>, C extends Configura
     @Override
     public void execute (final ButtonEvent event, final int velocity)
     {
-        final View view = this.surface.getViewManager ().getActiveView ();
+        final IView view = this.surface.getViewManager ().getActive ();
         if (view != null)
             view.onButton (this.buttonID, event, velocity);
     }

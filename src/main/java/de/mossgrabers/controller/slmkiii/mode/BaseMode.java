@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.slmkiii.mode;
@@ -12,7 +12,8 @@ import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.IItem;
 import de.mossgrabers.framework.daw.data.bank.IBank;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
+import de.mossgrabers.framework.parameterprovider.IParameterProvider;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
 
@@ -57,17 +58,21 @@ public abstract class BaseMode extends AbstractMode<SLMkIIIControlSurface, SLMkI
 
     /** {@inheritDoc} */
     @Override
+    public int getKnobValue (final int index)
+    {
+        final IParameterProvider parameterProvider = this.getParameterProvider ();
+        return parameterProvider == null ? 0 : parameterProvider.get (index).getValue ();
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
     public void onActivate ()
     {
         super.onActivate ();
 
         this.surface.getDisplay ().setDisplayLayout (SLMkIIIDisplay.SCREEN_LAYOUT_KNOB);
     }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public abstract int getKnobValue (final int index);
 
 
     /** {@inheritDoc} */

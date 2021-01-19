@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -10,7 +10,7 @@ import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -50,7 +50,7 @@ public class TrackCommand extends AbstractTriggerCommand<PushControlSurface, Pus
         }
 
         final ModeManager modeManager = this.surface.getModeManager ();
-        final Modes currentMode = modeManager.getActiveOrTempModeId ();
+        final Modes currentMode = modeManager.getActiveID ();
 
         if (currentMode != null)
         {
@@ -62,31 +62,31 @@ public class TrackCommand extends AbstractTriggerCommand<PushControlSurface, Pus
                 }
                 else if (currentMode.ordinal () >= Modes.SEND1.ordinal () && currentMode.ordinal () <= Modes.SEND8.ordinal ())
                 {
-                    modeManager.setActiveMode (Modes.TRACK);
+                    modeManager.setActive (Modes.TRACK);
                     this.model.toggleCurrentTrackBank ();
                 }
                 else
-                    modeManager.setActiveMode (config.getCurrentMixMode ());
+                    modeManager.setActive (config.getCurrentMixMode ());
             }
             else
             {
                 // Layer mode selection for Push 1
                 if (this.surface.isSelectPressed () && Modes.isLayerMode (currentMode))
                 {
-                    modeManager.setActiveMode (Modes.DEVICE_LAYER);
+                    modeManager.setActive (Modes.DEVICE_LAYER);
                     return;
                 }
 
                 if (Modes.TRACK.equals (currentMode))
                     this.model.toggleCurrentTrackBank ();
                 else
-                    modeManager.setActiveMode (Modes.TRACK);
+                    modeManager.setActive (Modes.TRACK);
             }
         }
         else
-            modeManager.setActiveMode (Modes.TRACK);
+            modeManager.setActive (Modes.TRACK);
 
-        config.setDebugMode (modeManager.getActiveOrTempModeId ());
+        config.setDebugMode (modeManager.getActiveID ());
 
         final ITrackBank tb = this.model.getCurrentTrackBank ();
         final ITrack track = tb.getSelectedItem ();

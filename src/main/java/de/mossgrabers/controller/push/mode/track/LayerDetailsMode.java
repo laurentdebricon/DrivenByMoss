@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode.track;
@@ -15,9 +15,10 @@ import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.IChannel;
 import de.mossgrabers.framework.daw.data.bank.IChannelBank;
 import de.mossgrabers.framework.daw.data.bank.IDrumPadBank;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -65,8 +66,8 @@ public class LayerDetailsMode extends BaseMode
                 break;
             case 7:
                 final ViewManager viewManager = this.surface.getViewManager ();
-                ((ColorView) viewManager.getView (Views.COLOR)).setMode (ColorView.SelectMode.MODE_LAYER);
-                viewManager.setActiveView (Views.COLOR);
+                ((ColorView) viewManager.get (Views.COLOR)).setMode (ColorView.SelectMode.MODE_LAYER);
+                viewManager.setActive (Views.COLOR);
                 break;
             default:
                 // Not used
@@ -132,7 +133,7 @@ public class LayerDetailsMode extends BaseMode
         if (index >= 0)
         {
             if (index >= 6)
-                return this.model.getColorManager ().getColorIndex (this.model.getCursorDevice ().getLayerOrDrumPadBank () instanceof IDrumPadBank ? AbstractMode.BUTTON_COLOR2_ON : AbstractMode.BUTTON_COLOR_OFF);
+                return this.model.getColorManager ().getColorIndex (this.model.getCursorDevice ().getLayerOrDrumPadBank () instanceof IDrumPadBank ? AbstractMode.BUTTON_COLOR2_ON : AbstractFeatureGroup.BUTTON_COLOR_OFF);
             return this.isPush2 ? PushColorManager.PUSH2_COLOR_BLACK : PushColorManager.PUSH1_COLOR_BLACK;
         }
 

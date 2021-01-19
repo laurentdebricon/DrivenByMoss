@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.fire.view;
@@ -12,7 +12,7 @@ import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.INoteClip;
 import de.mossgrabers.framework.daw.IStepInfo;
 import de.mossgrabers.framework.daw.data.ITrack;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.view.AbstractNoteSequencerView;
@@ -56,16 +56,16 @@ public class SequencerView extends AbstractNoteSequencerView<FireControlSurface,
             final int state = clip.getStep (channel, x, mappedY).getState ();
             if (state == IStepInfo.NOTE_START)
             {
-                final NoteMode noteMode = (NoteMode) modeManager.getMode (Modes.NOTE);
+                final NoteMode noteMode = (NoteMode) modeManager.get (Modes.NOTE);
                 noteMode.setValues (clip, channel, x, mappedY);
-                modeManager.setActiveMode (Modes.NOTE);
+                modeManager.setActive (Modes.NOTE);
             }
         }
         else
         {
             // Turn off Note mode
-            if (modeManager.isActiveOrTempMode (Modes.NOTE))
-                modeManager.restoreMode ();
+            if (modeManager.isActive (Modes.NOTE))
+                modeManager.restore ();
 
             if (this.isNoteEdited)
             {
@@ -100,23 +100,20 @@ public class SequencerView extends AbstractNoteSequencerView<FireControlSurface,
     @Override
     public int getSoloButtonColor (final int index)
     {
-        ITrack selectedTrack;
+        final ITrack cursorTrack = this.model.getCursorTrack ();
         switch (index)
         {
             case 0:
                 return 0;
 
             case 1:
-                selectedTrack = this.model.getSelectedTrack ();
-                return selectedTrack != null && selectedTrack.doesExist () && selectedTrack.isMute () ? 3 : 0;
+                return cursorTrack.doesExist () && cursorTrack.isMute () ? 3 : 0;
 
             case 2:
-                selectedTrack = this.model.getSelectedTrack ();
-                return selectedTrack != null && selectedTrack.doesExist () && selectedTrack.isSolo () ? 4 : 0;
+                return cursorTrack.doesExist () && cursorTrack.isSolo () ? 4 : 0;
 
             case 3:
-                selectedTrack = this.model.getSelectedTrack ();
-                return selectedTrack != null && selectedTrack.doesExist () && selectedTrack.isRecArm () ? 1 : 0;
+                return cursorTrack.doesExist () && cursorTrack.isRecArm () ? 1 : 0;
 
             default:
                 return 0;
@@ -131,9 +128,9 @@ public class SequencerView extends AbstractNoteSequencerView<FireControlSurface,
         if (event != ButtonEvent.DOWN || !this.isActive ())
             return;
 
-        ITrack selectedTrack;
-
+        final ITrack cursorTrack = this.model.getCursorTrack ();
         final INoteClip clip = this.getClip ();
+
         switch (buttonID)
         {
             case ARROW_LEFT:
@@ -157,27 +154,19 @@ public class SequencerView extends AbstractNoteSequencerView<FireControlSurface,
                 return;
 
             case SCENE1:
-                selectedTrack = this.model.getSelectedTrack ();
-                if (selectedTrack != null && selectedTrack.doesExist ())
-                    selectedTrack.stop ();
+                cursorTrack.stop ();
                 break;
 
             case SCENE2:
-                selectedTrack = this.model.getSelectedTrack ();
-                if (selectedTrack != null && selectedTrack.doesExist ())
-                    selectedTrack.toggleMute ();
+                cursorTrack.toggleMute ();
                 break;
 
             case SCENE3:
-                selectedTrack = this.model.getSelectedTrack ();
-                if (selectedTrack != null && selectedTrack.doesExist ())
-                    selectedTrack.toggleSolo ();
+                cursorTrack.toggleSolo ();
                 break;
 
             case SCENE4:
-                selectedTrack = this.model.getSelectedTrack ();
-                if (selectedTrack != null && selectedTrack.doesExist ())
-                    selectedTrack.toggleRecArm ();
+                cursorTrack.toggleRecArm ();
                 break;
 
             default:

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.maschine.mode;
@@ -31,7 +31,7 @@ public class MaschinePanMode extends PanMode<MaschineControlSurface, MaschineCon
      */
     public MaschinePanMode (final MaschineControlSurface surface, final IModel model)
     {
-        super (surface, model, false);
+        super (surface, model, false, surface.getMaschine ().hasMCUDisplay () ? DEFAULT_KNOB_IDS : null);
 
         this.isKnobTouched = new boolean [9];
         Arrays.fill (this.isKnobTouched, false);

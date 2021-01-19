@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode.device;
@@ -27,8 +27,8 @@ import de.mossgrabers.framework.daw.data.bank.ISendBank;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
 import de.mossgrabers.framework.daw.data.empty.EmptyParameter;
 import de.mossgrabers.framework.daw.resource.ChannelType;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.graphics.canvas.utils.SendData;
-import de.mossgrabers.framework.mode.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.observer.IParametersAdjustObserver;
 import de.mossgrabers.framework.observer.IValueObserver;
@@ -64,8 +64,6 @@ public class DeviceLayerMode extends BaseMode implements IParameterProvider, IVa
     public DeviceLayerMode (final String name, final PushControlSurface surface, final IModel model)
     {
         super (name, surface, model, model.getCursorDevice ().getLayerOrDrumPadBank ());
-
-        this.isTemporary = false;
 
         this.setParameters (this);
 
@@ -241,7 +239,7 @@ public class DeviceLayerMode extends BaseMode implements IParameterProvider, IVa
             layer.enter ();
             final ModeManager modeManager = this.surface.getModeManager ();
             this.setMode (Modes.DEVICE_PARAMS);
-            ((DeviceParamsMode) modeManager.getMode (Modes.DEVICE_PARAMS)).setShowDevices (true);
+            ((DeviceParamsMode) modeManager.get (Modes.DEVICE_PARAMS)).setShowDevices (true);
             return;
         }
 
@@ -267,7 +265,7 @@ public class DeviceLayerMode extends BaseMode implements IParameterProvider, IVa
         this.setMode (Modes.DEVICE_PARAMS);
         cd.selectChannel ();
         final ModeManager modeManager = this.surface.getModeManager ();
-        ((DeviceParamsMode) modeManager.getMode (Modes.DEVICE_PARAMS)).setShowDevices (true);
+        ((DeviceParamsMode) modeManager.get (Modes.DEVICE_PARAMS)).setShowDevices (true);
     }
 
 
@@ -294,14 +292,14 @@ public class DeviceLayerMode extends BaseMode implements IParameterProvider, IVa
         switch (index)
         {
             case 0:
-                if (modeManager.isActiveOrTempMode (Modes.DEVICE_LAYER_VOLUME))
+                if (modeManager.isActive (Modes.DEVICE_LAYER_VOLUME))
                     this.setMode (Modes.DEVICE_LAYER);
                 else
                     this.setMode (Modes.DEVICE_LAYER_VOLUME);
                 break;
 
             case 1:
-                if (modeManager.isActiveOrTempMode (Modes.DEVICE_LAYER_PAN))
+                if (modeManager.isActive (Modes.DEVICE_LAYER_PAN))
                     this.setMode (Modes.DEVICE_LAYER);
                 else
                     this.setMode (Modes.DEVICE_LAYER_PAN);
@@ -324,7 +322,7 @@ public class DeviceLayerMode extends BaseMode implements IParameterProvider, IVa
                 config.setSendsAreToggled (!config.isSendsAreToggled ());
                 this.bindControls ();
 
-                if (!modeManager.isActiveOrTempMode (Modes.DEVICE_LAYER))
+                if (!modeManager.isActive (Modes.DEVICE_LAYER))
                     this.setMode (Modes.get (Modes.DEVICE_LAYER_SEND1, config.isSendsAreToggled () ? 4 : 0));
                 break;
 
@@ -344,7 +342,7 @@ public class DeviceLayerMode extends BaseMode implements IParameterProvider, IVa
 
     private void setMode (final Modes layerMode)
     {
-        this.surface.getModeManager ().setActiveMode (layerMode);
+        this.surface.getModeManager ().setActive (layerMode);
         if (Modes.isLayerMode (layerMode))
             this.surface.getConfiguration ().setLayerMixMode (layerMode);
     }
@@ -364,7 +362,7 @@ public class DeviceLayerMode extends BaseMode implements IParameterProvider, IVa
             return;
         final Modes si = Modes.get (Modes.DEVICE_LAYER_SEND1, sendIndex);
         final ModeManager modeManager = this.surface.getModeManager ();
-        this.setMode (modeManager.isActiveOrTempMode (si) ? Modes.DEVICE_LAYER : si);
+        this.setMode (modeManager.isActive (si) ? Modes.DEVICE_LAYER : si);
     }
 
 
@@ -677,17 +675,17 @@ public class DeviceLayerMode extends BaseMode implements IParameterProvider, IVa
                 switch (index)
                 {
                     case 0:
-                        return modeManager.isActiveOrTempMode (Modes.DEVICE_LAYER_VOLUME) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (Modes.DEVICE_LAYER_VOLUME) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     case 1:
-                        return modeManager.isActiveOrTempMode (Modes.DEVICE_LAYER_PAN) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (Modes.DEVICE_LAYER_PAN) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     case 4:
-                        return modeManager.isActiveOrTempMode (config.isSendsAreToggled () ? Modes.DEVICE_LAYER_SEND5 : Modes.DEVICE_LAYER_SEND1) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (config.isSendsAreToggled () ? Modes.DEVICE_LAYER_SEND5 : Modes.DEVICE_LAYER_SEND1) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     case 5:
-                        return modeManager.isActiveOrTempMode (config.isSendsAreToggled () ? Modes.DEVICE_LAYER_SEND6 : Modes.DEVICE_LAYER_SEND2) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (config.isSendsAreToggled () ? Modes.DEVICE_LAYER_SEND6 : Modes.DEVICE_LAYER_SEND2) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     case 6:
-                        return modeManager.isActiveOrTempMode (config.isSendsAreToggled () ? Modes.DEVICE_LAYER_SEND7 : Modes.DEVICE_LAYER_SEND3) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (config.isSendsAreToggled () ? Modes.DEVICE_LAYER_SEND7 : Modes.DEVICE_LAYER_SEND3) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     case 7:
-                        return modeManager.isActiveOrTempMode (config.isSendsAreToggled () ? Modes.DEVICE_LAYER_SEND8 : Modes.DEVICE_LAYER_SEND4) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
+                        return modeManager.isActive (config.isSendsAreToggled () ? Modes.DEVICE_LAYER_SEND8 : Modes.DEVICE_LAYER_SEND4) ? PushColorManager.PUSH2_COLOR2_WHITE : PushColorManager.PUSH2_COLOR_BLACK;
                     default:
                         return PushColorManager.PUSH2_COLOR_BLACK;
                 }

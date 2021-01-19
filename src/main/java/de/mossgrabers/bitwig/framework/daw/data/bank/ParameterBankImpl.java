@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.daw.data.bank;
@@ -48,7 +48,7 @@ public class ParameterBankImpl extends AbstractItemBank<IParameter> implements I
         this.remoteControls = remoteControlsPage;
 
         for (int i = 0; i < this.getPageSize (); i++)
-            this.items.add (new ParameterImpl (this.valueChanger, this.remoteControls.getParameter (i), i));
+            this.items.add (new ParameterImpl (this.valueChanger, this.remoteControls.getParameter (i), i, true));
 
         this.remoteControls.hasPrevious ().markInterested ();
         this.remoteControls.hasNext ().markInterested ();

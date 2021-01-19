@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.maschine.view;
@@ -18,7 +18,7 @@ import de.mossgrabers.framework.daw.INoteClip;
 import de.mossgrabers.framework.daw.IStepInfo;
 import de.mossgrabers.framework.daw.constants.Resolution;
 import de.mossgrabers.framework.daw.midi.IMidiInput;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.scale.Scales;
 import de.mossgrabers.framework.utils.ButtonEvent;
@@ -214,7 +214,7 @@ public class PlayView extends AbstractPlayView<MaschineControlSurface, MaschineC
             default:
                 if (hilite)
                     return AbstractSequencerView.COLOR_STEP_HILITE_NO_CONTENT;
-                return this.getPadColor (note, this.model.getSelectedTrack ());
+                return this.getPadColor (note, this.model.getCursorTrack ());
         }
     }
 
@@ -282,8 +282,8 @@ public class PlayView extends AbstractPlayView<MaschineControlSurface, MaschineC
 
                 if (this.isChordActive)
                 {
-                    // Get the index of the note in the scale
-                    // Calculate two thirds (chors is then scale index: 0, 2, 4)
+                    // Get the index of the note in the scale and calculate two thirds (chord is
+                    // then scale index: 0, 2, 4)
                     final int [] thirdChord = this.scales.getThirdChord (note);
                     if (thirdChord == null)
                         return;
@@ -400,11 +400,11 @@ public class PlayView extends AbstractPlayView<MaschineControlSurface, MaschineC
     protected boolean handleSequencerAreaButtonCombinations (final INoteClip clip, final int channel, final int step, final int note, final int velocity)
     {
         final ModeManager modeManager = this.surface.getModeManager ();
-        if (modeManager.isActiveOrTempMode (Modes.NOTE))
+        if (modeManager.isActive (Modes.NOTE))
         {
             final int isSet = clip.getStep (channel, step, note).getState ();
             this.model.getHost ().showNotification ("Note " + Scales.formatNoteAndOctave (note, -3) + " - Step " + Integer.toString (step + 1));
-            ((EditNoteMode) modeManager.getMode (Modes.NOTE)).setValues (isSet == IStepInfo.NOTE_START ? clip : null, channel, step, note);
+            ((EditNoteMode) modeManager.get (Modes.NOTE)).setValues (isSet == IStepInfo.NOTE_START ? clip : null, channel, step, note);
             return true;
         }
 

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.slmkiii.view;
@@ -104,6 +104,13 @@ public class SessionView extends AbstractSessionView<SLMkIIIControlSurface, SLMk
             return;
         }
 
+        // Stop clip with normal stop button
+        if (this.isButtonCombination (ButtonID.STOP))
+        {
+            track.stop ();
+            return;
+        }
+
         super.onGridNote (note, velocity);
     }
 
@@ -155,9 +162,9 @@ public class SessionView extends AbstractSessionView<SLMkIIIControlSurface, SLMk
         this.keyboardScales.setScaleOffset (this.scales.getScaleOffset ());
         this.keyboardScales.setScale (this.scales.getScale ());
 
-        final ITrack selectedTrack = this.model.getSelectedTrack ();
+        final ITrack cursorTrack = this.model.getCursorTrack ();
         for (int i = this.keyboardScales.getStartNote (); i < this.keyboardScales.getEndNote (); i++)
-            lightGuide.light (i - 36, this.getGridColor (isKeyboardEnabled, isRecording, selectedTrack, i));
+            lightGuide.light (i - 36, this.getGridColor (isKeyboardEnabled, isRecording, cursorTrack, i));
     }
 
 

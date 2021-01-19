@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.configuration;
@@ -12,7 +12,7 @@ import de.mossgrabers.framework.controller.color.ColorEx;
  *
  * @author J&uuml;rgen Mo&szlig;graber
  */
-public interface IColorSetting extends ISetting<ColorEx>
+public interface IColorSetting extends IValueSetting<ColorEx>
 {
     /**
      * Set the RGB color value.

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.osc.module;
@@ -19,6 +19,7 @@ import de.mossgrabers.framework.osc.IOpenSoundControlWriter;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
 import java.util.LinkedList;
+import java.util.Locale;
 
 
 /**
@@ -245,7 +246,7 @@ public class TransportModule extends AbstractModule
 
             case "automationWriteMode":
                 if (value != null)
-                    this.transport.setAutomationWriteMode (AutomationMode.valueOf (value.toString ().toUpperCase ()));
+                    this.transport.setAutomationWriteMode (AutomationMode.valueOf (value.toString ().toUpperCase (Locale.US)));
                 break;
 
             case TAG_PREROLL:

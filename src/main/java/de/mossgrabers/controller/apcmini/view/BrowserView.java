@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.apcmini.view;
@@ -12,9 +12,9 @@ import de.mossgrabers.framework.controller.color.ColorManager;
 import de.mossgrabers.framework.controller.grid.IPadGrid;
 import de.mossgrabers.framework.daw.IBrowser;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.featuregroup.AbstractView;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.AbstractView;
-import de.mossgrabers.framework.view.ViewManager;
 
 
 /**
@@ -93,16 +93,16 @@ public class BrowserView extends AbstractView<APCminiControlSurface, APCminiConf
             case 0:
                 if (velocity == 0)
                     return;
-                this.model.getBrowser ().stopBrowsing (false);
-                viewManager.restoreView ();
+                browser.stopBrowsing (false);
+                viewManager.restore ();
                 break;
 
             // OK
             case 7:
                 if (velocity == 0)
                     return;
-                this.model.getBrowser ().stopBrowsing (true);
-                viewManager.restoreView ();
+                browser.stopBrowsing (true);
+                viewManager.restore ();
                 break;
 
             case 2:

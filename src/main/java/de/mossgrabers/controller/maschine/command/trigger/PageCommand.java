@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.maschine.command.trigger;
@@ -14,7 +14,7 @@ import de.mossgrabers.framework.daw.data.ICursorDevice;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.IParameterBank;
 import de.mossgrabers.framework.daw.data.bank.ISlotBank;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -52,7 +52,7 @@ public class PageCommand extends AbstractTriggerCommand<MaschineControlSurface, 
             return;
 
         final ModeManager modeManager = this.surface.getModeManager ();
-        final Modes mode = modeManager.getActiveOrTempModeId ();
+        final Modes mode = modeManager.getActiveID ();
 
         switch (mode)
         {
@@ -82,11 +82,11 @@ public class PageCommand extends AbstractTriggerCommand<MaschineControlSurface, 
                 break;
 
             default:
-                final ITrack selectedTrack = this.model.getSelectedTrack ();
-                if (selectedTrack == null)
+                final ITrack cursorTrack = this.model.getCursorTrack ();
+                if (!cursorTrack.doesExist ())
                     return;
 
-                final ISlotBank slotBank = selectedTrack.getSlotBank ();
+                final ISlotBank slotBank = cursorTrack.getSlotBank ();
                 if (this.direction == Direction.LEFT)
                 {
                     if (this.surface.isPressed (ButtonID.STOP))

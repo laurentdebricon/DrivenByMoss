@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.view;
@@ -252,10 +252,8 @@ public abstract class AbstractPolySequencerView<S extends IControlSurface<C>, C 
     protected boolean handleSequencerAreaButtonCombinations (final INoteClip clip, final int channel, final int step)
     {
         // Handle note duplicate function
-        final IHwButton duplicateButton = this.surface.getButton (ButtonID.DUPLICATE);
-        if (duplicateButton != null && duplicateButton.isPressed ())
+        if (this.isButtonCombination (ButtonID.DUPLICATE))
         {
-            duplicateButton.setConsumed ();
             if (this.getStep (clip, step) == IStepInfo.NOTE_START)
                 this.copyStep = step;
             else if (this.copyStep >= 0)
@@ -263,7 +261,7 @@ public abstract class AbstractPolySequencerView<S extends IControlSurface<C>, C 
                 for (int row = 0; row < 128; row++)
                 {
                     final IStepInfo stepInfo = clip.getStep (channel, this.copyStep, row);
-                    if (stepInfo != null)
+                    if (stepInfo != null && stepInfo.getVelocity () > 0)
                         clip.setStep (channel, step, row, stepInfo);
                 }
             }
@@ -344,10 +342,10 @@ public abstract class AbstractPolySequencerView<S extends IControlSurface<C>, C 
 
         // Paint the play part
         final boolean isRecording = this.model.hasRecordingState ();
-        final ITrack selectedTrack = this.model.getSelectedTrack ();
+        final ITrack cursorTrack = this.model.getCursorTrack ();
         final int startNote = this.scales.getStartNote ();
         for (int i = startNote; i < startNote + this.sequencerSteps; i++)
-            padGrid.light (i, this.getGridColor (isKeyboardEnabled, isRecording, selectedTrack, i));
+            padGrid.light (i, this.getGridColor (isKeyboardEnabled, isRecording, cursorTrack, i));
 
     }
 

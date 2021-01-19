@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.kontrol.mki.command.trigger;
@@ -8,7 +8,7 @@ import de.mossgrabers.controller.kontrol.mki.Kontrol1Configuration;
 import de.mossgrabers.controller.kontrol.mki.controller.Kontrol1ControlSurface;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -49,9 +49,9 @@ public class ScaleButtonCommand extends AbstractTriggerCommand<Kontrol1ControlSu
             return;
 
         final ModeManager modeManager = this.surface.getModeManager ();
-        if (modeManager.isActiveOrTempMode (Modes.SCALES))
-            modeManager.restoreMode ();
+        if (modeManager.isActive (Modes.SCALES))
+            modeManager.restore ();
         else
-            modeManager.setActiveMode (Modes.SCALES);
+            modeManager.setTemporary (Modes.SCALES);
     }
 }

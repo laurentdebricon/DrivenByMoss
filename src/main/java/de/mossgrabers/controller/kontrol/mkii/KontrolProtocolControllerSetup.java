@@ -1,10 +1,9 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.kontrol.mkii;
 
-import de.mossgrabers.controller.kontrol.mkii.command.trigger.KontrolRecordCommand;
 import de.mossgrabers.controller.kontrol.mkii.command.trigger.StartClipOrSceneCommand;
 import de.mossgrabers.controller.kontrol.mkii.controller.KontrolProtocolColorManager;
 import de.mossgrabers.controller.kontrol.mkii.controller.KontrolProtocolControlSurface;
@@ -23,6 +22,7 @@ import de.mossgrabers.framework.command.trigger.clip.StopClipCommand;
 import de.mossgrabers.framework.command.trigger.mode.ModeMultiSelectCommand;
 import de.mossgrabers.framework.command.trigger.track.MuteCommand;
 import de.mossgrabers.framework.command.trigger.track.SoloCommand;
+import de.mossgrabers.framework.command.trigger.transport.ConfiguredRecordCommand;
 import de.mossgrabers.framework.command.trigger.transport.MetronomeCommand;
 import de.mossgrabers.framework.command.trigger.transport.PlayCommand;
 import de.mossgrabers.framework.command.trigger.transport.StopCommand;
@@ -41,24 +41,22 @@ import de.mossgrabers.framework.daw.IHost;
 import de.mossgrabers.framework.daw.ITransport;
 import de.mossgrabers.framework.daw.ModelSetup;
 import de.mossgrabers.framework.daw.constants.DeviceID;
-import de.mossgrabers.framework.daw.data.ICursorDevice;
 import de.mossgrabers.framework.daw.data.ISpecificDevice;
 import de.mossgrabers.framework.daw.data.ITrack;
-import de.mossgrabers.framework.daw.data.bank.IParameterBank;
 import de.mossgrabers.framework.daw.data.bank.ISceneBank;
-import de.mossgrabers.framework.daw.data.bank.ISendBank;
+import de.mossgrabers.framework.daw.data.bank.ISlotBank;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
 import de.mossgrabers.framework.daw.midi.IMidiAccess;
 import de.mossgrabers.framework.daw.midi.IMidiInput;
 import de.mossgrabers.framework.daw.midi.IMidiOutput;
-import de.mossgrabers.framework.mode.Mode;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.IMode;
+import de.mossgrabers.framework.featuregroup.ModeManager;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.scale.Scales;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.utils.FrameworkException;
 import de.mossgrabers.framework.utils.OperatingSystem;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 import java.util.List;
@@ -154,6 +152,22 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
 
     /** {@inheritDoc} */
     @Override
+    protected void createSurface ()
+    {
+        final IMidiAccess midiAccess = this.factory.createMidiAccess ();
+        final IMidiOutput output = midiAccess.createOutput ();
+        final IMidiInput pianoInput = midiAccess.createInput (1, "Keyboard", "8?????" /* Note off */,
+                "9?????" /* Note on */, "B?????" /* Sustainpedal + Modulation + Strip */,
+                "D?????" /* Channel Aftertouch */, "E?????" /* Pitchbend */);
+        final KontrolProtocolControlSurface surface = new KontrolProtocolControlSurface (this.host, this.colorManager, this.configuration, output, midiAccess.createInput (null), this.version);
+        this.surfaces.add (surface);
+
+        surface.addPianoKeyboard (49, pianoInput, true);
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
     protected void createModel ()
     {
         final ModelSetup ms = new ModelSetup ();
@@ -171,27 +185,11 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
 
     /** {@inheritDoc} */
     @Override
-    protected void createSurface ()
-    {
-        final IMidiAccess midiAccess = this.factory.createMidiAccess ();
-        final IMidiOutput output = midiAccess.createOutput ();
-        final IMidiInput pianoInput = midiAccess.createInput (1, "Keyboard", "80????" /* Note off */,
-                "90????" /* Note on */, "B0????" /* Sustainpedal + Modulation + Strip */,
-                "D0????" /* Channel Aftertouch */, "E0????" /* Pitchbend */);
-        final KontrolProtocolControlSurface surface = new KontrolProtocolControlSurface (this.host, this.colorManager, this.configuration, output, midiAccess.createInput (null), this.version);
-        this.surfaces.add (surface);
-
-        surface.addPianoKeyboard (49, pianoInput, true);
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
     protected void createViews ()
     {
         final KontrolProtocolControlSurface surface = this.getSurface ();
         final ViewManager viewManager = surface.getViewManager ();
-        viewManager.registerView (Views.CONTROL, new ControlView (surface, this.model));
+        viewManager.register (Views.CONTROL, new ControlView (surface, this.model));
     }
 
 
@@ -205,9 +203,9 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
         final List<ContinuousID> controls = ContinuousID.createSequentialList (ContinuousID.KNOB1, 8);
         controls.addAll (ContinuousID.createSequentialList (ContinuousID.FADER1, 8));
 
-        modeManager.registerMode (Modes.VOLUME, new MixerMode (surface, this.model, controls));
-        modeManager.registerMode (Modes.SEND, new SendMode (surface, this.model, controls));
-        modeManager.registerMode (Modes.DEVICE_PARAMS, new ParamsMode (surface, this.model, controls));
+        modeManager.register (Modes.VOLUME, new MixerMode (surface, this.model, controls));
+        modeManager.register (Modes.SEND, new SendMode (surface, this.model, controls));
+        modeManager.register (Modes.DEVICE_PARAMS, new ParamsMode (surface, this.model, controls));
     }
 
 
@@ -216,8 +214,6 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
     protected void createObservers ()
     {
         super.createObservers ();
-
-        this.getSurface ().getModeManager ().addModeListener ( (oldMode, newMode) -> this.updateIndication (newMode));
 
         this.configuration.registerDeactivatedItemsHandler (this.model);
     }
@@ -232,12 +228,12 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
 
         this.addButton (ButtonID.PLAY, "Play", new PlayCommand<> (this.model, surface), 15, KontrolProtocolControlSurface.KONTROL_PLAY, t::isPlaying);
         this.addButton (ButtonID.NEW, "Shift+\nPlay", new NewCommand<> (this.model, surface), 15, KontrolProtocolControlSurface.KONTROL_RESTART);
-        this.addButton (ButtonID.RECORD, "Record", new KontrolRecordCommand (true, this.model, surface), 15, KontrolProtocolControlSurface.KONTROL_RECORD, this.model::hasRecordingState);
-        this.addButton (ButtonID.REC_ARM, "Shift+\nRecord", new KontrolRecordCommand (false, this.model, surface), 15, KontrolProtocolControlSurface.KONTROL_COUNT_IN, this.model::hasRecordingState);
+        this.addButton (ButtonID.RECORD, "Record", new ConfiguredRecordCommand<> (false, this.model, surface), 15, KontrolProtocolControlSurface.KONTROL_RECORD, this.model::hasRecordingState);
+        this.addButton (ButtonID.REC_ARM, "Shift+\nRecord", new ConfiguredRecordCommand<> (true, this.model, surface), 15, KontrolProtocolControlSurface.KONTROL_COUNT_IN, this.model::hasRecordingState);
         this.addButton (ButtonID.STOP, "Stop", new StopCommand<> (this.model, surface), 15, KontrolProtocolControlSurface.KONTROL_STOP, () -> !t.isPlaying ());
 
         this.addButton (ButtonID.LOOP, "Loop", new ToggleLoopCommand<> (this.model, surface), 15, KontrolProtocolControlSurface.KONTROL_LOOP, t::isLoop);
-        this.addButton (ButtonID.METRONOME, "Metronome", new MetronomeCommand<> (this.model, surface), 15, KontrolProtocolControlSurface.KONTROL_METRO, t::isMetronomeOn);
+        this.addButton (ButtonID.METRONOME, "Metronome", new MetronomeCommand<> (this.model, surface, false), 15, KontrolProtocolControlSurface.KONTROL_METRO, t::isMetronomeOn);
         this.addButton (ButtonID.TAP_TEMPO, "Tempo", new TapTempoCommand<> (this.model, surface), 15, KontrolProtocolControlSurface.KONTROL_TAP_TEMPO);
 
         // Note: Since there is no pressed-state with this device, in the sim-GUI the following
@@ -319,10 +315,12 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
             final int knobMidi1 = KontrolProtocolControlSurface.KONTROL_TRACK_VOLUME + i;
             final IHwRelativeKnob knob1 = this.addRelativeKnob (ContinuousID.get (ContinuousID.KNOB1, i), "Knob " + (i + 1), null, BindType.CC, 15, knobMidi1);
             knob1.addOutput ( () -> this.getKnobValue (knobMidi1), value -> surface.setTrigger (15, knobMidi1, value));
+            knob1.setIndexInGroup (i);
 
             final int knobMidi2 = KontrolProtocolControlSurface.KONTROL_TRACK_PAN + i;
             final IHwRelativeKnob knob2 = this.addRelativeKnob (ContinuousID.get (ContinuousID.FADER1, i), "Fader " + (i + 1), null, BindType.CC, 15, KontrolProtocolControlSurface.KONTROL_TRACK_PAN + i);
             knob2.addOutput ( () -> this.getKnobValue (knobMidi2), value -> surface.setTrigger (15, knobMidi2, value));
+            knob2.setIndexInGroup (i);
         }
     }
 
@@ -448,44 +446,9 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
     public void startup ()
     {
         final KontrolProtocolControlSurface surface = this.getSurface ();
-        surface.getViewManager ().setActiveView (Views.CONTROL);
-        surface.getModeManager ().setActiveMode (Modes.VOLUME);
+        surface.getViewManager ().setActive (Views.CONTROL);
+        surface.getModeManager ().setActive (Modes.VOLUME);
         surface.initHandshake ();
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    protected void updateIndication (final Modes mode)
-    {
-        if (this.currentMode != null && this.currentMode == mode)
-            return;
-
-        if (mode != null)
-            this.currentMode = mode;
-
-        final ITrackBank tb = this.model.getTrackBank ();
-        final boolean isVolume = Modes.VOLUME == this.currentMode;
-        final boolean isSend = Modes.SEND == this.currentMode;
-        final boolean isDevice = Modes.isDeviceMode (this.currentMode) || Modes.isLayerMode (this.currentMode);
-
-        final ICursorDevice cursorDevice = this.model.getCursorDevice ();
-        final ITrack selectedTrack = tb.getSelectedItem ();
-        final IParameterBank parameterBank = cursorDevice.getParameterBank ();
-        for (int i = 0; i < tb.getPageSize (); i++)
-        {
-            final boolean hasTrackSel = selectedTrack != null && selectedTrack.getIndex () == i;
-
-            final ITrack track = tb.getItem (i);
-            track.setVolumeIndication (isVolume);
-            track.setPanIndication (isVolume);
-
-            final ISendBank sendBank = track.getSendBank ();
-            for (int j = 0; j < sendBank.getPageSize (); j++)
-                sendBank.getItem (j).setIndication (isSend && hasTrackSel);
-
-            parameterBank.getItem (i).setIndication (isDevice);
-        }
     }
 
 
@@ -526,13 +489,14 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
      */
     private void navigateClips (final boolean isLeft)
     {
-        final ITrack selectedTrack = this.model.getSelectedTrack ();
-        if (selectedTrack == null)
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (!cursorTrack.doesExist ())
             return;
+        final ISlotBank slotBank = cursorTrack.getSlotBank ();
         if (isLeft)
-            selectedTrack.getSlotBank ().selectPreviousItem ();
+            slotBank.selectPreviousItem ();
         else
-            selectedTrack.getSlotBank ().selectNextItem ();
+            slotBank.selectNextItem ();
     }
 
 
@@ -569,7 +533,7 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
     {
         if (event != ButtonEvent.DOWN)
             return;
-        final Mode activeMode = this.getSurface ().getModeManager ().getActiveOrTempMode ();
+        final IMode activeMode = this.getSurface ().getModeManager ().getActive ();
         if (activeMode == null)
             return;
         if (isLeft)
@@ -585,7 +549,7 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
         if (event != ButtonEvent.DOWN)
             return;
 
-        if (this.getSurface ().getModeManager ().isActiveMode (Modes.VOLUME))
+        if (this.getSurface ().getModeManager ().isActive (Modes.VOLUME))
         {
             if (this.configuration.isFlipTrackClipNavigation ())
             {
@@ -599,7 +563,7 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
             return;
         }
 
-        final Mode activeMode = this.getSurface ().getModeManager ().getActiveOrTempMode ();
+        final IMode activeMode = this.getSurface ().getModeManager ().getActive ();
         if (activeMode == null)
             return;
         if (isLeft)
@@ -615,7 +579,7 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
         if (event != ButtonEvent.DOWN)
             return;
 
-        if (this.getSurface ().getModeManager ().isActiveMode (Modes.VOLUME))
+        if (this.getSurface ().getModeManager ().isActive (Modes.VOLUME))
         {
             if (this.configuration.isFlipTrackClipNavigation ())
             {
@@ -636,7 +600,7 @@ public class KontrolProtocolControllerSetup extends AbstractControllerSetup<Kont
 
     private int getKnobValue (final int continuousMidiControl)
     {
-        final Mode mode = this.getSurface ().getModeManager ().getActiveOrTempMode ();
+        final IMode mode = this.getSurface ().getModeManager ().getActive ();
         return mode == null ? 0 : mode.getKnobValue (continuousMidiControl);
     }
 }

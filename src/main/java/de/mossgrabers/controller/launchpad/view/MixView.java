@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.launchpad.view;
@@ -18,8 +18,8 @@ import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ISend;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
+import de.mossgrabers.framework.featuregroup.AbstractView;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.AbstractView;
 
 
 /**

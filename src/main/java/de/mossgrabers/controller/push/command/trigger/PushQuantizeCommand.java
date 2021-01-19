@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -9,7 +9,7 @@ import de.mossgrabers.controller.push.controller.PushControlSurface;
 import de.mossgrabers.framework.command.trigger.clip.QuantizeCommand;
 import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -40,7 +40,7 @@ public class PushQuantizeCommand extends QuantizeCommand<PushControlSurface, Pus
         final ModeManager modeManager = this.surface.getModeManager ();
         if (event == ButtonEvent.LONG || event == ButtonEvent.DOWN && this.surface.isShiftPressed ())
         {
-            modeManager.setActiveMode (Modes.REC_ARM);
+            modeManager.setTemporary (Modes.REC_ARM);
             this.surface.setTriggerConsumed (ButtonID.QUANTIZE);
             return;
         }
@@ -48,8 +48,8 @@ public class PushQuantizeCommand extends QuantizeCommand<PushControlSurface, Pus
         if (event != ButtonEvent.UP)
             return;
 
-        if (Modes.REC_ARM.equals (modeManager.getActiveOrTempModeId ()))
-            modeManager.restoreMode ();
+        if (Modes.REC_ARM.equals (modeManager.getActiveID ()))
+            modeManager.restore ();
         else
             this.quantize ();
     }

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode;
@@ -11,11 +11,12 @@ import de.mossgrabers.framework.controller.display.IGraphicDisplay;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ITrack;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
+import de.mossgrabers.framework.featuregroup.IView;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.utils.StringUtils;
-import de.mossgrabers.framework.view.View;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -30,9 +31,9 @@ public class NoteViewSelectMode extends BaseMode
     private static final Views [] VIEWS     =
     {
         Views.PLAY,
+        Views.CHORDS,
         Views.PIANO,
         Views.DRUM64,
-        null,
         null,
         null,
         Views.CLIP,
@@ -97,13 +98,13 @@ public class NoteViewSelectMode extends BaseMode
         {
             if (VIEWS[i] != null)
             {
-                final View view = viewManager.getView (VIEWS[i]);
-                display.setCell (3, i, view == null ? "" : (viewManager.isActiveView (VIEWS[i]) ? Push1Display.SELECT_ARROW : "") + StringUtils.optimizeName (view.getName (), 8));
+                final IView view = viewManager.get (VIEWS[i]);
+                display.setCell (3, i, view == null ? "" : (viewManager.isActive (VIEWS[i]) ? Push1Display.SELECT_ARROW : "") + StringUtils.optimizeName (view.getName (), 8));
             }
             if (VIEWS_TOP[i] != null)
             {
-                final View view = viewManager.getView (VIEWS_TOP[i]);
-                display.setCell (0, i, view == null ? "" : (viewManager.isActiveView (VIEWS_TOP[i]) ? Push1Display.SELECT_ARROW : "") + StringUtils.optimizeName (view.getName (), 8));
+                final IView view = viewManager.get (VIEWS_TOP[i]);
+                display.setCell (0, i, view == null ? "" : (viewManager.isActive (VIEWS_TOP[i]) ? Push1Display.SELECT_ARROW : "") + StringUtils.optimizeName (view.getName (), 8));
             }
         }
     }
@@ -119,13 +120,13 @@ public class NoteViewSelectMode extends BaseMode
             String menuBottomName = "";
             if (VIEWS[i] != null)
             {
-                final View view = viewManager.getView (VIEWS[i]);
+                final IView view = viewManager.get (VIEWS[i]);
                 if (view != null)
                     menuBottomName = view.getName ();
             }
-            final String menuTopName = VIEWS_TOP[i] == null ? "" : viewManager.getView (VIEWS_TOP[i]).getName ();
-            final boolean isMenuBottomSelected = VIEWS[i] != null && viewManager.isActiveView (VIEWS[i]);
-            final boolean isMenuTopSelected = VIEWS_TOP[i] != null && viewManager.isActiveView (VIEWS_TOP[i]);
+            final String menuTopName = VIEWS_TOP[i] == null ? "" : viewManager.get (VIEWS_TOP[i]).getName ();
+            final boolean isMenuBottomSelected = VIEWS[i] != null && viewManager.isActive (VIEWS[i]);
+            final boolean isMenuTopSelected = VIEWS_TOP[i] != null && viewManager.isActive (VIEWS_TOP[i]);
             String titleBottom = "";
             String titleTop = "";
             if (i == 0)
@@ -149,8 +150,8 @@ public class NoteViewSelectMode extends BaseMode
         {
             final ViewManager viewManager = this.surface.getViewManager ();
             if (VIEWS[index] == null)
-                return AbstractMode.BUTTON_COLOR_OFF;
-            return viewManager.isActiveView (VIEWS[index]) ? AbstractMode.BUTTON_COLOR_HI : AbstractMode.BUTTON_COLOR_ON;
+                return AbstractFeatureGroup.BUTTON_COLOR_OFF;
+            return viewManager.isActive (VIEWS[index]) ? AbstractMode.BUTTON_COLOR_HI : AbstractFeatureGroup.BUTTON_COLOR_ON;
         }
 
         index = this.isButtonRow (1, buttonID);
@@ -158,11 +159,11 @@ public class NoteViewSelectMode extends BaseMode
         {
             final ViewManager viewManager = this.surface.getViewManager ();
             if (VIEWS_TOP[index] == null)
-                return AbstractMode.BUTTON_COLOR_OFF;
-            return viewManager.isActiveView (VIEWS_TOP[index]) ? AbstractMode.BUTTON_COLOR_HI : AbstractMode.BUTTON_COLOR_ON;
+                return AbstractFeatureGroup.BUTTON_COLOR_OFF;
+            return viewManager.isActive (VIEWS_TOP[index]) ? AbstractMode.BUTTON_COLOR_HI : AbstractFeatureGroup.BUTTON_COLOR_ON;
         }
 
-        return AbstractMode.BUTTON_COLOR_OFF;
+        return AbstractFeatureGroup.BUTTON_COLOR_OFF;
     }
 
 
@@ -172,13 +173,13 @@ public class NoteViewSelectMode extends BaseMode
             return;
 
         final ViewManager viewManager = this.surface.getViewManager ();
-        if (viewManager.getView (viewID) == null)
+        if (viewManager.get (viewID) == null)
             return;
-        viewManager.setActiveView (viewID);
+        viewManager.setActive (viewID);
 
-        final ITrack selectedTrack = this.model.getSelectedTrack ();
-        if (selectedTrack != null)
-            viewManager.setPreferredView (selectedTrack.getPosition (), viewID);
-        this.surface.getModeManager ().restoreMode ();
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (cursorTrack.doesExist ())
+            viewManager.setPreferredView (cursorTrack.getPosition (), viewID);
+        this.surface.getModeManager ().restore ();
     }
 }

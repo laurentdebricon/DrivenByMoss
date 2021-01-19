@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger.device;
@@ -48,5 +48,19 @@ public class SelectNextDeviceOrParamPageCommand<S extends IControlSurface<C>, C 
     {
         if (event == ButtonEvent.DOWN)
             this.model.getCursorDevice ().selectNext ();
+    }
+
+
+    /**
+     * Check if the command can be executed.
+     *
+     * @return True if it can
+     */
+    public boolean canExecute ()
+    {
+        if (this.surface.isShiftPressed ())
+            return this.model.getCursorDevice ().canSelectNextFX ();
+
+        return this.model.getCursorDevice ().getParameterBank ().canScrollForwards ();
     }
 }

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger.track;
@@ -10,7 +10,7 @@ import de.mossgrabers.framework.controller.IControlSurface;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
 import de.mossgrabers.framework.daw.data.bank.IBank;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -57,7 +57,7 @@ public class MoveTrackBankCommand<S extends IControlSurface<C>, C extends Config
             return;
 
         final ModeManager modeManager = this.surface.getModeManager ();
-        if (modeManager.isActiveOrTempMode (this.deviceMode))
+        if (modeManager.isActive (this.deviceMode))
         {
             final ICursorDevice cursorDevice = this.model.getCursorDevice ();
             if (this.moveBy1)
@@ -73,7 +73,7 @@ public class MoveTrackBankCommand<S extends IControlSurface<C>, C extends Config
             return;
         }
 
-        if (modeManager.isActiveOrTempMode (Modes.MARKERS))
+        if (modeManager.isActive (Modes.MARKERS))
         {
             this.handleBankMovement (this.model.getMarkerBank ());
             return;

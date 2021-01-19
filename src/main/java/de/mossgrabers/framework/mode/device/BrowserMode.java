@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.mode.device;
@@ -9,7 +9,7 @@ import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.IControlSurface;
 import de.mossgrabers.framework.daw.IBrowser;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
 
 
 /**
@@ -31,7 +31,6 @@ public class BrowserMode<S extends IControlSurface<C>, C extends Configuration> 
     public BrowserMode (final S surface, final IModel model)
     {
         super ("Browser", surface, model, false);
-        this.isTemporary = false;
     }
 
 

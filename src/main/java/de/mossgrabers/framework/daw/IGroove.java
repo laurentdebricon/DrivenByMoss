@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.daw;
@@ -18,9 +18,10 @@ public interface IGroove extends IObserverManagement
     /**
      * Get all groove parameters.
      *
-     * @return The groove parameters
+     * @param id The ID of the parameter to get
+     * @return The groove parameter, might be null if not supported by the implementation
      */
-    IParameter [] getParameters ();
+    IParameter getParameter (GrooveParameterID id);
 
 
     /**
@@ -28,5 +29,5 @@ public interface IGroove extends IObserverManagement
      *
      * @param enable True to enable
      */
-    void setIndication (final boolean enable);
+    void setIndication (boolean enable);
 }

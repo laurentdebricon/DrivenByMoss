@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger.device;
@@ -50,7 +50,7 @@ public class DeviceLayerLeftCommand<S extends IControlSurface<C>, C extends Conf
         if (!cd.hasLayers () || layer == null)
             cd.selectPrevious ();
         else
-            bank.getItem (layer.getIndex () == 0 ? 0 : layer.getIndex () - 1).select ();
+            bank.selectPreviousItem ();
     }
 
 
@@ -75,5 +75,22 @@ public class DeviceLayerLeftCommand<S extends IControlSurface<C>, C extends Conf
         }
         else
             layer.setSelected (false);
+    }
+
+
+    /**
+     * Check if the command can be executed.
+     *
+     * @return True if it can
+     */
+    public boolean canExecute ()
+    {
+        if (this.surface.isShiftPressed ())
+            return true;
+
+        final ICursorDevice cd = this.model.getCursorDevice ();
+        final IChannelBank<?> bank = cd.getLayerOrDrumPadBank ();
+        final IChannel layer = bank.getSelectedItem ();
+        return cd.hasLayers () && layer != null ? bank.canScrollBackwards () : cd.canSelectPreviousFX ();
     }
 }

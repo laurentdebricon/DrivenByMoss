@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.fire.command.trigger;
@@ -9,8 +9,8 @@ import de.mossgrabers.controller.fire.controller.FireControlSurface;
 import de.mossgrabers.framework.command.trigger.view.ViewMultiSelectCommand;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ITrack;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -40,11 +40,11 @@ public class StepSequencerSelectCommand extends ViewMultiSelectCommand<FireContr
     {
         super.executeNormal (event);
 
-        final ITrack selectedTrack = this.model.getSelectedTrack ();
-        if (selectedTrack != null)
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (cursorTrack.doesExist ())
         {
             final ViewManager viewManager = this.surface.getViewManager ();
-            viewManager.setPreferredView (selectedTrack.getPosition (), viewManager.getActiveViewId ());
+            viewManager.setPreferredView (cursorTrack.getPosition (), viewManager.getActiveID ());
         }
     }
 

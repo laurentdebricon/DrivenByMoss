@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.autocolor;
@@ -56,8 +56,9 @@ public class AutoColorConfiguration extends AbstractConfiguration
         final IEnumSetting enableAutoColorSetting = globalSettings.getEnumSetting (CATEGORY_AUTO_COLOR, CATEGORY_AUTO_COLOR, ON_OFF_OPTIONS, ON_OFF_OPTIONS[1]);
         enableAutoColorSetting.addValueObserver (value -> {
             this.enableAutoColor = ON_OFF_OPTIONS[1].equals (value);
-            this.notifyObservers (AutoColorConfiguration.ENABLE_AUTO_COLOR);
+            this.notifyObservers (ENABLE_AUTO_COLOR);
         });
+        this.isSettingActive.add (ENABLE_AUTO_COLOR);
 
         final DAWColor [] colors = DAWColor.values ();
         for (int i = 0; i < colors.length; i++)
@@ -65,10 +66,12 @@ public class AutoColorConfiguration extends AbstractConfiguration
             final DAWColor color = colors[i];
             final IStringSetting setting = globalSettings.getStringSetting (color.getName (), CATEGORY_AUTO_COLOR, 256, "");
             final int index = i;
+            final Integer colorRegexIndex = Integer.valueOf (COLOR_REGEX.intValue () + index);
             setting.addValueObserver (value -> {
                 this.colorRegEx.put (color, value);
-                this.notifyObservers (Integer.valueOf (AutoColorConfiguration.COLOR_REGEX.intValue () + index));
+                this.notifyObservers (colorRegexIndex);
             });
+            this.isSettingActive.add (colorRegexIndex);
         }
     }
 

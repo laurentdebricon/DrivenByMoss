@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.sl.command.trigger;
@@ -40,6 +40,6 @@ public class P1ButtonCommand extends AbstractTriggerCommand<SLControlSurface, SL
     @Override
     public void execute (final ButtonEvent event, final int velocity)
     {
-        ((SLView) this.surface.getViewManager ().getActiveView ()).onButtonP1 (this.isUp, event);
+        ((SLView) this.surface.getViewManager ().getActive ()).onButtonP1 (this.isUp, event);
     }
 }

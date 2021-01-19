@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.osc.module;
@@ -18,10 +18,10 @@ import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.midi.IMidiInput;
 import de.mossgrabers.framework.daw.midi.INoteInput;
 import de.mossgrabers.framework.daw.midi.INoteRepeat;
+import de.mossgrabers.framework.featuregroup.AbstractView;
 import de.mossgrabers.framework.osc.IOpenSoundControlWriter;
 import de.mossgrabers.framework.scale.Scales;
 import de.mossgrabers.framework.utils.KeyManager;
-import de.mossgrabers.framework.view.AbstractView;
 
 import java.util.LinkedList;
 
@@ -351,8 +351,8 @@ public class MidiModule extends AbstractModule
         if (this.keyManager.isKeyPressed (note))
             return this.model.hasRecordingState () ? ColorEx.RED : ColorEx.GREEN;
 
-        final ITrack track = this.model.getSelectedTrack ();
-        final String colorID = AbstractView.replaceOctaveColorWithTrackColor (track, this.keyManager.getColor (note));
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        final String colorID = AbstractView.replaceOctaveColorWithTrackColor (cursorTrack, this.keyManager.getColor (note));
         final int colorIndex = colorManager.getColorIndex (colorID);
         return colorManager.getColor (colorIndex, null);
     }

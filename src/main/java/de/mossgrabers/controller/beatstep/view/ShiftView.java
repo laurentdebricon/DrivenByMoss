@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.beatstep.view;
@@ -12,10 +12,10 @@ import de.mossgrabers.framework.controller.grid.IPadGrid;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.ITransport;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
+import de.mossgrabers.framework.featuregroup.AbstractView;
+import de.mossgrabers.framework.featuregroup.IView;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.AbstractView;
-import de.mossgrabers.framework.view.View;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -85,7 +85,7 @@ public class ShiftView extends AbstractView<BeatstepControlSurface, BeatstepConf
             return;
 
         int viewIndex;
-        View view;
+        IView view;
         final ICursorDevice cursorDevice = this.model.getCursorDevice ();
         switch (note - 36)
         {
@@ -141,8 +141,8 @@ public class ShiftView extends AbstractView<BeatstepControlSurface, BeatstepConf
 
                 final ViewManager viewManager = this.surface.getViewManager ();
                 final Views viewId = VIEWS[viewIndex];
-                viewManager.setPreviousView (viewId);
-                view = viewManager.getView (viewId);
+                viewManager.setPreviousID (viewId);
+                view = viewManager.get (viewId);
                 this.surface.getDisplay ().notify (view.getName ());
                 break;
         }

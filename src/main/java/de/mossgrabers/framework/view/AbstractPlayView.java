@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.view;
@@ -10,6 +10,7 @@ import de.mossgrabers.framework.controller.grid.ILightGuide;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
+import de.mossgrabers.framework.featuregroup.AbstractView;
 import de.mossgrabers.framework.scale.Scales;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -36,6 +37,8 @@ public abstract class AbstractPlayView<S extends IControlSurface<C>, C extends C
     protected final int []     defaultVelocity;
     protected final boolean    useTrackColor;
 
+    private int                blockNotes   = 0;
+
 
     /**
      * Constructor.
@@ -46,7 +49,7 @@ public abstract class AbstractPlayView<S extends IControlSurface<C>, C extends C
      */
     public AbstractPlayView (final S surface, final IModel model, final boolean useTrackColor)
     {
-        this ("Play", surface, model, useTrackColor);
+        this (Views.VIEW_NAME_PLAY, surface, model, useTrackColor);
     }
 
 
@@ -74,6 +77,17 @@ public abstract class AbstractPlayView<S extends IControlSurface<C>, C extends C
     }
 
 
+    /**
+     * Blocks the number of notes from the bottom and shifts the rest up by this number.
+     *
+     * @param blockNotes The number of notes to block
+     */
+    public void setBlockedNotes (final int blockNotes)
+    {
+        this.blockNotes = blockNotes;
+    }
+
+
     /** {@inheritDoc} */
     @Override
     public void drawGrid ()
@@ -87,9 +101,11 @@ public abstract class AbstractPlayView<S extends IControlSurface<C>, C extends C
         final boolean isKeyboardEnabled = this.model.canSelectedTrackHoldNotes ();
         final boolean isRecording = this.model.hasRecordingState ();
 
-        final ITrack selectedTrack = this.model.getSelectedTrack ();
-        for (int i = this.scales.getStartNote (); i < this.scales.getEndNote (); i++)
-            lightGuide.light (i, this.getGridColor (isKeyboardEnabled, isRecording, selectedTrack, i));
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        final int startNote = this.scales.getStartNote ();
+        final int endNote = this.scales.getEndNote ();
+        for (int i = startNote; i < endNote; i++)
+            lightGuide.light (i, this.getGridColor (isKeyboardEnabled, isRecording, cursorTrack, i));
     }
 
 
@@ -212,7 +228,33 @@ public abstract class AbstractPlayView<S extends IControlSurface<C>, C extends C
     @Override
     public void updateNoteMapping ()
     {
-        this.delayedUpdateNoteMapping (this.model.canSelectedTrackHoldNotes () ? this.scales.getNoteMatrix () : EMPTY_TABLE);
+        this.surface.scheduleTask ( () -> this.delayedUpdateNoteMapping (this.getMapping ()), 100);
+    }
+
+
+    protected int [] getMapping ()
+    {
+        if (!this.model.canSelectedTrackHoldNotes ())
+            return EMPTY_TABLE;
+
+        final int [] noteMatrix = this.getScaleMatrix ();
+
+        if (this.blockNotes > 0)
+        {
+            final int startNote = this.scales.getStartNote ();
+            final int endNote = this.scales.getEndNote ();
+            final int length = endNote - startNote - this.blockNotes;
+            System.arraycopy (noteMatrix, startNote, noteMatrix, startNote + this.blockNotes, length);
+            Arrays.fill (noteMatrix, startNote, startNote + 8, -1);
+        }
+
+        return noteMatrix;
+    }
+
+
+    protected int [] getScaleMatrix ()
+    {
+        return this.scales.getNoteMatrix ();
     }
 
 

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger;
@@ -8,7 +8,7 @@ import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.configuration.Configuration;
 import de.mossgrabers.framework.controller.IControlSurface;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -42,10 +42,10 @@ public class MarkerCommand<S extends IControlSurface<C>, C extends Configuration
         if (event != ButtonEvent.DOWN)
             return;
         final ModeManager modeManager = this.surface.getModeManager ();
-        if (modeManager.isActiveOrTempMode (Modes.MARKERS))
-            modeManager.restoreMode ();
+        if (modeManager.isActive (Modes.MARKERS))
+            modeManager.restore ();
         else
-            modeManager.setActiveMode (Modes.MARKERS);
+            modeManager.setActive (Modes.MARKERS);
     }
 
 

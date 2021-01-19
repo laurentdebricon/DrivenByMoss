@@ -1,11 +1,10 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.daw.data;
 
 import de.mossgrabers.framework.controller.valuechanger.IValueChanger;
-import de.mossgrabers.framework.daw.data.ISend;
 import de.mossgrabers.framework.observer.IValueObserver;
 
 import com.bitwig.extension.controller.api.Parameter;
@@ -19,6 +18,7 @@ import com.bitwig.extension.controller.api.Parameter;
 public class ParameterImpl extends RangedValueImpl
 {
     private final Parameter parameter;
+    private final boolean   fixNames;
 
 
     /**
@@ -42,9 +42,26 @@ public class ParameterImpl extends RangedValueImpl
      */
     public ParameterImpl (final IValueChanger valueChanger, final Parameter parameter, final int index)
     {
+        this (valueChanger, parameter, index, false);
+    }
+
+
+    /**
+     * Constructor.
+     *
+     * @param valueChanger The value changer
+     * @param parameter The parameter
+     * @param index The index of the item in the page
+     * @param fixNames Don't use targetName if true
+     */
+    public ParameterImpl (final IValueChanger valueChanger, final Parameter parameter, final int index, final boolean fixNames)
+    {
         super (null, valueChanger, parameter, index);
 
         this.parameter = parameter;
+
+        // TODO Bugfix required: https://github.com/teotigraphix/Framework4Bitwig/issues/268
+        this.fixNames = fixNames;
 
         parameter.exists ().markInterested ();
         parameter.name ().markInterested ();
@@ -80,9 +97,7 @@ public class ParameterImpl extends RangedValueImpl
     @Override
     public String getName ()
     {
-        // TODO Bugfix required: The ISend check is a workaround for
-        // https://github.com/teotigraphix/Framework4Bitwig/issues/267
-        return this.targetName == null || this instanceof ISend ? this.parameter.name ().get () : this.targetName.get ();
+        return this.targetName == null || this.fixNames ? this.parameter.name ().get () : this.targetName.get ();
     }
 
 
@@ -90,9 +105,7 @@ public class ParameterImpl extends RangedValueImpl
     @Override
     public String getName (final int limit)
     {
-        // TODO Bugfix required: The ISend check is a workaround for
-        // https://github.com/teotigraphix/Framework4Bitwig/issues/267
-        return this.targetName == null || this instanceof ISend ? this.parameter.name ().getLimited (limit) : this.targetName.getLimited (limit);
+        return this.targetName == null || this.fixNames ? this.parameter.name ().getLimited (limit) : this.targetName.getLimited (limit);
     }
 
 

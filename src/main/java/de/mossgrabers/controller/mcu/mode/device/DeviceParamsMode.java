@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.mcu.mode.device;
@@ -11,6 +11,8 @@ import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
 import de.mossgrabers.framework.daw.data.IParameter;
 import de.mossgrabers.framework.daw.data.bank.IParameterBank;
+import de.mossgrabers.framework.parameterprovider.BankParameterProvider;
+import de.mossgrabers.framework.parameterprovider.RangeFilterParameterProvider;
 import de.mossgrabers.framework.utils.StringUtils;
 
 
@@ -30,15 +32,9 @@ public class DeviceParamsMode extends BaseMode
     public DeviceParamsMode (final MCUControlSurface surface, final IModel model)
     {
         super ("Parameters", surface, model, model.getCursorDevice ().getParameterBank ());
-    }
 
-
-    /** {@inheritDoc} */
-    @Override
-    public void onKnobValue (final int index, final int value)
-    {
-        final int extenderOffset = this.surface.getExtenderOffset ();
-        this.model.getCursorDevice ().getParameterBank ().getItem (extenderOffset + index).changeValue (value);
+        final int surfaceID = surface.getSurfaceID ();
+        this.setParameters (new RangeFilterParameterProvider (new BankParameterProvider (model.getCursorDevice ().getParameterBank ()), surfaceID * 8, 8));
     }
 
 

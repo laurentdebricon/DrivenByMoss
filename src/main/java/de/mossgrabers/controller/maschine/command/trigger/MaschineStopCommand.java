@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.maschine.command.trigger;
@@ -10,8 +10,8 @@ import de.mossgrabers.framework.command.trigger.transport.StopCommand;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.ITransport;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -45,16 +45,16 @@ public class MaschineStopCommand extends StopCommand<MaschineControlSurface, Mas
 
         if (event == ButtonEvent.DOWN)
         {
-            if (!viewManager.isActiveView (Views.SHIFT))
-                viewManager.setActiveView (Views.SHIFT);
+            if (!viewManager.isActive (Views.SHIFT))
+                viewManager.setActive (Views.SHIFT);
             return;
         }
 
         if (event != ButtonEvent.UP)
             return;
 
-        if (viewManager.isActiveView (Views.SHIFT))
-            viewManager.restoreView ();
+        if (viewManager.isActive (Views.SHIFT))
+            viewManager.restore ();
 
         if (this.consumed)
         {

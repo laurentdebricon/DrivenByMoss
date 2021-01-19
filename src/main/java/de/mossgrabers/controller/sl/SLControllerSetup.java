@@ -1,15 +1,12 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.sl;
 
-import de.mossgrabers.controller.sl.command.continuous.DeviceKnobRowCommand;
-import de.mossgrabers.controller.sl.command.continuous.FaderCommand;
 import de.mossgrabers.controller.sl.command.continuous.TapTempoInitMkICommand;
 import de.mossgrabers.controller.sl.command.continuous.TapTempoMkICommand;
 import de.mossgrabers.controller.sl.command.continuous.TouchpadCommand;
-import de.mossgrabers.controller.sl.command.continuous.TrackKnobRowCommand;
 import de.mossgrabers.controller.sl.command.trigger.ButtonRowSelectCommand;
 import de.mossgrabers.controller.sl.command.trigger.ButtonRowViewCommand;
 import de.mossgrabers.controller.sl.command.trigger.P1ButtonCommand;
@@ -21,15 +18,14 @@ import de.mossgrabers.controller.sl.controller.SLDisplay;
 import de.mossgrabers.controller.sl.mode.FixedMode;
 import de.mossgrabers.controller.sl.mode.FrameMode;
 import de.mossgrabers.controller.sl.mode.FunctionMode;
-import de.mossgrabers.controller.sl.mode.MasterMode;
 import de.mossgrabers.controller.sl.mode.PlayOptionsMode;
+import de.mossgrabers.controller.sl.mode.SLTrackMode;
+import de.mossgrabers.controller.sl.mode.SLVolumeMode;
 import de.mossgrabers.controller.sl.mode.SessionMode;
-import de.mossgrabers.controller.sl.mode.TrackMode;
 import de.mossgrabers.controller.sl.mode.TrackTogglesMode;
 import de.mossgrabers.controller.sl.mode.ViewSelectMode;
-import de.mossgrabers.controller.sl.mode.VolumeMode;
-import de.mossgrabers.controller.sl.mode.device.DeviceParamsMode;
 import de.mossgrabers.controller.sl.mode.device.DevicePresetsMode;
+import de.mossgrabers.controller.sl.mode.device.SLParameterMode;
 import de.mossgrabers.controller.sl.view.ControlView;
 import de.mossgrabers.controller.sl.view.PlayView;
 import de.mossgrabers.framework.configuration.ISettingsUI;
@@ -43,20 +39,15 @@ import de.mossgrabers.framework.controller.valuechanger.DefaultValueChanger;
 import de.mossgrabers.framework.controller.valuechanger.RelativeEncoding;
 import de.mossgrabers.framework.daw.IHost;
 import de.mossgrabers.framework.daw.ModelSetup;
-import de.mossgrabers.framework.daw.data.ICursorDevice;
-import de.mossgrabers.framework.daw.data.IMasterTrack;
-import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.IParameterBank;
-import de.mossgrabers.framework.daw.data.bank.ISendBank;
-import de.mossgrabers.framework.daw.data.bank.ITrackBank;
 import de.mossgrabers.framework.daw.midi.IMidiAccess;
 import de.mossgrabers.framework.daw.midi.IMidiInput;
 import de.mossgrabers.framework.daw.midi.IMidiOutput;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.IView;
+import de.mossgrabers.framework.featuregroup.ModeManager;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.scale.Scales;
-import de.mossgrabers.framework.view.View;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -109,7 +100,10 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
     {
         super.flush ();
 
-        this.updateIndication (this.getSurface ().getModeManager ().getActiveOrTempModeId ());
+        // Always refresh volume mode
+        final ModeManager modeManager = this.getSurface ().getModeManager ();
+        if (!modeManager.isActive (Modes.VOLUME))
+            modeManager.get (Modes.VOLUME).updateDisplay ();
     }
 
 
@@ -128,16 +122,9 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
     protected void createModel ()
     {
         final ModelSetup ms = new ModelSetup ();
+        ms.setHasFullFlatTrackList (true);
         ms.setNumSends (6);
         this.model = this.factory.createModel (this.colorManager, this.valueChanger, this.scales, ms);
-        this.model.getTrackBank ().addSelectionObserver ( (index, isSelected) -> this.handleTrackChange (isSelected));
-        this.model.getMasterTrack ().addSelectionObserver ( (index, isSelected) -> {
-            if (!isSelected)
-                return;
-            final ModeManager modeManager = this.getSurface ().getModeManager ();
-            if (!modeManager.isActiveOrTempMode (Modes.VOLUME))
-                modeManager.setActiveMode (Modes.MASTER);
-        });
     }
 
 
@@ -162,19 +149,21 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
     protected void createModes ()
     {
         final SLControlSurface surface = this.getSurface ();
+
         final ModeManager modeManager = surface.getModeManager ();
-        modeManager.registerMode (Modes.FIXED, new FixedMode (surface, this.model));
-        modeManager.registerMode (Modes.FRAME, new FrameMode (surface, this.model));
-        modeManager.registerMode (Modes.FUNCTIONS, new FunctionMode (surface, this.model));
-        modeManager.registerMode (Modes.MASTER, new MasterMode (surface, this.model));
-        modeManager.registerMode (Modes.PLAY_OPTIONS, new PlayOptionsMode (surface, this.model));
-        modeManager.registerMode (Modes.SESSION, new SessionMode (surface, this.model));
-        modeManager.registerMode (Modes.TRACK, new TrackMode (surface, this.model));
-        modeManager.registerMode (Modes.TRACK_DETAILS, new TrackTogglesMode (surface, this.model));
-        modeManager.registerMode (Modes.VIEW_SELECT, new ViewSelectMode (surface, this.model));
-        modeManager.registerMode (Modes.VOLUME, new VolumeMode (surface, this.model));
-        modeManager.registerMode (Modes.DEVICE_PARAMS, new DeviceParamsMode (surface, this.model));
-        modeManager.registerMode (Modes.BROWSER, new DevicePresetsMode (surface, this.model));
+
+        modeManager.register (Modes.VOLUME, new SLVolumeMode (surface, this.model));
+        modeManager.register (Modes.TRACK, new SLTrackMode (surface, this.model));
+        modeManager.register (Modes.DEVICE_PARAMS, new SLParameterMode (surface, this.model));
+
+        modeManager.register (Modes.FIXED, new FixedMode (surface, this.model));
+        modeManager.register (Modes.FRAME, new FrameMode (surface, this.model));
+        modeManager.register (Modes.FUNCTIONS, new FunctionMode (surface, this.model));
+        modeManager.register (Modes.PLAY_OPTIONS, new PlayOptionsMode (surface, this.model));
+        modeManager.register (Modes.SESSION, new SessionMode (surface, this.model));
+        modeManager.register (Modes.TRACK_DETAILS, new TrackTogglesMode (surface, this.model));
+        modeManager.register (Modes.VIEW_SELECT, new ViewSelectMode (surface, this.model));
+        modeManager.register (Modes.BROWSER, new DevicePresetsMode (surface, this.model));
     }
 
 
@@ -184,8 +173,8 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
     {
         final SLControlSurface surface = this.getSurface ();
         final ViewManager viewManager = surface.getViewManager ();
-        viewManager.registerView (Views.PLAY, new PlayView (surface, this.model));
-        viewManager.registerView (Views.CONTROL, new ControlView (surface, this.model));
+        viewManager.register (Views.PLAY, new PlayView (surface, this.model));
+        viewManager.register (Views.CONTROL, new ControlView (surface, this.model));
     }
 
 
@@ -199,6 +188,9 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
         this.configuration.registerDeactivatedItemsHandler (this.model);
 
         this.activateBrowserObserver (Modes.BROWSER);
+
+        final SLControlSurface surface = this.getSurface ();
+        surface.getModeManager ().addChangeListener ( (oldMode, newMode) -> surface.getTextDisplay ().forceFlush ());
     }
 
 
@@ -207,6 +199,10 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
     protected void registerTriggerCommands ()
     {
         final SLControlSurface surface = this.getSurface ();
+
+        // Needs to be before the switch to Automap to catch the success response
+        this.addButton (ButtonID.CONTROL, "DAW Online", (event, velocity) -> surface.setDAWConnected (velocity > 0), SLControlSurface.MKI_CC_OFF_ONLINE_MESSAGE, surface::isDAWConnected);
+        surface.sendStartup ();
 
         for (int i = 0; i < 8; i++)
         {
@@ -240,7 +236,7 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
 
     private int getViewButtonColor (final ButtonID buttonID)
     {
-        final View activeView = this.getSurface ().getViewManager ().getActiveView ();
+        final IView activeView = this.getSurface ().getViewManager ().getActive ();
         return activeView == null ? 0 : activeView.getButtonColor (buttonID);
     }
 
@@ -254,9 +250,9 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
         {
             final int index = i;
 
-            this.addFader (ContinuousID.get (ContinuousID.FADER1, i), "Fader " + (i + 1), new FaderCommand (i, this.model, surface), BindType.CC, SLControlSurface.MKII_SLIDER1 + i);
+            this.addFader (ContinuousID.get (ContinuousID.FADER1, i), "Fader " + (i + 1), null, BindType.CC, SLControlSurface.MKII_SLIDER1 + i);
 
-            final IHwRelativeKnob relativeKnob = this.addRelativeKnob (ContinuousID.get (ContinuousID.DEVICE_KNOB1, i), "Device Knob " + (i + 1), new DeviceKnobRowCommand (i, this.model, surface), SLControlSurface.MKII_KNOB_ROW1_1 + i, RelativeEncoding.SIGNED_BIT);
+            final IHwRelativeKnob relativeKnob = this.addRelativeKnob (ContinuousID.get (ContinuousID.DEVICE_KNOB1, i), "Device Knob " + (i + 1), null, SLControlSurface.MKII_KNOB_ROW1_1 + i, RelativeEncoding.SIGNED_BIT);
             relativeKnob.addOutput ( () -> {
 
                 final boolean hasDevice = this.model.hasSelectedDevice ();
@@ -265,15 +261,21 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
 
             }, value -> surface.getMidiOutput ().sendCC (0x70 + index, Math.min (value * 11 / 127, 11)));
 
-            this.addAbsoluteKnob (ContinuousID.get (ContinuousID.KNOB1, i), "Knob " + (i + 1), new TrackKnobRowCommand (i, this.model, surface), SLControlSurface.MKII_KNOB_ROW2_1 + i);
+            this.addAbsoluteKnob (ContinuousID.get (ContinuousID.KNOB1, i), "Knob " + (i + 1), null, SLControlSurface.MKII_KNOB_ROW2_1 + i);
         }
 
         this.addFader (ContinuousID.TOUCHPAD_X, "Touchpad X", new TouchpadCommand (true, this.model, surface), BindType.CC, SLControlSurface.MKII_TOUCHPAD_X);
         this.addFader (ContinuousID.TOUCHPAD_Y, "Touchpad Y", new TouchpadCommand (false, this.model, surface), BindType.CC, SLControlSurface.MKII_TOUCHPAD_Y);
 
-        // These are no faders but cannot mapped to any meaningful control anyway
+        // These are no faders but cannot be mapped to any meaningful control anyway
         this.addFader (ContinuousID.HELLO, "Tap Init", new TapTempoInitMkICommand (this.model, surface), BindType.CC, SLControlSurface.MKI_BUTTON_TAP_TEMPO);
         this.addFader (ContinuousID.TEMPO, "Tap Tempo", new TapTempoMkICommand (this.model, surface), BindType.CC, SLControlSurface.MKI_BUTTON_TAP_TEMPO_VALUE);
+
+        // Volume, Track and Parameter modes are always bound since they have dedicated controls
+        final ModeManager modeManager = surface.getModeManager ();
+        modeManager.get (Modes.VOLUME).onActivate ();
+        modeManager.get (Modes.TRACK).onActivate ();
+        modeManager.get (Modes.DEVICE_PARAMS).onActivate ();
     }
 
 
@@ -343,6 +345,8 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
         surface.getButton (ButtonID.ARROW_DOWN).setBounds (762.5, 30.0, 25.0, 16.5);
         surface.getButton (ButtonID.NOTE).setBounds (385.75, 161.75, 24.25, 17.0);
 
+        surface.getButton (ButtonID.CONTROL).setBounds (767.75, 328.75, 22.75, 18.25);
+
         surface.getContinuous (ContinuousID.DEVICE_KNOB1).setBounds (55.0, 83.5, 23.5, 24.25);
         surface.getContinuous (ContinuousID.KNOB1).setBounds (53.75, 146.0, 25.0, 25.0);
         surface.getContinuous (ContinuousID.DEVICE_KNOB2).setBounds (95.75, 83.5, 23.5, 23.5);
@@ -372,6 +376,9 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
         surface.getContinuous (ContinuousID.TOUCHPAD_X).setBounds (25.0, 375.25, 49.0, 90.25);
         surface.getContinuous (ContinuousID.TOUCHPAD_Y).setBounds (90.75, 375.25, 49.0, 90.25);
 
+        surface.getContinuous (ContinuousID.HELLO).setBounds (767.75, 268.25, 10.0, 50.0);
+        surface.getContinuous (ContinuousID.TEMPO).setBounds (780.5, 268.25, 10.0, 50.0);
+
         final SLDisplay textDisplay = (SLDisplay) surface.getTextDisplay ();
         textDisplay.getHwTextDisplay1 ().setBounds (55.5, 17.5, 316.25, 34.75);
         textDisplay.getHwTextDisplay2 ().setBounds (431.75, 17.5, 317.75, 34.75);
@@ -387,67 +394,12 @@ public class SLControllerSetup extends AbstractControllerSetup<SLControlSurface,
     @Override
     public void startup ()
     {
-        // Initialise 2nd display
         final SLControlSurface surface = this.getSurface ();
+
+        // Initialise 2nd display
         final ModeManager modeManager = surface.getModeManager ();
-        modeManager.getMode (Modes.VOLUME).updateDisplay ();
-        surface.getViewManager ().setActiveView (Views.CONTROL);
-        modeManager.setActiveMode (Modes.TRACK);
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    protected void updateIndication (final Modes mode)
-    {
-        if (this.currentMode != null && this.currentMode.equals (mode))
-            return;
-        this.currentMode = mode;
-
-        final IMasterTrack mt = this.model.getMasterTrack ();
-        mt.setVolumeIndication (Modes.MASTER.equals (mode));
-        mt.setPanIndication (Modes.MASTER.equals (mode));
-
-        final ITrackBank tb = this.model.getTrackBank ();
-        final ITrackBank tbe = this.model.getEffectTrackBank ();
-        final boolean isEffect = this.model.isEffectTrackBankActive ();
-        final boolean isVolume = Modes.VOLUME.equals (mode);
-
-        final ICursorDevice cursorDevice = this.model.getCursorDevice ();
-        final IParameterBank parameterBank = cursorDevice.getParameterBank ();
-        final ITrack selectedTrack = tb.getSelectedItem ();
-        for (int i = 0; i < 8; i++)
-        {
-            final boolean hasTrackSel = selectedTrack != null && selectedTrack.getIndex () == i && Modes.TRACK.equals (mode);
-            final ITrack track = tb.getItem (i);
-            track.setVolumeIndication (!isEffect && (isVolume || hasTrackSel));
-            track.setPanIndication (!isEffect && hasTrackSel);
-
-            final ISendBank sendBank = track.getSendBank ();
-            for (int j = 0; j < 6; j++)
-                sendBank.getItem (j).setIndication (!isEffect && hasTrackSel);
-
-            if (tbe != null)
-            {
-                final ITrack fxTrack = tbe.getItem (i);
-                fxTrack.setVolumeIndication (isEffect);
-                fxTrack.setPanIndication (isEffect);
-            }
-
-            parameterBank.getItem (i).setIndication (true);
-        }
-    }
-
-
-    /**
-     * Handle a track selection change.
-     *
-     * @param isSelected Has the track been selected?
-     */
-    private void handleTrackChange (final boolean isSelected)
-    {
-        final ModeManager modeManager = this.getSurface ().getModeManager ();
-        if (isSelected && modeManager.isActiveOrTempMode (Modes.MASTER))
-            modeManager.setActiveMode (Modes.TRACK);
+        modeManager.get (Modes.VOLUME).updateDisplay ();
+        surface.getViewManager ().setActive (Views.CONTROL);
+        modeManager.setActive (Modes.TRACK);
     }
 }

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.apc.command.trigger;
@@ -13,7 +13,7 @@ import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -60,7 +60,7 @@ public class SelectTrackSendOrClipLengthCommand extends AbstractTriggerCommand<A
             if (this.surface.isMkII ())
                 ((ModeMultiSelectCommand<?, ?>) this.surface.getButton (ButtonID.SEND1).getCommand ()).activateMode (sendModeId);
             else
-                modeManager.setActiveMode (sendModeId);
+                modeManager.setActive (sendModeId);
 
             // Display the sends name
             String modeName = "Send " + (this.index + 1) + ": ";
@@ -78,9 +78,9 @@ public class SelectTrackSendOrClipLengthCommand extends AbstractTriggerCommand<A
 
         if (this.surface.isMkII () && this.surface.isPressed (ButtonID.SEND2))
         {
-            modeManager.setActiveMode (Modes.USER);
+            modeManager.setActive (Modes.USER);
             this.surface.setTriggerConsumed (ButtonID.USER);
-            modeManager.getMode (Modes.USER).selectItemPage (this.index);
+            modeManager.get (Modes.USER).selectItemPage (this.index);
             return;
         }
 

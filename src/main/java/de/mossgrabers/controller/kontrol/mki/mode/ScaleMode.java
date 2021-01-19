@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.kontrol.mki.mode;
@@ -11,6 +11,8 @@ import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.color.ColorManager;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.scale.Scales;
+
+import java.util.Locale;
 
 
 /**
@@ -32,7 +34,7 @@ public class ScaleMode extends AbstractKontrol1Mode
     public ScaleMode (final Kontrol1ControlSurface surface, final IModel model)
     {
         super ("Scales", surface, model);
-        this.isTemporary = true;
+
         this.scales = this.model.getScales ();
     }
 
@@ -44,7 +46,7 @@ public class ScaleMode extends AbstractKontrol1Mode
         final Kontrol1Display d = (Kontrol1Display) this.surface.getDisplay ();
         d.clear ();
         d.setCell (0, 0, "SCALE");
-        d.setCell (0, 1, "SCALE").setCell (1, 1, this.scales.getScale ().getName ().toUpperCase ());
+        d.setCell (0, 1, "SCALE").setCell (1, 1, this.scales.getScale ().getName ().toUpperCase (Locale.US));
         d.setCell (0, 2, "BASE").setCell (1, 2, Scales.BASES[this.scales.getScaleOffset ()]);
         d.allDone ();
     }
@@ -121,7 +123,7 @@ public class ScaleMode extends AbstractKontrol1Mode
     @Override
     public void onBack ()
     {
-        this.surface.getModeManager ().restoreMode ();
+        this.surface.getModeManager ().restore ();
     }
 
 
@@ -129,7 +131,7 @@ public class ScaleMode extends AbstractKontrol1Mode
     @Override
     public void onEnter ()
     {
-        this.surface.getModeManager ().restoreMode ();
+        this.surface.getModeManager ().restore ();
     }
 
 

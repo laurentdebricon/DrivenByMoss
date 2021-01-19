@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode;
@@ -11,7 +11,8 @@ import de.mossgrabers.framework.controller.display.IGraphicDisplay;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.constants.AutomationMode;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
 
@@ -80,7 +81,7 @@ public class AutomationSelectionMode extends BaseMode
         {
             final AutomationMode writeMode = this.model.getTransport ().getAutomationWriteMode ();
             if (index < this.automationWriteModes.length)
-                return this.colorManager.getColorIndex (this.automationWriteModes[index] == writeMode ? AbstractMode.BUTTON_COLOR_HI : AbstractMode.BUTTON_COLOR_ON);
+                return this.colorManager.getColorIndex (this.automationWriteModes[index] == writeMode ? AbstractMode.BUTTON_COLOR_HI : AbstractFeatureGroup.BUTTON_COLOR_ON);
         }
 
         return super.getButtonColor (buttonID);

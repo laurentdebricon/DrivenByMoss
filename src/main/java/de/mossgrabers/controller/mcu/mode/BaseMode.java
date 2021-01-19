@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.mcu.mode;
@@ -8,6 +8,7 @@ import de.mossgrabers.controller.mcu.MCUConfiguration;
 import de.mossgrabers.controller.mcu.MCUControllerSetup;
 import de.mossgrabers.controller.mcu.controller.MCUControlSurface;
 import de.mossgrabers.framework.controller.ButtonID;
+import de.mossgrabers.framework.controller.ContinuousID;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
@@ -16,7 +17,9 @@ import de.mossgrabers.framework.daw.data.IMasterTrack;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.IBank;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
+import de.mossgrabers.framework.mode.Modes;
+import de.mossgrabers.framework.parameterprovider.IParameterProvider;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.utils.StringUtils;
 
@@ -56,10 +59,28 @@ public abstract class BaseMode extends AbstractMode<MCUControlSurface, MCUConfig
     {
         super (name, surface, model, true, bank, DEFAULT_KNOB_IDS);
 
-        this.isTemporary = false;
-
         final MCUConfiguration configuration = this.surface.getConfiguration ();
         this.useFxBank = configuration.shouldPinFXTracksToLastController () && this.surface.getSurfaceID () == configuration.getNumMCUDevices () - 1;
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    protected void bindControls ()
+    {
+        if (!this.isActive || this.defaultParameterProvider == null)
+            return;
+
+        super.bindControls ();
+
+        final IParameterProvider parameterProvider;
+        if (this.surface.getConfiguration ().useFadersAsKnobs ())
+            parameterProvider = this.getParameterProvider ();
+        else
+            parameterProvider = ((AbstractMode<?, ?>) this.surface.getModeManager ().get (Modes.VOLUME)).getParameterProvider ();
+
+        for (int i = 0; i < this.controls.size (); i++)
+            this.surface.getContinuous (ContinuousID.get (ContinuousID.FADER1, i)).bind (parameterProvider.get (i));
     }
 
 

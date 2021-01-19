@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode;
@@ -10,7 +10,8 @@ import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.display.IGraphicDisplay;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
 import de.mossgrabers.framework.scale.ScaleLayout;
 import de.mossgrabers.framework.scale.Scales;
 import de.mossgrabers.framework.utils.ButtonEvent;
@@ -35,6 +36,7 @@ public class ScaleLayoutMode extends BaseMode
     public ScaleLayoutMode (final PushControlSurface surface, final IModel model)
     {
         super ("Scale Layout", surface, model);
+
         this.scales = model.getScales ();
     }
 
@@ -54,7 +56,7 @@ public class ScaleLayoutMode extends BaseMode
         else
             return;
 
-        this.surface.getViewManager ().getActiveView ().updateNoteMapping ();
+        this.surface.getViewManager ().getActive ().updateNoteMapping ();
         this.surface.getConfiguration ().setScaleLayout (this.scales.getScaleLayout ().getName ());
     }
 
@@ -69,11 +71,11 @@ public class ScaleLayoutMode extends BaseMode
             final int sl = this.scales.getScaleLayout ().ordinal ();
             final int pos = sl / 2;
             if (index < ScaleLayout.getNames ().length / 2)
-                return pos == index ? AbstractMode.BUTTON_COLOR_HI : AbstractMode.BUTTON_COLOR_ON;
-            return index == 7 ? AbstractMode.BUTTON_COLOR_ON : AbstractMode.BUTTON_COLOR_OFF;
+                return pos == index ? AbstractMode.BUTTON_COLOR_HI : AbstractFeatureGroup.BUTTON_COLOR_ON;
+            return index == 7 ? AbstractFeatureGroup.BUTTON_COLOR_ON : AbstractFeatureGroup.BUTTON_COLOR_OFF;
         }
 
-        return AbstractMode.BUTTON_COLOR_OFF;
+        return AbstractFeatureGroup.BUTTON_COLOR_OFF;
     }
 
 

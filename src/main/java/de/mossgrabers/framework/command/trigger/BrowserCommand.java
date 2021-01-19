@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger;
@@ -12,10 +12,10 @@ import de.mossgrabers.framework.daw.IBrowser;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.IChannel;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.view.AbstractDrumView;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -122,7 +122,7 @@ public class BrowserCommand<S extends IControlSurface<C>, C extends Configuratio
 
             // Add device to layer or track
 
-            if (Modes.isLayerMode (this.surface.getModeManager ().getActiveOrTempModeId ()))
+            if (Modes.isLayerMode (this.surface.getModeManager ().getActiveID ()))
             {
                 final IChannel layer = cursorDevice.getLayerOrDrumPadBank ().getSelectedItem ();
                 if (layer == null)
@@ -165,8 +165,8 @@ public class BrowserCommand<S extends IControlSurface<C>, C extends Configuratio
 
         // Workaround for drum page scroll bug
         final ViewManager viewManager = this.surface.getViewManager ();
-        if (viewManager.isActiveView (Views.DRUM))
-            AbstractDrumView.class.cast (viewManager.getView (Views.DRUM)).repositionBankPage ();
+        if (viewManager.isActive (Views.DRUM))
+            AbstractDrumView.class.cast (viewManager.get (Views.DRUM)).repositionBankPage ();
     }
 
 

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.command.trigger.clip;
@@ -52,14 +52,14 @@ public class QuantizeCommand<S extends IControlSurface<C>, C extends Configurati
         if (event != ButtonEvent.DOWN)
             return;
 
-        final ITrack selectedTrack = this.model.getSelectedTrack ();
-        if (selectedTrack == null)
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (!cursorTrack.doesExist ())
             return;
 
         // Toggle through all record quantization settings...
 
         final RecordQuantization [] values = RecordQuantization.values ();
-        final RecordQuantization recordQuantization = selectedTrack.getRecordQuantizationGrid ();
+        final RecordQuantization recordQuantization = cursorTrack.getRecordQuantizationGrid ();
         int index = 0;
         for (int i = 0; i < values.length; i++)
         {
@@ -71,14 +71,14 @@ public class QuantizeCommand<S extends IControlSurface<C>, C extends Configurati
                 break;
             }
         }
-        selectedTrack.setRecordQuantizationGrid (values[index]);
+        cursorTrack.setRecordQuantizationGrid (values[index]);
         this.surface.getDisplay ().notify ("Record Quantization: " + values[index].getName ());
     }
 
 
     protected void quantize ()
     {
-        final IClip clip = this.model.getClip ();
+        final IClip clip = this.model.getCursorClip ();
         if (clip.doesExist ())
             clip.quantize (this.surface.getConfiguration ().getQuantizeAmount () / 100.0);
     }

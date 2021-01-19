@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.slmkiii.controller;
@@ -130,7 +130,7 @@ public class SLMkIIIDisplay extends AbstractTextDisplay
      * Set a text property.
      *
      * @param hPosition The horizontal position (0-8)
-     * @param vPosition The vertical position (0-5), 0 (Parametername),1 (Parametertextwert), 5
+     * @param vPosition The vertical position (0-5), 0 (Parametername),1 (Parametertextvalue), 5
      *            (Trackname)
      * @param text The text
      */

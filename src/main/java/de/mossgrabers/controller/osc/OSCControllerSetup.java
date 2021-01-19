@@ -1,11 +1,12 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.osc;
 
 import de.mossgrabers.controller.osc.module.ActionModule;
 import de.mossgrabers.controller.osc.module.BrowserModule;
+import de.mossgrabers.controller.osc.module.ClipModule;
 import de.mossgrabers.controller.osc.module.DeviceModule;
 import de.mossgrabers.controller.osc.module.GlobalModule;
 import de.mossgrabers.controller.osc.module.IModule;
@@ -31,7 +32,6 @@ import de.mossgrabers.framework.daw.constants.DeviceID;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
 import de.mossgrabers.framework.daw.midi.IMidiAccess;
 import de.mossgrabers.framework.daw.midi.IMidiInput;
-import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.osc.IOpenSoundControlClient;
 import de.mossgrabers.framework.osc.IOpenSoundControlServer;
 import de.mossgrabers.framework.scale.Scales;
@@ -104,6 +104,7 @@ public class OSCControllerSetup extends AbstractControllerSetup<IControlSurface<
         ms.setNumSends (bankPageSize);
         ms.setNumDevicesInBank (bankPageSize);
         ms.setNumDeviceLayers (bankPageSize);
+        ms.setNumParamPages (bankPageSize);
         ms.setNumParams (bankPageSize);
         ms.setNumUserPageSize (bankPageSize);
         ms.setNumMarkers (bankPageSize);
@@ -200,6 +201,7 @@ public class OSCControllerSetup extends AbstractControllerSetup<IControlSurface<
         modules.add (new MidiModule (this.host, this.model, surface, this.writer, this.keyManager));
         modules.add (new UserModule (this.host, this.model, this.writer));
         modules.add (new ActionModule (this.host, this.model, this.writer, this.configuration));
+        modules.add (new ClipModule (this.host, this.model, this.writer));
 
         modules.forEach (module -> {
             this.writer.registerModule (module);
@@ -216,13 +218,5 @@ public class OSCControllerSetup extends AbstractControllerSetup<IControlSurface<
     {
         // Initial flush of the whole DAW state
         this.host.scheduleTask ( () -> this.writer.flush (true), 1000);
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    protected void updateIndication (final Modes mode)
-    {
-        // Not used
     }
 }

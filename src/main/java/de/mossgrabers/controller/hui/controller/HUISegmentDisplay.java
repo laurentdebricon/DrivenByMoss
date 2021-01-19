@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.hui.controller;
@@ -10,6 +10,7 @@ import de.mossgrabers.framework.daw.midi.IMidiOutput;
 import de.mossgrabers.framework.utils.StringUtils;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 
 /**
@@ -44,7 +45,7 @@ public class HUISegmentDisplay extends AbstractTextDisplay
     public void writeLine (final int row, final String text)
     {
         // Sets the position string. Must only contain numbers and ':'
-        final String lowerText = text.toLowerCase ();
+        final String lowerText = text.toLowerCase (Locale.US);
         Arrays.fill (this.transportBuffer, 0);
 
         // Convert string to display character codes

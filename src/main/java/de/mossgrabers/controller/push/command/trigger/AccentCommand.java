@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -45,11 +45,11 @@ public class AccentCommand extends AbstractTriggerCommand<PushControlSurface, Pu
                 break;
             case LONG:
                 this.quitAccentMode = true;
-                this.surface.getModeManager ().setActiveMode (Modes.ACCENT);
+                this.surface.getModeManager ().setTemporary (Modes.ACCENT);
                 break;
             case UP:
                 if (this.quitAccentMode)
-                    this.surface.getModeManager ().restoreMode ();
+                    this.surface.getModeManager ().restore ();
                 else
                 {
                     final PushConfiguration config = this.surface.getConfiguration ();

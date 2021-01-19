@@ -1,10 +1,11 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.configuration;
 
 import de.mossgrabers.framework.configuration.AbstractConfiguration.BehaviourOnStop;
+import de.mossgrabers.framework.configuration.AbstractConfiguration.RecordFunction;
 import de.mossgrabers.framework.daw.constants.Resolution;
 import de.mossgrabers.framework.daw.midi.ArpeggiatorMode;
 import de.mossgrabers.framework.observer.ISettingObserver;
@@ -27,9 +28,24 @@ public interface Configuration
 
 
     /**
+     * Notify all registered observers no matter for which they are registered.
+     */
+    void notifyAllObservers ();
+
+
+    /**
      * Removes all setting observers.
      */
     void clearSettingObservers ();
+
+
+    /**
+     * Check if the setting with the given ID is active and can be observed.
+     *
+     * @param settingID The ID of a setting
+     * @return True if it can be observed
+     */
+    boolean canSettingBeObserved (Integer settingID);
 
 
     /**
@@ -399,4 +415,20 @@ public interface Configuration
      * @param midiChannel The midi channel, 0-15
      */
     void setMidiEditChannel (int midiChannel);
+
+
+    /**
+     * Get the selected function for the record button.
+     *
+     * @return The function index
+     */
+    RecordFunction getRecordButtonFunction ();
+
+
+    /**
+     * Get the selected function for the shifted record button.
+     *
+     * @return The function index
+     */
+    RecordFunction getShiftedRecordButtonFunction ();
 }

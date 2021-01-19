@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.generic;
@@ -41,7 +41,7 @@ import de.mossgrabers.framework.daw.data.bank.ITrackBank;
 import de.mossgrabers.framework.daw.midi.IMidiAccess;
 import de.mossgrabers.framework.daw.midi.IMidiInput;
 import de.mossgrabers.framework.daw.midi.IMidiOutput;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.mode.device.BrowserMode;
 import de.mossgrabers.framework.mode.device.ParameterMode;
@@ -58,6 +58,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 
@@ -191,7 +192,7 @@ public class GenericFlexiControllerSetup extends AbstractControllerSetup<Generic
             if (keyboardChannel >= 16)
                 midiChannel = "?";
             else
-                midiChannel = Integer.toHexString (keyboardChannel).toUpperCase ();
+                midiChannel = Integer.toHexString (keyboardChannel).toUpperCase (Locale.US);
 
             final List<String> filters = new ArrayList<> ();
             Collections.addAll (filters, "8" + midiChannel + "????", "9" + midiChannel + "????", "A" + midiChannel + "????", "D" + midiChannel + "????");
@@ -220,15 +221,15 @@ public class GenericFlexiControllerSetup extends AbstractControllerSetup<Generic
     {
         final GenericFlexiControlSurface surface = this.getSurface ();
         final ModeManager modeManager = surface.getModeManager ();
-        modeManager.registerMode (Modes.TRACK, new TrackMode<> (surface, this.model, true));
-        modeManager.registerMode (Modes.VOLUME, new VolumeMode<> (surface, this.model, true));
-        modeManager.registerMode (Modes.PAN, new PanMode<> (surface, this.model, true));
+        modeManager.register (Modes.TRACK, new TrackMode<> (surface, this.model, true));
+        modeManager.register (Modes.VOLUME, new VolumeMode<> (surface, this.model, true));
+        modeManager.register (Modes.PAN, new PanMode<> (surface, this.model, true));
         for (int i = 0; i < 8; i++)
-            modeManager.registerMode (Modes.get (Modes.SEND1, i), new SendMode<> (i, surface, this.model, true));
-        modeManager.registerMode (Modes.DEVICE_PARAMS, new ParameterMode<> (surface, this.model, true));
-        modeManager.registerMode (Modes.BROWSER, new BrowserMode<> (surface, this.model));
+            modeManager.register (Modes.get (Modes.SEND1, i), new SendMode<> (i, surface, this.model, true));
+        modeManager.register (Modes.DEVICE_PARAMS, new ParameterMode<> (surface, this.model, true));
+        modeManager.register (Modes.BROWSER, new BrowserMode<> (surface, this.model));
 
-        modeManager.setDefaultMode (Modes.VOLUME);
+        modeManager.setDefaultID (Modes.VOLUME);
     }
 
 
@@ -248,7 +249,7 @@ public class GenericFlexiControllerSetup extends AbstractControllerSetup<Generic
         if (effectTrackBank != null)
             effectTrackBank.addSelectionObserver ( (index, selected) -> this.handleTrackChange (selected));
 
-        surface.getModeManager ().addModeListener ( (oldMode, newMode) -> this.updateIndication (newMode));
+        surface.getModeManager ().addChangeListener ( (oldMode, newMode) -> this.updateIndication ());
 
         this.createNoteRepeatObservers (this.configuration, surface);
 
@@ -265,10 +266,10 @@ public class GenericFlexiControllerSetup extends AbstractControllerSetup<Generic
         this.configuration.clearNoteMap ();
 
         final GenericFlexiControlSurface surface = this.getSurface ();
-        surface.getModeManager ().setActiveMode (Modes.TRACK);
+        surface.getModeManager ().setActive (Modes.TRACK);
 
         // Load last configuration
-        this.host.scheduleTask ( () -> surface.importFile (false), 2000);
+        this.host.scheduleTask ( () -> this.host.println (surface.loadFile (this.configuration.getFilename ())), 2000);
     }
 
 
@@ -326,7 +327,7 @@ public class GenericFlexiControllerSetup extends AbstractControllerSetup<Generic
     @Override
     public void update (final FlexiCommand value)
     {
-        this.updateIndication (null);
+        this.updateIndication ();
     }
 
 
@@ -336,15 +337,13 @@ public class GenericFlexiControllerSetup extends AbstractControllerSetup<Generic
         if (selectedModeName == null)
             return;
         final GenericFlexiControlSurface surface = this.getSurface ();
-        final Modes modeID = surface.getModeManager ().getMode (selectedModeName);
+        final Modes modeID = surface.getModeManager ().get (selectedModeName);
         if (modeID != null)
             surface.activateMode (modeID);
     }
 
 
-    /** {@inheritDoc} */
-    @Override
-    protected void updateIndication (final Modes mode)
+    protected void updateIndication ()
     {
         final Set<FlexiCommand> commands = this.configuration.getMappedCommands ();
         final FlexiCommand [] allCommands = FlexiCommand.values ();
@@ -380,7 +379,7 @@ public class GenericFlexiControllerSetup extends AbstractControllerSetup<Generic
             return true;
         if (commands.contains (allCommands[FlexiCommand.TRACK_1_SET_VOLUME.ordinal () + trackIndex]))
             return true;
-        return commands.contains (allCommands[FlexiCommand.MODES_KNOB1.ordinal () + trackIndex]) && this.getSurface ().getModeManager ().isActiveMode (Modes.VOLUME);
+        return commands.contains (allCommands[FlexiCommand.MODES_KNOB1.ordinal () + trackIndex]) && this.getSurface ().getModeManager ().isActive (Modes.VOLUME);
     }
 
 
@@ -390,7 +389,7 @@ public class GenericFlexiControllerSetup extends AbstractControllerSetup<Generic
             return true;
         if (commands.contains (allCommands[FlexiCommand.TRACK_1_SET_PANORAMA.ordinal () + trackIndex]))
             return true;
-        return commands.contains (allCommands[FlexiCommand.MODES_KNOB1.ordinal () + trackIndex]) && this.getSurface ().getModeManager ().isActiveMode (Modes.PAN);
+        return commands.contains (allCommands[FlexiCommand.MODES_KNOB1.ordinal () + trackIndex]) && this.getSurface ().getModeManager ().isActive (Modes.PAN);
     }
 
 
@@ -401,12 +400,12 @@ public class GenericFlexiControllerSetup extends AbstractControllerSetup<Generic
         {
             if (commands.contains (allCommands[FlexiCommand.TRACK_SELECTED_SET_SEND_1.ordinal () + sendIndex]))
                 return true;
-            if (modeManager.isActiveMode (Modes.TRACK) && sendIndex < 6)
+            if (modeManager.isActive (Modes.TRACK) && sendIndex < 6)
                 return true;
         }
         if (commands.contains (allCommands[FlexiCommand.TRACK_1_SET_SEND_1.ordinal () + sendIndex * sendPageSize + trackIndex]))
             return true;
-        return modeManager.isActiveMode (Modes.get (Modes.SEND1, sendIndex));
+        return modeManager.isActive (Modes.get (Modes.SEND1, sendIndex));
     }
 
 
@@ -414,6 +413,6 @@ public class GenericFlexiControllerSetup extends AbstractControllerSetup<Generic
     {
         if (commands.contains (allCommands[FlexiCommand.DEVICE_SET_PARAMETER_1.ordinal () + parameterIndex]))
             return true;
-        return commands.contains (allCommands[FlexiCommand.MODES_KNOB1.ordinal () + parameterIndex]) && this.getSurface ().getModeManager ().isActiveMode (Modes.DEVICE_PARAMS);
+        return commands.contains (allCommands[FlexiCommand.MODES_KNOB1.ordinal () + parameterIndex]) && this.getSurface ().getModeManager ().isActive (Modes.DEVICE_PARAMS);
     }
 }

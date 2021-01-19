@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.launchpad.view;
@@ -16,8 +16,8 @@ import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.ITransport;
 import de.mossgrabers.framework.daw.constants.Resolution;
 import de.mossgrabers.framework.daw.midi.INoteRepeat;
+import de.mossgrabers.framework.featuregroup.AbstractView;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.AbstractView;
 
 
 /**
@@ -89,9 +89,14 @@ public class ShiftView extends AbstractView<LaunchpadControlSurface, LaunchpadCo
         padGrid.light (66, lengthIndex == 5 ? LaunchpadColorManager.LAUNCHPAD_COLOR_PINK_HI : LaunchpadColorManager.LAUNCHPAD_COLOR_PINK_LO);
         padGrid.light (58, lengthIndex == 7 ? LaunchpadColorManager.LAUNCHPAD_COLOR_PINK_HI : LaunchpadColorManager.LAUNCHPAD_COLOR_PINK_LO);
 
+        // Stop all
+        padGrid.light (51, LaunchpadColorManager.LAUNCHPAD_COLOR_RED);
+
         if (this.surface.isPro ())
         {
-            for (int i = 44; i < 55; i++)
+            for (int i = 44; i < 51; i++)
+                padGrid.light (i, LaunchpadColorManager.LAUNCHPAD_COLOR_BLACK);
+            for (int i = 52; i < 55; i++)
                 padGrid.light (i, LaunchpadColorManager.LAUNCHPAD_COLOR_BLACK);
             for (int i = 59; i < 63; i++)
                 padGrid.light (i, LaunchpadColorManager.LAUNCHPAD_COLOR_BLACK);
@@ -114,9 +119,6 @@ public class ShiftView extends AbstractView<LaunchpadControlSurface, LaunchpadCo
 
         for (int i = 46; i < 51; i++)
             padGrid.light (i, LaunchpadColorManager.LAUNCHPAD_COLOR_BLACK);
-
-        // Stop all
-        padGrid.light (51, LaunchpadColorManager.LAUNCHPAD_COLOR_RED);
 
         // Play / New
         padGrid.light (52, transport.isPlaying () ? LaunchpadColorManager.LAUNCHPAD_COLOR_GREEN_HI : LaunchpadColorManager.LAUNCHPAD_COLOR_GREEN_LO);
@@ -196,6 +198,11 @@ public class ShiftView extends AbstractView<LaunchpadControlSurface, LaunchpadCo
                 configuration.setNewClipLength (newClipLength);
                 this.surface.getDisplay ().notify ("New clip length: " + AbstractConfiguration.getNewClipLengthValue (newClipLength));
                 return;
+
+            case 51:
+                this.model.getCurrentTrackBank ().stop ();
+                this.surface.getDisplay ().notify ("Stop");
+                break;
 
             case 87:
                 configuration.toggleNoteRepeatActive ();
@@ -331,10 +338,6 @@ public class ShiftView extends AbstractView<LaunchpadControlSurface, LaunchpadCo
             case 45:
                 this.executeShifted (ButtonID.RECORD, ButtonEvent.UP);
                 this.mvHelper.delayDisplay ( () -> "Overdub launcher clips: " + (this.model.getTransport ().isLauncherOverdub () ? "On" : "Off"));
-                break;
-            case 51:
-                this.model.getCurrentTrackBank ().stop ();
-                this.surface.getDisplay ().notify ("Stop");
                 break;
             default:
                 // Not used

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.maschine.command.trigger;
@@ -11,7 +11,7 @@ import de.mossgrabers.controller.maschine.mode.MaschineVolumeMode;
 import de.mossgrabers.framework.command.trigger.mode.ModeMultiSelectCommand;
 import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.view.Views;
@@ -43,11 +43,11 @@ public class VolumePanSendCommand extends ModeMultiSelectCommand<MaschineControl
         final ModeManager modeManager = this.surface.getModeManager ();
 
         // Switch Gain/Velocity note edit parameters
-        if (modeManager.isActiveOrTempMode (Modes.NOTE) && this.surface.getViewManager ().isActiveView (Views.DRUM, Views.PLAY))
+        if (modeManager.isActive (Modes.NOTE) && this.surface.getViewManager ().isActive (Views.DRUM, Views.PLAY))
         {
             if (event == ButtonEvent.DOWN)
             {
-                final EditNoteMode mode = (EditNoteMode) modeManager.getMode (Modes.NOTE);
+                final EditNoteMode mode = (EditNoteMode) modeManager.get (Modes.NOTE);
                 final boolean isVelocity = mode.getSelectedItem () == EditNoteMode.VELOCITY;
                 mode.selectItem (isVelocity ? EditNoteMode.GAIN : EditNoteMode.VELOCITY);
                 this.surface.getDisplay ().notify (isVelocity ? "Gain" : "Velocity");
@@ -61,7 +61,7 @@ public class VolumePanSendCommand extends ModeMultiSelectCommand<MaschineControl
             if (event == ButtonEvent.DOWN)
             {
                 this.surface.setStopConsumed ();
-                ((MaschineVolumeMode) modeManager.getMode (Modes.VOLUME)).toggleDisplayVU ();
+                ((MaschineVolumeMode) modeManager.get (Modes.VOLUME)).toggleDisplayVU ();
             }
             return;
         }

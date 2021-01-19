@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.midimonitor;
@@ -12,7 +12,6 @@ import de.mossgrabers.framework.controller.ISetupFactory;
 import de.mossgrabers.framework.daw.IHost;
 import de.mossgrabers.framework.daw.midi.IMidiAccess;
 import de.mossgrabers.framework.daw.midi.IMidiInput;
-import de.mossgrabers.framework.mode.Modes;
 
 
 /**
@@ -67,14 +66,6 @@ public class MidiMonitorSetup extends AbstractControllerSetup<IControlSurface<Mi
     /** {@inheritDoc} */
     @Override
     public void startup ()
-    {
-        // Intentionally empty
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    protected void updateIndication (final Modes mode)
     {
         // Intentionally empty
     }

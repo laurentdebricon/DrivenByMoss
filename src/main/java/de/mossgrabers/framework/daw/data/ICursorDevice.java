@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.daw.data;
@@ -12,7 +12,7 @@ import de.mossgrabers.framework.daw.data.bank.IDeviceBank;
  *
  * @author J&uuml;rgen Mo&szlig;graber
  */
-public interface ICursorDevice extends ISpecificDevice
+public interface ICursorDevice extends ISpecificDevice, IPinnable
 {
     /**
      * Select the parent of the device.
@@ -40,20 +40,6 @@ public interface ICursorDevice extends ISpecificDevice
      * @return True if there is a next device
      */
     boolean canSelectNextFX ();
-
-
-    /**
-     * Get if the cursor device is pinned.
-     *
-     * @return True if pinned
-     */
-    boolean isPinned ();
-
-
-    /**
-     * Toggles if the cursor device is pinned.
-     */
-    void togglePinned ();
 
 
     /**

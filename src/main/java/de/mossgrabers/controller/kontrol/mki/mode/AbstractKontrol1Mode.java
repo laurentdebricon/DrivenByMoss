@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.kontrol.mki.mode;
@@ -13,7 +13,7 @@ import de.mossgrabers.framework.daw.data.IItem;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.IBank;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
 
 
 /**
@@ -47,8 +47,6 @@ public abstract class AbstractKontrol1Mode extends AbstractMode<Kontrol1ControlS
     public AbstractKontrol1Mode (final String name, final Kontrol1ControlSurface surface, final IModel model, final IBank<? extends IItem> bank)
     {
         super (name, surface, model, false, bank, DEFAULT_KNOB_IDS);
-
-        this.isTemporary = false;
     }
 
 

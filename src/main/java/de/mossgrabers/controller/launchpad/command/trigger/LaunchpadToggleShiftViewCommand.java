@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.launchpad.command.trigger;
@@ -9,8 +9,8 @@ import de.mossgrabers.controller.launchpad.controller.LaunchpadControlSurface;
 import de.mossgrabers.framework.command.trigger.view.ToggleShiftViewCommand;
 import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -41,9 +41,9 @@ public class LaunchpadToggleShiftViewCommand extends ToggleShiftViewCommand<Laun
             return;
 
         final ViewManager viewManager = this.surface.getViewManager ();
-        if (event == ButtonEvent.DOWN && (viewManager.isActiveView (Views.TEMPO) || viewManager.isActiveView (Views.SHUFFLE)))
+        if (event == ButtonEvent.DOWN && (viewManager.isActive (Views.TEMPO) || viewManager.isActive (Views.SHUFFLE)))
         {
-            viewManager.restoreView ();
+            viewManager.restore ();
             this.surface.setTriggerConsumed (ButtonID.SHIFT);
             return;
         }

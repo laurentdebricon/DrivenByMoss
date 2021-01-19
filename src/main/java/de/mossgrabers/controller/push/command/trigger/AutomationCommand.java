@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -54,11 +54,11 @@ public class AutomationCommand extends AbstractTriggerCommand<PushControlSurface
                 break;
             case LONG:
                 this.quitAutomationMode = true;
-                this.surface.getModeManager ().setActiveMode (Modes.AUTOMATION);
+                this.surface.getModeManager ().setTemporary (Modes.AUTOMATION);
                 break;
             case UP:
                 if (this.quitAutomationMode)
-                    this.surface.getModeManager ().restoreMode ();
+                    this.surface.getModeManager ().restore ();
                 else
                     this.doCommand ();
                 break;

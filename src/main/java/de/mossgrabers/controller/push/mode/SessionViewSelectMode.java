@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode;
@@ -11,10 +11,11 @@ import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.display.IGraphicDisplay;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -77,15 +78,15 @@ public class SessionViewSelectMode extends BaseMode
 
             case 2:
                 configuration.setSceneView ();
-                this.surface.getModeManager ().restoreMode ();
+                this.surface.getModeManager ().restore ();
                 break;
 
             case 6:
-                this.surface.getModeManager ().setActiveMode (Modes.MARKERS);
+                this.surface.getModeManager ().setActive (Modes.MARKERS);
                 break;
 
             case 7:
-                this.surface.getModeManager ().restoreMode ();
+                this.surface.getModeManager ().restore ();
                 configuration.toggleScenesClipMode ();
                 break;
 
@@ -108,7 +109,7 @@ public class SessionViewSelectMode extends BaseMode
                 display.setCell (3, i, (this.isSelected (viewManager, i) ? Push1Display.SELECT_ARROW : "") + VIEW_NAMES[i]);
         }
         display.setBlock (1, 3, "Session mode:");
-        final boolean isOn = this.surface.getModeManager ().isActiveMode (Modes.SESSION);
+        final boolean isOn = this.surface.getModeManager ().isActive (Modes.SESSION);
         display.setCell (3, 6, "Markers");
         display.setCell (3, 7, (isOn ? Push1Display.SELECT_ARROW : "") + " Clips");
     }
@@ -124,7 +125,7 @@ public class SessionViewSelectMode extends BaseMode
             final boolean isMenuBottomSelected = VIEWS[i] != null && this.isSelected (viewManager, i);
             display.addOptionElement ("", "", false, i == 0 ? "Session view" : "", VIEW_NAMES[i], isMenuBottomSelected, false);
         }
-        final boolean isOn = this.surface.getModeManager ().isActiveMode (Modes.SESSION);
+        final boolean isOn = this.surface.getModeManager ().isActive (Modes.SESSION);
         display.addOptionElement ("", "", false, "", "", false, false);
         display.addOptionElement ("", "", false, "Session mode", "Markers", false, false);
         display.addOptionElement ("", "", false, "", "Clips", isOn, false);
@@ -141,22 +142,22 @@ public class SessionViewSelectMode extends BaseMode
             if (index < VIEWS.length)
             {
                 if (VIEWS[index] == null)
-                    return AbstractMode.BUTTON_COLOR_OFF;
+                    return AbstractFeatureGroup.BUTTON_COLOR_OFF;
                 final ViewManager viewManager = this.surface.getViewManager ();
-                return this.isSelected (viewManager, index) ? AbstractMode.BUTTON_COLOR_HI : AbstractMode.BUTTON_COLOR_ON;
+                return this.isSelected (viewManager, index) ? AbstractMode.BUTTON_COLOR_HI : AbstractFeatureGroup.BUTTON_COLOR_ON;
             }
 
             if (index == 6)
-                return AbstractMode.BUTTON_COLOR_ON;
+                return AbstractFeatureGroup.BUTTON_COLOR_ON;
             if (index == 7)
             {
-                final boolean isOn = this.surface.getModeManager ().isActiveMode (Modes.SESSION);
-                return isOn ? AbstractMode.BUTTON_COLOR_HI : AbstractMode.BUTTON_COLOR_ON;
+                final boolean isOn = this.surface.getModeManager ().isActive (Modes.SESSION);
+                return isOn ? AbstractMode.BUTTON_COLOR_HI : AbstractFeatureGroup.BUTTON_COLOR_ON;
             }
-            return AbstractMode.BUTTON_COLOR_OFF;
+            return AbstractFeatureGroup.BUTTON_COLOR_OFF;
         }
 
-        return AbstractMode.BUTTON_COLOR_OFF;
+        return AbstractFeatureGroup.BUTTON_COLOR_OFF;
     }
 
 
@@ -164,14 +165,14 @@ public class SessionViewSelectMode extends BaseMode
     {
         if (viewID == null)
             return;
-        this.surface.getViewManager ().setActiveView (viewID);
-        this.surface.getModeManager ().restoreMode ();
+        this.surface.getViewManager ().setActive (viewID);
+        this.surface.getModeManager ().restore ();
     }
 
 
     private boolean isSelected (final ViewManager viewManager, final int index)
     {
-        final boolean activeView = viewManager.isActiveView (VIEWS[index]);
+        final boolean activeView = viewManager.isActive (VIEWS[index]);
         switch (index)
         {
             case 0:

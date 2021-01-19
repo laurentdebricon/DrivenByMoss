@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode;
@@ -14,15 +14,18 @@ import de.mossgrabers.framework.controller.display.Format;
 import de.mossgrabers.framework.controller.display.IGraphicDisplay;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.controller.valuechanger.IValueChanger;
+import de.mossgrabers.framework.daw.GrooveParameterID;
+import de.mossgrabers.framework.daw.IGroove;
 import de.mossgrabers.framework.daw.IHost;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.daw.constants.EditCapability;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.daw.constants.Resolution;
 import de.mossgrabers.framework.daw.data.IParameter;
 import de.mossgrabers.framework.daw.midi.ArpeggiatorMode;
 import de.mossgrabers.framework.daw.midi.INoteInput;
 import de.mossgrabers.framework.daw.midi.INoteRepeat;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
+import de.mossgrabers.framework.featuregroup.AbstractMode;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.utils.Pair;
 import de.mossgrabers.framework.utils.StringUtils;
@@ -49,7 +52,6 @@ public class NoteRepeatMode extends BaseMode
     {
         super ("Note Repeat", surface, model);
 
-        this.isTemporary = true;
         this.host = this.model.getHost ();
 
         final INoteInput defaultNoteInput = surface.getMidiInput ().getDefaultNoteInput ();
@@ -96,7 +98,7 @@ public class NoteRepeatMode extends BaseMode
 
             case 2:
             case 3:
-                if (this.host.canEdit (EditCapability.NOTE_REPEAT_LENGTH))
+                if (this.host.supports (Capability.NOTE_REPEAT_LENGTH))
                 {
                     final int sel2 = Resolution.change (Resolution.getMatch (configuration.getNoteRepeatLength ().getValue ()), valueChanger.calcKnobChange (value) > 0);
                     configuration.setNoteRepeatLength (Resolution.values ()[sel2]);
@@ -104,7 +106,7 @@ public class NoteRepeatMode extends BaseMode
                 break;
 
             case 5:
-                if (this.host.canEdit (EditCapability.NOTE_REPEAT_MODE))
+                if (this.host.supports (Capability.NOTE_REPEAT_MODE))
                 {
                     final ArpeggiatorMode arpMode = configuration.getNoteRepeatMode ();
                     final int modeIndex = configuration.lookupArpeggiatorModeIndex (arpMode);
@@ -116,13 +118,13 @@ public class NoteRepeatMode extends BaseMode
                 break;
 
             case 6:
-                if (this.host.canEdit (EditCapability.NOTE_REPEAT_OCTAVES))
+                if (this.host.supports (Capability.NOTE_REPEAT_OCTAVES))
                     configuration.setNoteRepeatOctave (configuration.getNoteRepeatOctave () + (valueChanger.calcKnobChange (value) > 0 ? 1 : -1));
                 break;
 
             case 7:
-                if (this.host.canEdit (EditCapability.NOTE_REPEAT_SWING))
-                    this.model.getGroove ().getParameters ()[1].changeValue (value);
+                if (this.host.supports (Capability.NOTE_REPEAT_SWING))
+                    this.model.getGroove ().getParameter (GrooveParameterID.SHUFFLE_AMOUNT).changeValue (value);
                 break;
 
             default:
@@ -145,18 +147,18 @@ public class NoteRepeatMode extends BaseMode
             switch (index)
             {
                 case 5:
-                    if (this.host.canEdit (EditCapability.NOTE_REPEAT_MODE))
+                    if (this.host.supports (Capability.NOTE_REPEAT_MODE))
                         this.noteRepeat.setMode (ArpeggiatorMode.UP);
                     break;
 
                 case 6:
-                    if (this.host.canEdit (EditCapability.NOTE_REPEAT_OCTAVES))
+                    if (this.host.supports (Capability.NOTE_REPEAT_OCTAVES))
                         this.noteRepeat.setOctaves (1);
                     break;
 
                 case 7:
-                    if (this.host.canEdit (EditCapability.NOTE_REPEAT_SWING))
-                        this.model.getGroove ().getParameters ()[1].resetValue ();
+                    if (this.host.supports (Capability.NOTE_REPEAT_SWING))
+                        this.model.getGroove ().getParameter (GrooveParameterID.SHUFFLE_AMOUNT).resetValue ();
                     break;
 
                 default:
@@ -186,7 +188,7 @@ public class NoteRepeatMode extends BaseMode
 
             case 2:
             case 3:
-                if (this.host.canEdit (EditCapability.NOTE_REPEAT_LENGTH))
+                if (this.host.supports (Capability.NOTE_REPEAT_LENGTH))
                 {
                     final int sel2 = Resolution.change (Resolution.getMatch (this.noteRepeat.getNoteLength ()), index == 3);
                     configuration.setNoteRepeatLength (Resolution.values ()[sel2]);
@@ -194,17 +196,17 @@ public class NoteRepeatMode extends BaseMode
                 break;
 
             case 5:
-                if (this.host.canEdit (EditCapability.NOTE_REPEAT_USE_PRESSURE_TO_VELOCITY))
+                if (this.host.supports (Capability.NOTE_REPEAT_USE_PRESSURE_TO_VELOCITY))
                     this.noteRepeat.toggleUsePressure ();
                 break;
 
             case 6:
-                if (this.host.canEdit (EditCapability.NOTE_REPEAT_IS_FREE_RUNNING))
+                if (this.host.supports (Capability.NOTE_REPEAT_IS_FREE_RUNNING))
                     this.noteRepeat.toggleIsFreeRunning ();
                 break;
 
             case 7:
-                if (this.host.canEdit (EditCapability.NOTE_REPEAT_SWING))
+                if (this.host.supports (Capability.NOTE_REPEAT_SWING))
                     this.noteRepeat.toggleShuffle ();
                 break;
 
@@ -222,9 +224,9 @@ public class NoteRepeatMode extends BaseMode
         if (event != ButtonEvent.UP || this.noteRepeat == null)
             return;
 
-        if (index == 7 && this.host.canEdit (EditCapability.NOTE_REPEAT_SWING))
+        if (index == 7 && this.host.supports (Capability.NOTE_REPEAT_SWING))
         {
-            final IParameter grooveEnabled = this.model.getGroove ().getParameters ()[0];
+            final IParameter grooveEnabled = this.model.getGroove ().getParameter (GrooveParameterID.ENABLED);
             grooveEnabled.setValue (grooveEnabled.getValue () == 0 ? this.model.getValueChanger ().getUpperBound () : 0);
         }
     }
@@ -238,8 +240,8 @@ public class NoteRepeatMode extends BaseMode
         if (index >= 0)
         {
             final ColorManager colorManager = this.model.getColorManager ();
-            final int offColor = colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_OFF);
-            final int onColor = colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_ON);
+            final int offColor = colorManager.getColorIndex (AbstractFeatureGroup.BUTTON_COLOR_OFF);
+            final int onColor = colorManager.getColorIndex (AbstractFeatureGroup.BUTTON_COLOR_ON);
             final int hiColor = colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_HI);
 
             switch (index)
@@ -249,25 +251,25 @@ public class NoteRepeatMode extends BaseMode
                 case 1:
                     return onColor;
                 case 2:
-                    return this.host.canEdit (EditCapability.NOTE_REPEAT_LENGTH) ? onColor : offColor;
+                    return this.host.supports (Capability.NOTE_REPEAT_LENGTH) ? onColor : offColor;
                 case 3:
-                    return this.host.canEdit (EditCapability.NOTE_REPEAT_LENGTH) ? onColor : offColor;
+                    return this.host.supports (Capability.NOTE_REPEAT_LENGTH) ? onColor : offColor;
 
                 case 4:
                     return offColor;
 
                 case 5:
-                    if (this.host.canEdit (EditCapability.NOTE_REPEAT_USE_PRESSURE_TO_VELOCITY))
+                    if (this.host.supports (Capability.NOTE_REPEAT_USE_PRESSURE_TO_VELOCITY))
                         return this.noteRepeat.usePressure () ? hiColor : onColor;
                     return offColor;
 
                 case 6:
-                    if (this.host.canEdit (EditCapability.NOTE_REPEAT_IS_FREE_RUNNING))
+                    if (this.host.supports (Capability.NOTE_REPEAT_IS_FREE_RUNNING))
                         return !this.noteRepeat.isFreeRunning () ? hiColor : onColor;
                     return offColor;
 
                 case 7:
-                    if (this.host.canEdit (EditCapability.NOTE_REPEAT_SWING))
+                    if (this.host.supports (Capability.NOTE_REPEAT_SWING))
                         return this.noteRepeat.isShuffle () ? hiColor : onColor;
                     return offColor;
             }
@@ -278,8 +280,8 @@ public class NoteRepeatMode extends BaseMode
         {
             final ColorManager colorManager = this.model.getColorManager ();
             if (index < 7)
-                return colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_OFF);
-            return this.model.getGroove ().getParameters ()[0].getValue () > 0 ? colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_HI) : colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_ON);
+                return colorManager.getColorIndex (AbstractFeatureGroup.BUTTON_COLOR_OFF);
+            return this.model.getGroove ().getParameter (GrooveParameterID.ENABLED).getValue () > 0 ? colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_HI) : colorManager.getColorIndex (AbstractFeatureGroup.BUTTON_COLOR_ON);
         }
 
         return super.getButtonColor (buttonID);
@@ -299,7 +301,7 @@ public class NoteRepeatMode extends BaseMode
             pos++;
         }
 
-        if (this.host.canEdit (EditCapability.NOTE_REPEAT_LENGTH))
+        if (this.host.supports (Capability.NOTE_REPEAT_LENGTH))
         {
             display.setCell (0, 2, "Length:");
             final int selLengthIndex = this.getSelectedNoteLengthIndex ();
@@ -312,9 +314,9 @@ public class NoteRepeatMode extends BaseMode
         }
 
         final int upperBound = this.model.getValueChanger ().getUpperBound ();
-        if (this.host.canEdit (EditCapability.NOTE_REPEAT_MODE))
+        if (this.host.supports (Capability.NOTE_REPEAT_MODE))
         {
-            final String bottomMenu = this.host.canEdit (EditCapability.NOTE_REPEAT_USE_PRESSURE_TO_VELOCITY) ? "Use Pressure" : "";
+            final String bottomMenu = this.host.supports (Capability.NOTE_REPEAT_USE_PRESSURE_TO_VELOCITY) ? "Use Pressure" : "";
             final ArpeggiatorMode mode = this.noteRepeat.getMode ();
             final Configuration configuration = this.surface.getConfiguration ();
             final ArpeggiatorMode [] arpeggiatorModes = configuration.getArpeggiatorModes ();
@@ -326,9 +328,9 @@ public class NoteRepeatMode extends BaseMode
             display.setCell (3, 5, bottomMenu);
         }
 
-        if (this.host.canEdit (EditCapability.NOTE_REPEAT_OCTAVES))
+        if (this.host.supports (Capability.NOTE_REPEAT_OCTAVES))
         {
-            final String bottomMenu = this.host.canEdit (EditCapability.NOTE_REPEAT_IS_FREE_RUNNING) ? "Sync" : "";
+            final String bottomMenu = this.host.supports (Capability.NOTE_REPEAT_IS_FREE_RUNNING) ? "Sync" : "";
             final int octaves = this.noteRepeat.getOctaves ();
             final int value = octaves * upperBound / 8;
             display.setCell (0, 6, "Octaves");
@@ -337,9 +339,9 @@ public class NoteRepeatMode extends BaseMode
             display.setCell (3, 6, bottomMenu);
         }
 
-        if (this.host.canEdit (EditCapability.NOTE_REPEAT_SWING))
+        if (this.host.supports (Capability.NOTE_REPEAT_SWING))
         {
-            final IParameter shuffleParam = this.model.getGroove ().getParameters ()[1];
+            final IParameter shuffleParam = this.model.getGroove ().getParameter (GrooveParameterID.SHUFFLE_AMOUNT);
             display.setCell (0, 7, shuffleParam.getName (10));
             display.setCell (1, 7, shuffleParam.getDisplayedValue (8));
             display.setCell (2, 7, shuffleParam.getValue (), Format.FORMAT_VALUE);
@@ -359,7 +361,7 @@ public class NoteRepeatMode extends BaseMode
         final int selPeriodIndex = this.getSelectedPeriodIndex ();
         display.addListElement (6, Resolution.getNames (), selPeriodIndex);
 
-        if (this.host.canEdit (EditCapability.NOTE_REPEAT_LENGTH))
+        if (this.host.supports (Capability.NOTE_REPEAT_LENGTH))
         {
             display.addOptionElement ("  Length", "", false, "", "", false, false);
             final int selLengthIndex = this.getSelectedNoteLengthIndex ();
@@ -374,9 +376,9 @@ public class NoteRepeatMode extends BaseMode
         display.addEmptyElement ();
 
         final int upperBound = this.model.getValueChanger ().getUpperBound ();
-        if (this.host.canEdit (EditCapability.NOTE_REPEAT_MODE))
+        if (this.host.supports (Capability.NOTE_REPEAT_MODE))
         {
-            final String bottomMenu = this.host.canEdit (EditCapability.NOTE_REPEAT_USE_PRESSURE_TO_VELOCITY) ? "Use Pressure" : "";
+            final String bottomMenu = this.host.supports (Capability.NOTE_REPEAT_USE_PRESSURE_TO_VELOCITY) ? "Use Pressure" : "";
             final boolean isBottomMenuEnabled = this.noteRepeat.usePressure ();
             final ArpeggiatorMode mode = this.noteRepeat.getMode ();
             final Configuration configuration = this.surface.getConfiguration ();
@@ -388,9 +390,9 @@ public class NoteRepeatMode extends BaseMode
         else
             display.addEmptyElement ();
 
-        if (this.host.canEdit (EditCapability.NOTE_REPEAT_OCTAVES))
+        if (this.host.supports (Capability.NOTE_REPEAT_OCTAVES))
         {
-            final String bottomMenu = this.host.canEdit (EditCapability.NOTE_REPEAT_IS_FREE_RUNNING) ? "Sync" : "";
+            final String bottomMenu = this.host.supports (Capability.NOTE_REPEAT_IS_FREE_RUNNING) ? "Sync" : "";
             final boolean isBottomMenuEnabled = !this.noteRepeat.isFreeRunning ();
             final int octaves = this.noteRepeat.getOctaves ();
             final int value = octaves * upperBound / 8;
@@ -399,12 +401,13 @@ public class NoteRepeatMode extends BaseMode
         else
             display.addEmptyElement ();
 
-        if (this.host.canEdit (EditCapability.NOTE_REPEAT_SWING))
+        if (this.host.supports (Capability.NOTE_REPEAT_SWING))
         {
-            final IParameter [] grooveParameters = this.model.getGroove ().getParameters ();
-            final IParameter shuffleParam = grooveParameters[1];
-            final int value = grooveParameters[0].getValue ();
-            display.addParameterElementWithPlainMenu ("Groove " + grooveParameters[0].getDisplayedValue (8), value != 0, "Shuffle", null, this.noteRepeat.isShuffle (), shuffleParam.getName (10), shuffleParam.getValue (), shuffleParam.getDisplayedValue (8), this.isKnobTouched[7], -1);
+            final IGroove groove = this.model.getGroove ();
+            final IParameter shuffleParam = groove.getParameter (GrooveParameterID.SHUFFLE_AMOUNT);
+            final IParameter enabledParam = groove.getParameter (GrooveParameterID.ENABLED);
+            final int value = enabledParam.getValue ();
+            display.addParameterElementWithPlainMenu ("Groove " + enabledParam.getDisplayedValue (8), value != 0, "Shuffle", null, this.noteRepeat.isShuffle (), shuffleParam.getName (10), shuffleParam.getValue (), shuffleParam.getDisplayedValue (8), this.isKnobTouched[7], -1);
         }
         else
             display.addEmptyElement ();

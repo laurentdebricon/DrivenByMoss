@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.sl.command.trigger;
@@ -9,8 +9,8 @@ import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.configuration.Configuration;
 import de.mossgrabers.framework.controller.IControlSurface;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.featuregroup.IView;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.View;
 
 
 /**
@@ -47,7 +47,7 @@ public class ButtonRowViewCommand<S extends IControlSurface<C>, C extends Config
     @Override
     public void execute (final ButtonEvent event, final int velocity)
     {
-        final View view = this.surface.getViewManager ().getActiveView ();
+        final IView view = this.surface.getViewManager ().getActive ();
         if (view == null)
             return;
 

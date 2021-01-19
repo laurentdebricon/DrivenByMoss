@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.osc.module;
@@ -99,7 +99,7 @@ public class MarkerModule extends AbstractModule
             final String markerAddress = "/marker/" + (i + 1) + "/";
             final IMarker marker = markerBank.getItem (i);
             this.writer.sendOSC (markerAddress + "exists", marker.doesExist (), dump);
-            this.writer.sendOSC (markerAddress + "name", marker.getName (), dump);
+            this.writer.sendOSC (markerAddress + TAG_NAME, marker.getName (), dump);
             final ColorEx color = marker.getColor ();
             this.writer.sendOSCColor (markerAddress + "color", color.getRed (), color.getGreen (), color.getBlue (), dump);
         }

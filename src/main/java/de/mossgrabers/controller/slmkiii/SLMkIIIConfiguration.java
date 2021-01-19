@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.slmkiii;
@@ -50,6 +50,7 @@ public class SLMkIIIConfiguration extends AbstractConfiguration
 
         this.activateScaleBaseSetting (documentSettings);
         this.activateScaleSetting (documentSettings);
+        this.activateScaleInScaleSetting (documentSettings);
 
         ///////////////////////////
         // Workflow
@@ -63,12 +64,14 @@ public class SLMkIIIConfiguration extends AbstractConfiguration
             this.enableFaders = "On".equals (value);
             this.notifyObservers (ENABLE_FADERS);
         });
+        this.isSettingActive.add (ENABLE_FADERS);
 
         final IEnumSetting enableLightguideSetting = globalSettings.getEnumSetting ("Enable Lightguide", CATEGORY_WORKFLOW, ON_OFF_OPTIONS, ON_OFF_OPTIONS[1]);
         enableLightguideSetting.addValueObserver (value -> {
             this.enableLightguide = "On".equals (value);
             this.notifyObservers (ENABLE_LIGHTGUIDE);
         });
+        this.isSettingActive.add (ENABLE_LIGHTGUIDE);
 
         this.activateUserPageNamesSetting (globalSettings);
 

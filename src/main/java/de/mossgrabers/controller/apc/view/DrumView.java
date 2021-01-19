@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.apc.view;
@@ -14,7 +14,7 @@ import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.INoteClip;
 import de.mossgrabers.framework.daw.IStepInfo;
 import de.mossgrabers.framework.daw.data.IChannel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.view.AbstractDrumView;
@@ -35,7 +35,7 @@ public class DrumView extends AbstractDrumView<APCControlSurface, APCConfigurati
      */
     public DrumView (final APCControlSurface surface, final IModel model)
     {
-        super ("Drum", surface, model, 2, 3, true);
+        super ("Drum", surface, model, 2, 3, surface.isMkII ());
     }
 
 
@@ -58,16 +58,16 @@ public class DrumView extends AbstractDrumView<APCControlSurface, APCConfigurati
             final int state = cursorClip.getStep (channel, step, note).getState ();
             if (state == IStepInfo.NOTE_START)
             {
-                final NoteMode noteMode = (NoteMode) modeManager.getMode (Modes.NOTE);
+                final NoteMode noteMode = (NoteMode) modeManager.get (Modes.NOTE);
                 noteMode.setValues (cursorClip, channel, step, note);
-                modeManager.setActiveMode (Modes.NOTE);
+                modeManager.setActive (Modes.NOTE);
             }
         }
         else
         {
             // Turn off Note mode
-            if (modeManager.isActiveOrTempMode (Modes.NOTE))
-                modeManager.restoreMode ();
+            if (modeManager.isActive (Modes.NOTE))
+                modeManager.restore ();
 
             if (this.isNoteEdited)
             {

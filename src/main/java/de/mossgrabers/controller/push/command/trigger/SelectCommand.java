@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -8,7 +8,7 @@ import de.mossgrabers.controller.push.PushConfiguration;
 import de.mossgrabers.controller.push.controller.PushControlSurface;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -37,23 +37,23 @@ public class SelectCommand extends AbstractTriggerCommand<PushControlSurface, Pu
     public void execute (final ButtonEvent event, final int velocity)
     {
         // Update for key combinations
-        this.surface.getViewManager ().getActiveView ().updateNoteMapping ();
+        this.surface.getViewManager ().getActive ().updateNoteMapping ();
 
         final ModeManager modeManager = this.surface.getModeManager ();
 
         // Don't do anything in browser mode
-        if (modeManager.isActiveOrTempMode (Modes.BROWSER))
+        if (modeManager.isActive (Modes.BROWSER))
             return;
 
         if (event == ButtonEvent.DOWN)
         {
             // Track or layer details?
-            if (Modes.isLayerMode (modeManager.getActiveOrTempModeId ()))
-                modeManager.setActiveMode (Modes.DEVICE_LAYER_DETAILS);
+            if (Modes.isLayerMode (modeManager.getActiveID ()))
+                modeManager.setActive (Modes.DEVICE_LAYER_DETAILS);
             else
-                modeManager.setActiveMode (Modes.TRACK_DETAILS);
+                modeManager.setActive (Modes.TRACK_DETAILS);
         }
-        else if (event == ButtonEvent.UP && (modeManager.isActiveOrTempMode (Modes.TRACK_DETAILS, Modes.DEVICE_LAYER_DETAILS)))
-            modeManager.restoreMode ();
+        else if (event == ButtonEvent.UP && modeManager.isActive (Modes.TRACK_DETAILS, Modes.DEVICE_LAYER_DETAILS))
+            modeManager.restore ();
     }
 }

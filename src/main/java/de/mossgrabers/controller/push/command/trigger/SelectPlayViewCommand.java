@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -9,10 +9,10 @@ import de.mossgrabers.controller.push.controller.PushControlSurface;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ITrack;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -44,27 +44,27 @@ public class SelectPlayViewCommand extends AbstractTriggerCommand<PushControlSur
 
         final ModeManager modeManager = this.surface.getModeManager ();
         final ViewManager viewManager = this.surface.getViewManager ();
-        if (Views.isSessionView (viewManager.getActiveViewId ()))
+        if (Views.isSessionView (viewManager.getActiveID ()))
         {
-            final ITrack selectedTrack = this.model.getSelectedTrack ();
-            if (selectedTrack == null)
+            final ITrack cursorTrack = this.model.getCursorTrack ();
+            if (!cursorTrack.doesExist ())
             {
                 this.surface.getDisplay ().notify ("Please select a track first.");
                 return;
             }
 
-            final Views preferredView = viewManager.getPreferredView (selectedTrack.getPosition ());
-            viewManager.setActiveView (preferredView == null ? Views.PLAY : preferredView);
+            final Views preferredView = viewManager.getPreferredView (cursorTrack.getPosition ());
+            viewManager.setActive (preferredView == null ? Views.PLAY : preferredView);
 
-            if (modeManager.isActiveMode (Modes.SESSION) || modeManager.getActiveOrTempMode ().isTemporary ())
-                modeManager.restoreMode ();
+            if (modeManager.isActive (Modes.SESSION) || modeManager.isTemporary ())
+                modeManager.restore ();
 
             return;
         }
 
-        if (modeManager.isActiveOrTempMode (Modes.VIEW_SELECT))
-            modeManager.restoreMode ();
+        if (modeManager.isActive (Modes.VIEW_SELECT))
+            modeManager.restore ();
         else
-            modeManager.setActiveMode (Modes.VIEW_SELECT);
+            modeManager.setTemporary (Modes.VIEW_SELECT);
     }
 }

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.daw.data;
@@ -85,4 +85,12 @@ public interface IItem extends IObserverManagement
      * @param observer The observer to notify on a name change
      */
     void addNameObserver (final IValueObserver<String> observer);
+
+
+    /**
+     * Set the name of the item.
+     *
+     * @param name The new name
+     */
+    void setName (String name);
 }

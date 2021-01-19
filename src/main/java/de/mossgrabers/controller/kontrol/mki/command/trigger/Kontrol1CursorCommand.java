@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.kontrol.mki.command.trigger;
@@ -7,7 +7,7 @@ package de.mossgrabers.controller.kontrol.mki.command.trigger;
 import de.mossgrabers.controller.kontrol.mki.Kontrol1Configuration;
 import de.mossgrabers.controller.kontrol.mki.controller.Kontrol1ControlSurface;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.Mode;
+import de.mossgrabers.framework.featuregroup.IMode;
 
 
 /**
@@ -34,7 +34,7 @@ public class Kontrol1CursorCommand extends de.mossgrabers.framework.command.trig
     @Override
     protected void scrollUp ()
     {
-        final Mode mode = this.surface.getModeManager ().getActiveOrTempMode ();
+        final IMode mode = this.surface.getModeManager ().getActive ();
         if (mode != null)
             mode.selectNextItemPage ();
     }
@@ -44,7 +44,7 @@ public class Kontrol1CursorCommand extends de.mossgrabers.framework.command.trig
     @Override
     protected void scrollDown ()
     {
-        final Mode mode = this.surface.getModeManager ().getActiveOrTempMode ();
+        final IMode mode = this.surface.getModeManager ().getActive ();
         if (mode != null)
             mode.selectPreviousItemPage ();
     }

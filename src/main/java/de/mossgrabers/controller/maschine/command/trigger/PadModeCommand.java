@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.maschine.command.trigger;
@@ -9,10 +9,10 @@ import de.mossgrabers.controller.maschine.controller.MaschineControlSurface;
 import de.mossgrabers.controller.maschine.view.DrumView;
 import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -43,18 +43,18 @@ public class PadModeCommand extends AbstractTriggerCommand<MaschineControlSurfac
             return;
 
         final ViewManager viewManager = this.surface.getViewManager ();
-        if (viewManager.isActiveView (Views.DRUM))
+        if (viewManager.isActive (Views.DRUM))
         {
             if (!this.surface.getMaschine ().hasMCUDisplay ())
-                ((DrumView) viewManager.getView (Views.DRUM)).toggleShifted ();
+                ((DrumView) viewManager.get (Views.DRUM)).toggleShifted ();
 
             final ModeManager modeManager = this.surface.getModeManager ();
-            if (modeManager.isActiveOrTempMode (Modes.PLAY_OPTIONS))
-                modeManager.restoreMode ();
+            if (modeManager.isActive (Modes.PLAY_OPTIONS))
+                modeManager.restore ();
             else
-                modeManager.setActiveMode (Modes.PLAY_OPTIONS);
+                modeManager.setActive (Modes.PLAY_OPTIONS);
         }
         else
-            viewManager.setActiveView (Views.DRUM);
+            viewManager.setActive (Views.DRUM);
     }
 }

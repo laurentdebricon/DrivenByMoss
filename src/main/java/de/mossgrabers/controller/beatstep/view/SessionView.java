@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.beatstep.view;
@@ -10,7 +10,7 @@ import de.mossgrabers.controller.beatstep.controller.BeatstepControlSurface;
 import de.mossgrabers.framework.controller.grid.IPadGrid;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.bank.ISceneBank;
-import de.mossgrabers.framework.view.AbstractView;
+import de.mossgrabers.framework.featuregroup.AbstractView;
 
 
 /**

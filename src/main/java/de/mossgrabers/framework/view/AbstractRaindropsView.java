@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.view;
@@ -125,7 +125,7 @@ public abstract class AbstractRaindropsView<S extends IControlSurface<C>, C exte
         if (this.ongoingResolutionChange)
             return;
 
-        final ITrack selectedTrack = this.useDawColors ? this.model.getSelectedTrack () : null;
+        final ITrack cursorTrack = this.useDawColors ? this.model.getCursorTrack () : null;
 
         final INoteClip clip = this.getClip ();
         final int length = (int) Math.floor (clip.getLoopLength () / Resolution.getValueAt (this.selectedResolutionIndex));
@@ -143,7 +143,7 @@ public abstract class AbstractRaindropsView<S extends IControlSurface<C>, C exte
 
             for (int y = 0; y < this.numDisplayRows; y++)
             {
-                String colorID = y == 0 ? this.getPadColor (x, selectedTrack) : AbstractSequencerView.COLOR_NO_CONTENT;
+                String colorID = y == 0 ? this.getPadColor (x, cursorTrack) : AbstractSequencerView.COLOR_NO_CONTENT;
                 if (isOn)
                 {
                     if (y == distance)

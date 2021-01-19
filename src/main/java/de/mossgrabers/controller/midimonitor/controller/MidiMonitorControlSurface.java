@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.midimonitor.controller;
@@ -248,17 +248,17 @@ public class MidiMonitorControlSurface extends AbstractControlSurface<MidiMonito
         {
             // Note off
             case 0x80:
-                this.log (status, data1, data2, channel, "Note Off " + Scales.formatNoteAndOctave (data1, 0));
+                this.log (status, data1, data2, channel, "Note Off " + Scales.formatNoteAndOctave (data1, -2));
                 break;
 
             // Note on
             case 0x90:
-                this.log (status, data1, data2, channel, "Note On  " + Scales.formatNoteAndOctave (data1, 0));
+                this.log (status, data1, data2, channel, "Note On  " + Scales.formatNoteAndOctave (data1, -2));
                 break;
 
             // Polyphonic Aftertouch
             case 0xA0:
-                this.log (status, data1, data2, channel, "Polyphonic Key Pressure " + Scales.formatNoteAndOctave (data1, 0));
+                this.log (status, data1, data2, channel, "Polyphonic Key Pressure " + Scales.formatNoteAndOctave (data1, -2));
                 break;
 
             // CC

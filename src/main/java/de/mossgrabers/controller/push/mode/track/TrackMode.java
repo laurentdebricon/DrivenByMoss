@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode.track;
@@ -14,6 +14,7 @@ import de.mossgrabers.framework.controller.display.IGraphicDisplay;
 import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.controller.valuechanger.IValueChanger;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.daw.data.ISend;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ISendBank;
@@ -239,7 +240,7 @@ public class TrackMode extends AbstractTrackMode
         this.updateMenuItems (0);
 
         final PushConfiguration config = this.surface.getConfiguration ();
-        final boolean displayCrossfader = this.model.getHost ().hasCrossfader ();
+        final boolean displayCrossfader = this.model.getHost ().supports (Capability.HAS_CROSSFADER);
         for (int i = 0; i < 8; i++)
         {
             final ITrack t = tb.getItem (i);

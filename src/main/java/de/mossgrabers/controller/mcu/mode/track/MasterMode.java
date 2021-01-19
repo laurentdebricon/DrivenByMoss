@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.mcu.mode.track;
@@ -10,6 +10,8 @@ import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.daw.IApplication;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.IMasterTrack;
+import de.mossgrabers.framework.daw.data.empty.EmptyParameter;
+import de.mossgrabers.framework.parameterprovider.FixedParameterProvider;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.utils.StringUtils;
 
@@ -31,7 +33,8 @@ public class MasterMode extends BaseMode
     {
         super ("Master", surface, model);
 
-        this.isTemporary = true;
+        final IMasterTrack masterTrack = this.model.getMasterTrack ();
+        this.setParameters (new FixedParameterProvider (masterTrack.getVolumeParameter (), masterTrack.getPanParameter (), EmptyParameter.INSTANCE, EmptyParameter.INSTANCE, EmptyParameter.INSTANCE, EmptyParameter.INSTANCE, EmptyParameter.INSTANCE, EmptyParameter.INSTANCE));
     }
 
 
@@ -57,17 +60,6 @@ public class MasterMode extends BaseMode
 
     /** {@inheritDoc} */
     @Override
-    public void onKnobValue (final int index, final int value)
-    {
-        if (index == 0)
-            this.model.getMasterTrack ().changeVolume (value);
-        else if (index == 1)
-            this.model.getMasterTrack ().changePan (value);
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
     public void onKnobTouch (final int index, final boolean isTouched)
     {
         this.isKnobTouched[index] = isTouched;
@@ -85,7 +77,7 @@ public class MasterMode extends BaseMode
     {
         if (event == ButtonEvent.DOWN && row > 0)
         {
-            this.surface.getModeManager ().restoreMode ();
+            this.surface.getModeManager ().restore ();
             return;
         }
 

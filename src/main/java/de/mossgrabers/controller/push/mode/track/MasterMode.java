@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.mode.track;
@@ -16,11 +16,11 @@ import de.mossgrabers.framework.controller.display.ITextDisplay;
 import de.mossgrabers.framework.controller.valuechanger.IValueChanger;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.IProject;
-import de.mossgrabers.framework.daw.constants.EditCapability;
+import de.mossgrabers.framework.daw.constants.Capability;
 import de.mossgrabers.framework.daw.data.IMasterTrack;
 import de.mossgrabers.framework.daw.data.empty.EmptyParameter;
 import de.mossgrabers.framework.daw.resource.ChannelType;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
 import de.mossgrabers.framework.parameterprovider.FixedParameterProvider;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -42,8 +42,6 @@ public class MasterMode extends BaseMode
     public MasterMode (final PushControlSurface surface, final IModel model, final boolean isTemporary)
     {
         super ("Master", surface, model);
-
-        this.isTemporary = isTemporary;
 
         final IMasterTrack masterTrack = this.model.getMasterTrack ();
         final IProject project = this.model.getProject ();
@@ -130,7 +128,7 @@ public class MasterMode extends BaseMode
     {
         final IMasterTrack master = this.model.getMasterTrack ();
         final IProject project = this.model.getProject ();
-        final boolean canEditCueVolume = this.model.getHost ().canEdit (EditCapability.CUE_VOLUME);
+        final boolean canEditCueVolume = this.model.getHost ().supports (Capability.CUE_VOLUME);
 
         display.setCell (0, 0, "Volume").setCell (0, 1, "Pan");
         if (canEditCueVolume)
@@ -168,7 +166,7 @@ public class MasterMode extends BaseMode
         display.addChannelElement ("Volume", false, master.getName (), ChannelType.MASTER, master.getColor (), master.isSelected (), valueChanger.toDisplayValue (master.getVolume ()), valueChanger.toDisplayValue (master.getModulatedVolume ()), this.isKnobTouched[0] ? master.getVolumeStr (8) : "", valueChanger.toDisplayValue (master.getPan ()), valueChanger.toDisplayValue (master.getModulatedPan ()), this.isKnobTouched[1] ? master.getPanStr (8) : "", vuL, vuR, master.isMute (), master.isSolo (), master.isRecArm (), master.isActivated (), 0);
         display.addChannelSelectorElement ("Pan", false, "", null, ColorEx.BLACK, false, master.isActivated ());
 
-        if (this.model.getHost ().canEdit (EditCapability.CUE_VOLUME))
+        if (this.model.getHost ().supports (Capability.CUE_VOLUME))
         {
             display.addChannelElement ("Cue Volume", false, "Cue", ChannelType.MASTER, ColorEx.GRAY, false, valueChanger.toDisplayValue (project.getCueVolume ()), -1, this.isKnobTouched[2] ? project.getCueVolumeStr (8) : "", valueChanger.toDisplayValue (project.getCueMix ()), -1, this.isKnobTouched[3] ? project.getCueMixStr (8) : "", 0, 0, false, false, false, true, 0);
             display.addChannelSelectorElement ("Cue Mix", false, "", null, ColorEx.BLACK, false, true);
@@ -238,12 +236,12 @@ public class MasterMode extends BaseMode
             if (index == 0)
                 return this.getTrackButtonColor ();
             if (index < 4 || index == 5)
-                return colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_OFF);
+                return colorManager.getColorIndex (AbstractFeatureGroup.BUTTON_COLOR_OFF);
             if (index > 5)
-                return colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_ON);
+                return colorManager.getColorIndex (AbstractFeatureGroup.BUTTON_COLOR_ON);
 
             final int red = isPush2 ? PushColorManager.PUSH2_COLOR_RED_HI : PushColorManager.PUSH1_COLOR_RED_HI;
-            return this.model.getApplication ().isEngineActive () ? colorManager.getColorIndex (AbstractMode.BUTTON_COLOR_ON) : red;
+            return this.model.getApplication ().isEngineActive () ? colorManager.getColorIndex (AbstractFeatureGroup.BUTTON_COLOR_ON) : red;
         }
 
         index = this.isButtonRow (1, buttonID);

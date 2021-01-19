@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.fire.command.trigger;
@@ -11,8 +11,8 @@ import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.constants.RecordQuantization;
 import de.mossgrabers.framework.daw.data.ITrack;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.ButtonEvent;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -41,18 +41,18 @@ public class PlaySelectCommand extends ViewMultiSelectCommand<FireControlSurface
     {
         if (this.surface.isPressed (ButtonID.ALT))
         {
-            this.model.getClip ().quantize (1);
+            this.model.getCursorClip ().quantize (1);
             this.surface.getDisplay ().notify ("Quantize");
             return;
         }
 
         super.executeNormal (event);
 
-        final ITrack selectedTrack = this.model.getSelectedTrack ();
-        if (selectedTrack != null)
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (cursorTrack.doesExist ())
         {
             final ViewManager viewManager = this.surface.getViewManager ();
-            viewManager.setPreferredView (selectedTrack.getPosition (), viewManager.getActiveViewId ());
+            viewManager.setPreferredView (cursorTrack.getPosition (), viewManager.getActiveID ());
         }
     }
 
@@ -64,14 +64,14 @@ public class PlaySelectCommand extends ViewMultiSelectCommand<FireControlSurface
         if (event != ButtonEvent.DOWN)
             return;
 
-        final ITrack selectedTrack = this.model.getSelectedTrack ();
-        if (selectedTrack == null)
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (!cursorTrack.doesExist ())
             return;
 
         // Toggle through all record quantization settings...
 
         final RecordQuantization [] values = RecordQuantization.values ();
-        final RecordQuantization recordQuantization = selectedTrack.getRecordQuantizationGrid ();
+        final RecordQuantization recordQuantization = cursorTrack.getRecordQuantizationGrid ();
         int index = 0;
         for (int i = 0; i < values.length; i++)
         {
@@ -83,7 +83,7 @@ public class PlaySelectCommand extends ViewMultiSelectCommand<FireControlSurface
                 break;
             }
         }
-        selectedTrack.setRecordQuantizationGrid (values[index]);
+        cursorTrack.setRecordQuantizationGrid (values[index]);
         this.surface.getDisplay ().notify ("Rec. Quant.: " + values[index].getName ());
     }
 }

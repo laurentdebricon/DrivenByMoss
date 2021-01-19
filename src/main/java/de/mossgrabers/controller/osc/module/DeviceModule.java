@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.osc.module;
@@ -16,6 +16,7 @@ import de.mossgrabers.framework.daw.data.IChannel;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
 import de.mossgrabers.framework.daw.data.IEqualizerDevice;
 import de.mossgrabers.framework.daw.data.ILayer;
+import de.mossgrabers.framework.daw.data.IParameter;
 import de.mossgrabers.framework.daw.data.ISend;
 import de.mossgrabers.framework.daw.data.ISpecificDevice;
 import de.mossgrabers.framework.daw.data.ITrack;
@@ -103,6 +104,7 @@ public class DeviceModule extends AbstractModule
     {
         final ICursorDevice cd = this.model.getCursorDevice ();
         this.flushDevice (this.writer, "/device/", cd, dump);
+        this.writer.sendOSC ("/device/pinned", cd.isPinned (), dump);
         if (cd.hasDrumPads ())
         {
             final IDrumPadBank drumPadBank = cd.getDrumPadBank ();
@@ -131,7 +133,7 @@ public class DeviceModule extends AbstractModule
     private void flushDevice (final IOpenSoundControlWriter writer, final String deviceAddress, final ISpecificDevice device, final boolean dump)
     {
         writer.sendOSC (deviceAddress + TAG_EXISTS, device.doesExist (), dump);
-        writer.sendOSC (deviceAddress + "name", device.getName (), dump);
+        writer.sendOSC (deviceAddress + TAG_NAME, device.getName (), dump);
         writer.sendOSC (deviceAddress + "bypass", !device.isEnabled (), dump);
         writer.sendOSC (deviceAddress + "expand", device.isExpanded (), dump);
         writer.sendOSC (deviceAddress + "parameters", device.isParameterPageSectionVisible (), dump);
@@ -199,7 +201,7 @@ public class DeviceModule extends AbstractModule
         writer.sendOSC (deviceAddress + TAG_EXISTS, channel.doesExist (), dump);
         writer.sendOSC (deviceAddress + "activated", channel.isActivated (), dump);
         writer.sendOSC (deviceAddress + TAG_SELECTED, channel.isSelected (), dump);
-        writer.sendOSC (deviceAddress + "name", channel.getName (), dump);
+        writer.sendOSC (deviceAddress + TAG_NAME, channel.getName (), dump);
         writer.sendOSC (deviceAddress + "volumeStr", channel.getVolumeStr (), dump);
         writer.sendOSC (deviceAddress + TAG_VOLUME, channel.getVolume (), dump);
         writer.sendOSC (deviceAddress + "panStr", channel.getPanStr (), dump);
@@ -268,6 +270,13 @@ public class DeviceModule extends AbstractModule
                     cursorDevice.selectPrevious ();
                 break;
 
+            case "pinned":
+                if (value == null)
+                    cursorDevice.togglePinned ();
+                else
+                    cursorDevice.setPinned (isTrigger (value));
+                break;
+
             default:
                 path.add (0, command);
                 this.parseDeviceValue (cursorDevice, path, value);
@@ -302,6 +311,10 @@ public class DeviceModule extends AbstractModule
                         }
                         break;
                 }
+                break;
+
+            case TAG_REMOVE:
+                device.remove ();
                 break;
 
             case "bypass":
@@ -447,9 +460,9 @@ public class DeviceModule extends AbstractModule
                 return true;
 
             case "add":
-                final ITrack selectedTrack = this.model.getSelectedTrack ();
-                if (selectedTrack != null && isTrigger (value))
-                    selectedTrack.addEqualizerDevice ();
+                final ITrack cursorTrack = this.model.getCursorTrack ();
+                if (cursorTrack.doesExist () && isTrigger (value))
+                    cursorTrack.addEqualizerDevice ();
                 return true;
 
             default:
@@ -532,7 +545,12 @@ public class DeviceModule extends AbstractModule
         {
             case TAG_SELECT:
             case TAG_SELECTED:
-                layerOrDrumPadBank.getItem (layerIndex).select ();
+                layer.select ();
+                break;
+
+            case TAG_NAME:
+                if (value != null)
+                    layer.setName (value.toString ());
                 break;
 
             case TAG_VOLUME:
@@ -595,22 +613,23 @@ public class DeviceModule extends AbstractModule
     private static void parseFXParamValue (final ISpecificDevice cursorDevice, final int fxparamIndex, final LinkedList<String> path, final Object value) throws MissingCommandException, IllegalParameterException, UnknownCommandException
     {
         final String command = getSubCommand (path);
+        final IParameter param = cursorDevice.getParameterBank ().getItem (fxparamIndex);
         switch (command)
         {
             case "value":
-                cursorDevice.getParameterBank ().getItem (fxparamIndex).setValue (toInteger (value));
+                param.setValue (toInteger (value));
                 break;
 
             case TAG_INDICATE:
-                cursorDevice.getParameterBank ().getItem (fxparamIndex).setIndication (isTrigger (value));
+                param.setIndication (isTrigger (value));
                 break;
 
             case "reset":
-                cursorDevice.getParameterBank ().getItem (fxparamIndex).resetValue ();
+                param.resetValue ();
                 break;
 
             case TAG_TOUCHED:
-                cursorDevice.getParameterBank ().getItem (fxparamIndex).touchValue (isTrigger (value));
+                param.touchValue (isTrigger (value));
                 break;
 
             default:

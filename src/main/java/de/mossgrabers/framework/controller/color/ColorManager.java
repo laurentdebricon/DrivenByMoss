@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.controller.color;
@@ -39,6 +39,18 @@ public class ColorManager
     {
         if (this.colorIndexByKey.containsKey (key))
             throw new ColorIndexException ("Color for key " + key + " is already registered!");
+        this.updateColorIndex (key, colorIndex);
+    }
+
+
+    /**
+     * Registers a a color index. Overwrites already registered indices.
+     *
+     * @param key The key under which to register the color index
+     * @param colorIndex The color index
+     */
+    public void updateColorIndex (final String key, final int colorIndex)
+    {
         this.colorIndexByKey.put (key, Integer.valueOf (colorIndex));
     }
 

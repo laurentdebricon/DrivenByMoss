@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.sl.view;
@@ -8,8 +8,8 @@ import de.mossgrabers.controller.sl.SLConfiguration;
 import de.mossgrabers.controller.sl.command.trigger.ButtonRowSelectCommand;
 import de.mossgrabers.controller.sl.command.trigger.P2ButtonCommand;
 import de.mossgrabers.controller.sl.controller.SLControlSurface;
-import de.mossgrabers.controller.sl.mode.device.DeviceParamsMode;
 import de.mossgrabers.controller.sl.mode.device.DevicePresetsMode;
+import de.mossgrabers.controller.sl.mode.device.SLParameterMode;
 import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.ITransport;
@@ -18,7 +18,7 @@ import de.mossgrabers.framework.daw.data.ISlot;
 import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.daw.data.bank.ISlotBank;
 import de.mossgrabers.framework.daw.data.bank.ITrackBank;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.view.ControlOnlyView;
@@ -60,26 +60,26 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
             return;
 
         final ModeManager modeManager = this.surface.getModeManager ();
-        Modes activeModeId = modeManager.getActiveOrTempModeId ();
+        Modes activeModeId = modeManager.getActiveID ();
         if (Modes.VIEW_SELECT == activeModeId)
         {
             if (index == 1)
             {
-                this.surface.getViewManager ().setActiveView (Views.PLAY);
-                if (Modes.VOLUME.equals (modeManager.getPreviousModeId ()))
-                    modeManager.restoreMode ();
+                this.surface.getViewManager ().setActive (Views.PLAY);
+                if (Modes.VOLUME.equals (modeManager.getPreviousID ()))
+                    modeManager.restore ();
                 else
-                    modeManager.setActiveMode (Modes.SESSION);
+                    modeManager.setActive (Modes.SESSION);
             }
             else
-                modeManager.restoreMode ();
+                modeManager.restore ();
             this.surface.turnOffTransport ();
             return;
         }
 
         if (!Modes.FUNCTIONS.equals (activeModeId) && !Modes.FIXED.equals (activeModeId))
         {
-            modeManager.setActiveMode (Modes.FUNCTIONS);
+            modeManager.setActive (Modes.FUNCTIONS);
             activeModeId = Modes.FUNCTIONS;
         }
 
@@ -113,10 +113,10 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
 
             // New
             case 4:
-                final ITrack t = this.model.getSelectedTrack ();
-                if (t == null)
+                final ITrack cursorTrack = this.model.getCursorTrack ();
+                if (!cursorTrack.doesExist ())
                     return;
-                final ISlotBank slotBank = t.getSlotBank ();
+                final ISlotBank slotBank = cursorTrack.getSlotBank ();
                 final List<ISlot> slotIndexes = slotBank.getSelectedItems ();
                 final int slotIndex = slotIndexes.isEmpty () ? 0 : slotIndexes.get (0).getIndex ();
                 for (int i = 0; i < 8; i++)
@@ -126,7 +126,7 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
                     if (!s.hasContent ())
                     {
                         final int lengthInBeats = this.surface.getConfiguration ().getNewClipLenghthInBeats (this.model.getTransport ().getQuartersPerMeasure ());
-                        this.model.createNoteClip (t, s, lengthInBeats, true);
+                        this.model.createNoteClip (cursorTrack, s, lengthInBeats, true);
                         return;
                     }
                 }
@@ -163,46 +163,39 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
             return;
 
         final ModeManager modeManager = this.surface.getModeManager ();
-        Modes cm = modeManager.getActiveOrTempModeId ();
+        Modes cm = modeManager.getActiveID ();
         if (!Modes.TRACK_DETAILS.equals (cm) && !Modes.FRAME.equals (cm) && !Modes.BROWSER.equals (cm))
         {
-            modeManager.setActiveMode (Modes.TRACK_DETAILS);
+            modeManager.setActive (Modes.TRACK_DETAILS);
             cm = Modes.TRACK_DETAILS;
         }
 
         if (Modes.FRAME.equals (cm))
         {
-            modeManager.getMode (Modes.FRAME).onButton (0, index, event);
+            modeManager.get (Modes.FRAME).onButton (0, index, event);
             return;
         }
         else if (Modes.BROWSER.equals (cm))
         {
-            modeManager.getMode (Modes.BROWSER).onButton (0, index, event);
+            modeManager.get (Modes.BROWSER).onButton (0, index, event);
             return;
         }
 
-        ITrack track;
         switch (index)
         {
             // Mute
             case 0:
-                track = this.model.getSelectedTrack ();
-                if (track != null)
-                    track.toggleMute ();
+                this.model.getCursorTrack ().toggleMute ();
                 break;
 
             // Solo
             case 1:
-                track = this.model.getSelectedTrack ();
-                if (track != null)
-                    track.toggleSolo ();
+                this.model.getCursorTrack ().toggleSolo ();
                 break;
 
             // Arm
             case 2:
-                track = this.model.getSelectedTrack ();
-                if (track != null)
-                    track.toggleRecArm ();
+                this.model.getCursorTrack ().toggleRecArm ();
                 break;
 
             // Write
@@ -213,7 +206,7 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
             // Browse
             case 4:
                 this.model.getBrowser ().replace (this.model.getCursorDevice ());
-                modeManager.setActiveMode (Modes.BROWSER);
+                modeManager.setTemporary (Modes.BROWSER);
                 break;
 
             // Dis-/Enable device
@@ -242,8 +235,7 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
     @Override
     public void onButtonRow3 (final int index, final ButtonEvent event)
     {
-        if (!this.model.getMasterTrack ().isSelected ())
-            this.selectTrack (index);
+        this.selectTrack (index);
     }
 
 
@@ -309,8 +301,8 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
     public void onButtonRow1Select ()
     {
         final ModeManager modeManager = this.surface.getModeManager ();
-        final boolean selectFixed = Modes.FUNCTIONS.equals (modeManager.getActiveOrTempModeId ());
-        modeManager.setActiveMode (selectFixed ? Modes.FIXED : Modes.FUNCTIONS);
+        final boolean selectFixed = Modes.FUNCTIONS.equals (modeManager.getActiveID ());
+        modeManager.setActive (selectFixed ? Modes.FIXED : Modes.FUNCTIONS);
         this.model.getHost ().showNotification (selectFixed ? "Fixed Length" : "Functions");
     }
 
@@ -320,8 +312,8 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
     public void onButtonRow2Select ()
     {
         final ModeManager modeManager = this.surface.getModeManager ();
-        final boolean selectFrame = Modes.TRACK_DETAILS.equals (modeManager.getActiveOrTempModeId ());
-        modeManager.setActiveMode (selectFrame ? Modes.FRAME : Modes.TRACK_DETAILS);
+        final boolean selectFrame = Modes.TRACK_DETAILS.equals (modeManager.getActiveID ());
+        modeManager.setActive (selectFrame ? Modes.FRAME : Modes.TRACK_DETAILS);
         this.model.getHost ().showNotification (selectFrame ? "Layouts & Panels" : "Track & Device");
     }
 
@@ -334,21 +326,33 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
             return;
 
         final ModeManager modeManager = this.surface.getModeManager ();
-        final Modes activeModeId = modeManager.getActiveOrTempModeId ();
-        if (Modes.FUNCTIONS.equals (activeModeId) || Modes.FIXED.equals (activeModeId))
-            this.onButtonRow1Select ();
-        else if (Modes.VOLUME.equals (activeModeId))
-            new P2ButtonCommand (isUp, this.model, this.surface).execute (ButtonEvent.DOWN, 127);
-        else if (Modes.TRACK.equals (activeModeId) || Modes.MASTER.equals (activeModeId))
-            new ButtonRowSelectCommand<> (3, this.model, this.surface).execute (ButtonEvent.DOWN, 127);
-        else if (Modes.TRACK_DETAILS.equals (activeModeId) || Modes.FRAME.equals (activeModeId))
-            this.onButtonRow2Select ();
-        else
+        switch (modeManager.getActiveID ())
         {
-            if (isUp)
-                ((DeviceParamsMode) modeManager.getMode (Modes.DEVICE_PARAMS)).nextPage ();
-            else
-                ((DeviceParamsMode) modeManager.getMode (Modes.DEVICE_PARAMS)).previousPage ();
+            case FUNCTIONS:
+            case FIXED:
+                this.onButtonRow1Select ();
+                break;
+
+            case VOLUME:
+                new P2ButtonCommand (isUp, this.model, this.surface).execute (ButtonEvent.DOWN, 127);
+                break;
+
+            case TRACK:
+                new ButtonRowSelectCommand<> (3, this.model, this.surface).execute (ButtonEvent.DOWN, 127);
+                break;
+
+            case TRACK_DETAILS:
+            case FRAME:
+                this.onButtonRow2Select ();
+                break;
+
+            default:
+                final SLParameterMode deviceParamsMode = (SLParameterMode) modeManager.get (Modes.DEVICE_PARAMS);
+                if (isUp)
+                    deviceParamsMode.selectNextItemPage ();
+                else
+                    deviceParamsMode.selectPreviousItemPage ();
+                break;
         }
     }
 
@@ -362,7 +366,7 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
         final ITransport transport = this.model.getTransport ();
         final int clipLength = this.surface.getConfiguration ().getNewClipLength ();
 
-        final Modes mode = this.surface.getModeManager ().getActiveOrTempModeId ();
+        final Modes mode = this.surface.getModeManager ().getActiveID ();
         final boolean isFunctions = Modes.FUNCTIONS.equals (mode);
 
         final boolean isViewSelectMode = Modes.VIEW_SELECT.equals (mode);
@@ -410,7 +414,7 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
         // Button row 2: Track toggles / Browse
         if (Modes.BROWSER.equals (mode))
         {
-            final int selMode = ((DevicePresetsMode) this.surface.getModeManager ().getMode (Modes.BROWSER)).getSelectionMode ();
+            final int selMode = ((DevicePresetsMode) this.surface.getModeManager ().get (Modes.BROWSER)).getSelectionMode ();
 
             switch (buttonID)
             {
@@ -472,7 +476,6 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
         final boolean isTrack = Modes.TRACK.equals (mode);
         final boolean isTrackToggles = Modes.TRACK_DETAILS.equals (mode);
         final boolean isVolume = Modes.VOLUME.equals (mode);
-        final boolean isMaster = Modes.MASTER.equals (mode);
         final boolean isFixed = Modes.FIXED.equals (mode);
         final boolean isFrame = Modes.FRAME.equals (mode);
         final boolean isPreset = Modes.BROWSER.equals (mode);
@@ -497,7 +500,7 @@ public class ControlView extends ControlOnlyView<SLControlSurface, SLConfigurati
             case ROW_SELECT_3:
                 return isTrackToggles || isFrame || isPreset ? SLControlSurface.MKII_BUTTON_STATE_ON : SLControlSurface.MKII_BUTTON_STATE_OFF;
             case ROW_SELECT_4:
-                return isTrack || isMaster ? SLControlSurface.MKII_BUTTON_STATE_ON : SLControlSurface.MKII_BUTTON_STATE_OFF;
+                return isTrack ? SLControlSurface.MKII_BUTTON_STATE_ON : SLControlSurface.MKII_BUTTON_STATE_OFF;
             case ROW_SELECT_6:
                 return isVolume ? SLControlSurface.MKII_BUTTON_STATE_ON : SLControlSurface.MKII_BUTTON_STATE_OFF;
             case ROW_SELECT_7:

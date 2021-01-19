@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.maschine.command.trigger;
@@ -9,7 +9,7 @@ import de.mossgrabers.controller.maschine.controller.MaschineControlSurface;
 import de.mossgrabers.controller.maschine.mode.EditNoteMode;
 import de.mossgrabers.framework.command.trigger.mode.ModeSelectCommand;
 import de.mossgrabers.framework.daw.IModel;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.view.Views;
@@ -41,11 +41,11 @@ public class TempoCommand extends ModeSelectCommand<MaschineControlSurface, Masc
         final ModeManager modeManager = this.surface.getModeManager ();
 
         // Switch Transpose/Pressure note edit parameters
-        if (modeManager.isActiveOrTempMode (Modes.NOTE) && this.surface.getViewManager ().isActiveView (Views.DRUM, Views.PLAY))
+        if (modeManager.isActive (Modes.NOTE) && this.surface.getViewManager ().isActive (Views.DRUM, Views.PLAY))
         {
             if (event == ButtonEvent.DOWN)
             {
-                final EditNoteMode mode = (EditNoteMode) modeManager.getMode (Modes.NOTE);
+                final EditNoteMode mode = (EditNoteMode) modeManager.get (Modes.NOTE);
                 final boolean isTranspose = mode.getSelectedItem () == EditNoteMode.TRANSPOSE;
                 mode.selectItem (isTranspose ? EditNoteMode.PRESSURE : EditNoteMode.TRANSPOSE);
                 this.surface.getDisplay ().notify (isTranspose ? "Pressure" : "Pitch");

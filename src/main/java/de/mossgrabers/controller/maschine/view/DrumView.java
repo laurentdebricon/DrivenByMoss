@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.maschine.view;
@@ -14,7 +14,7 @@ import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.INoteClip;
 import de.mossgrabers.framework.daw.IStepInfo;
 import de.mossgrabers.framework.daw.data.IDrumDevice;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.scale.Scales;
 import de.mossgrabers.framework.utils.ButtonEvent;
@@ -228,11 +228,11 @@ public class DrumView extends AbstractDrumView<MaschineControlSurface, MaschineC
     protected boolean handleSequencerAreaButtonCombinations (final INoteClip clip, final int channel, final int step, final int note, final int velocity)
     {
         final ModeManager modeManager = this.surface.getModeManager ();
-        if (modeManager.isActiveOrTempMode (Modes.NOTE))
+        if (modeManager.isActive (Modes.NOTE))
         {
             final int isSet = clip.getStep (channel, step, note).getState ();
             this.model.getHost ().showNotification ("Note " + Scales.formatNoteAndOctave (note, -3) + " - Step " + Integer.toString (step + 1));
-            ((EditNoteMode) modeManager.getMode (Modes.NOTE)).setValues (isSet == IStepInfo.NOTE_START ? clip : null, channel, step, note);
+            ((EditNoteMode) modeManager.get (Modes.NOTE)).setValues (isSet == IStepInfo.NOTE_START ? clip : null, channel, step, note);
             return true;
         }
 

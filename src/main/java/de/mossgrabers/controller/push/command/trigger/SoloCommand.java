@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -11,7 +11,6 @@ import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.IChannel;
 import de.mossgrabers.framework.daw.data.ICursorDevice;
-import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -40,7 +39,7 @@ public class SoloCommand extends AbstractTriggerCommand<PushControlSurface, Push
     public void execute (final ButtonEvent event, final int velocity)
     {
         // Update for key combinations
-        this.surface.getViewManager ().getActiveView ().updateNoteMapping ();
+        this.surface.getViewManager ().getActive ().updateNoteMapping ();
 
         if (this.surface.isSelectPressed ())
         {
@@ -98,7 +97,7 @@ public class SoloCommand extends AbstractTriggerCommand<PushControlSurface, Push
             return;
         }
 
-        final Modes activeModeId = this.surface.getModeManager ().getActiveOrTempModeId ();
+        final Modes activeModeId = this.surface.getModeManager ().getActiveID ();
         if (Modes.isLayerMode (activeModeId))
         {
             final ICursorDevice cd = this.model.getCursorDevice ();
@@ -109,10 +108,6 @@ public class SoloCommand extends AbstractTriggerCommand<PushControlSurface, Push
         else if (Modes.MASTER.equals (activeModeId))
             this.model.getMasterTrack ().toggleSolo ();
         else
-        {
-            final ITrack selTrack = this.model.getSelectedTrack ();
-            if (selTrack != null)
-                selTrack.toggleSolo ();
-        }
+            this.model.getCursorTrack ().toggleSolo ();
     }
 }

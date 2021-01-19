@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.maschine.view;
@@ -12,7 +12,7 @@ import de.mossgrabers.framework.daw.DAWColor;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.IScene;
 import de.mossgrabers.framework.daw.data.bank.ISceneBank;
-import de.mossgrabers.framework.mode.AbstractMode;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
 
 
 /**
@@ -78,7 +78,7 @@ public class SceneView extends BaseView
                     padGrid.lightEx (x, y, DAWColor.getColorIndex (item.getColor ()));
             }
             else
-                padGrid.lightEx (x, y, AbstractMode.BUTTON_COLOR_OFF);
+                padGrid.lightEx (x, y, AbstractFeatureGroup.BUTTON_COLOR_OFF);
         }
     }
 }

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -36,6 +36,6 @@ public class DeviceCommand extends AbstractTriggerCommand<PushControlSurface, Pu
     public void execute (final ButtonEvent event, final int velocity)
     {
         if (event == ButtonEvent.DOWN)
-            this.surface.getModeManager ().setActiveMode (Modes.DEVICE_PARAMS);
+            this.surface.getModeManager ().setActive (Modes.DEVICE_PARAMS);
     }
 }

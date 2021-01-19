@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.continuous;
@@ -10,7 +10,7 @@ import de.mossgrabers.framework.command.core.AbstractTriggerCommand;
 import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.IMasterTrack;
-import de.mossgrabers.framework.mode.ModeManager;
+import de.mossgrabers.framework.featuregroup.ModeManager;
 import de.mossgrabers.framework.mode.Modes;
 import de.mossgrabers.framework.utils.ButtonEvent;
 
@@ -42,7 +42,7 @@ public class MastertrackTouchCommand extends AbstractTriggerCommand<PushControlS
 
         // Avoid accidentally leaving the browser
         final ModeManager modeManager = this.surface.getModeManager ();
-        if (modeManager.isActiveOrTempMode (Modes.BROWSER))
+        if (modeManager.isActive (Modes.BROWSER))
             return;
 
         final IMasterTrack masterTrack = this.model.getMasterTrack ();
@@ -55,13 +55,13 @@ public class MastertrackTouchCommand extends AbstractTriggerCommand<PushControlS
             return;
         }
 
-        final boolean isMasterMode = modeManager.isActiveOrTempMode (Modes.MASTER);
+        final boolean isMasterMode = modeManager.isActive (Modes.MASTER);
         if (isTouched && isMasterMode)
             return;
 
         if (isTouched)
-            modeManager.setActiveMode (Modes.MASTER_TEMP);
+            modeManager.setTemporary (Modes.MASTER_TEMP);
         else if (!isMasterMode)
-            modeManager.restoreMode ();
+            modeManager.restore ();
     }
 }

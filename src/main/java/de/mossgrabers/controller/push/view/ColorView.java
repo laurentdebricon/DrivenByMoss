@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.view;
@@ -14,8 +14,8 @@ import de.mossgrabers.framework.daw.IClip;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.IMasterTrack;
 import de.mossgrabers.framework.daw.data.ITrack;
-import de.mossgrabers.framework.mode.AbstractMode;
-import de.mossgrabers.framework.view.AbstractView;
+import de.mossgrabers.framework.featuregroup.AbstractFeatureGroup;
+import de.mossgrabers.framework.featuregroup.AbstractView;
 
 
 /**
@@ -90,15 +90,15 @@ public class ColorView extends AbstractView<PushControlSurface, PushConfiguratio
             switch (this.mode)
             {
                 case MODE_TRACK:
-                    final ITrack t = this.model.getSelectedTrack ();
-                    if (t == null)
+                    final ITrack cursorTrack = this.model.getCursorTrack ();
+                    if (cursorTrack.doesExist ())
+                        cursorTrack.setColor (entry);
+                    else
                     {
                         final IMasterTrack master = this.model.getMasterTrack ();
                         if (master.isSelected ())
                             master.setColor (entry);
                     }
-                    else
-                        t.setColor (entry);
                     break;
 
                 case MODE_LAYER:
@@ -106,13 +106,13 @@ public class ColorView extends AbstractView<PushControlSurface, PushConfiguratio
                     break;
 
                 case MODE_CLIP:
-                    final IClip clip = this.model.getClip ();
+                    final IClip clip = this.model.getCursorClip ();
                     if (clip.doesExist ())
                         clip.setColor (entry);
                     break;
             }
         }
-        this.surface.getViewManager ().restoreView ();
+        this.surface.getViewManager ().restore ();
     }
 
 
@@ -120,6 +120,6 @@ public class ColorView extends AbstractView<PushControlSurface, PushConfiguratio
     @Override
     public String getButtonColorID (final ButtonID buttonID)
     {
-        return AbstractMode.BUTTON_COLOR_OFF;
+        return AbstractFeatureGroup.BUTTON_COLOR_OFF;
     }
 }

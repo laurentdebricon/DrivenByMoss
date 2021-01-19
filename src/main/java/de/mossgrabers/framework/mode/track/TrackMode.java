@@ -1,14 +1,18 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.mode.track;
 
 import de.mossgrabers.framework.configuration.Configuration;
+import de.mossgrabers.framework.controller.ContinuousID;
 import de.mossgrabers.framework.controller.IControlSurface;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.data.ISend;
 import de.mossgrabers.framework.daw.data.ITrack;
+import de.mossgrabers.framework.parameterprovider.ChannelParameterProvider;
+
+import java.util.List;
 
 
 /**
@@ -31,7 +35,22 @@ public class TrackMode<S extends IControlSurface<C>, C extends Configuration> ex
      */
     public TrackMode (final S surface, final IModel model, final boolean isAbsolute)
     {
-        this ("Track", surface, model, isAbsolute);
+        this (surface, model, isAbsolute, null);
+    }
+
+
+    /**
+     * Constructor.
+     *
+     * @param surface The control surface
+     * @param model The model
+     * @param isAbsolute If true the value change is happending with a setter otherwise relative
+     *            change method is used
+     * @param controls The IDs of the knobs or faders to control this mode
+     */
+    public TrackMode (final S surface, final IModel model, final boolean isAbsolute, final List<ContinuousID> controls)
+    {
+        this ("Track", surface, model, isAbsolute, controls);
     }
 
 
@@ -43,10 +62,14 @@ public class TrackMode<S extends IControlSurface<C>, C extends Configuration> ex
      * @param model The model
      * @param isAbsolute If true the value change is happending with a setter otherwise relative
      *            change method is used
+     * @param controls The IDs of the knobs or faders to control this mode
      */
-    public TrackMode (final String name, final S surface, final IModel model, final boolean isAbsolute)
+    public TrackMode (final String name, final S surface, final IModel model, final boolean isAbsolute, final List<ContinuousID> controls)
     {
-        super (name, surface, model, isAbsolute);
+        super (name, surface, model, isAbsolute, controls);
+
+        if (controls != null)
+            this.setParameters (new ChannelParameterProvider (model));
     }
 
 

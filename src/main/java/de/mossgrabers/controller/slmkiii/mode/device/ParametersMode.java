@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.slmkiii.mode.device;
@@ -17,6 +17,9 @@ import de.mossgrabers.framework.daw.data.IParameter;
 import de.mossgrabers.framework.daw.data.bank.IDeviceBank;
 import de.mossgrabers.framework.daw.data.bank.IParameterBank;
 import de.mossgrabers.framework.daw.data.bank.IParameterPageBank;
+import de.mossgrabers.framework.parameterprovider.BankParameterProvider;
+import de.mossgrabers.framework.parameterprovider.IParameterProvider;
+import de.mossgrabers.framework.parameterprovider.ResetParameterProvider;
 import de.mossgrabers.framework.utils.ButtonEvent;
 import de.mossgrabers.framework.utils.StringUtils;
 
@@ -46,6 +49,10 @@ public class ParametersMode extends AbstractParametersMode
         this.setShowDevices (true);
 
         this.browserCommand = new BrowserCommand<> (model, surface);
+
+        final IParameterProvider parameterProvider = new BankParameterProvider (this.model.getCursorDevice ().getParameterBank ());
+        this.setParameters (parameterProvider);
+        this.setParameters (ButtonID.DELETE, new ResetParameterProvider (parameterProvider));
     }
 
 
@@ -71,27 +78,6 @@ public class ParametersMode extends AbstractParametersMode
     public boolean isShowDevices ()
     {
         return this.showDevices;
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public void onKnobValue (final int index, final int value)
-    {
-        final IParameter param = this.model.getCursorDevice ().getParameterBank ().getItem (index);
-        if (this.surface.isDeletePressed ())
-            param.resetValue ();
-        else
-            param.changeValue (value);
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public int getKnobValue (final int index)
-    {
-        final ICursorDevice cd = this.model.getCursorDevice ();
-        return cd.doesExist () ? cd.getParameterBank ().getItem (index).getValue () : 0;
     }
 
 
@@ -194,7 +180,7 @@ public class ParametersMode extends AbstractParametersMode
                     this.browserCommand.startBrowser (false, false);
                 break;
             case 7:
-                if (this.model.getSelectedTrack () != null)
+                if (this.model.getCursorTrack ().doesExist ())
                     this.browserCommand.startBrowser (true, false);
                 break;
             default:
@@ -250,7 +236,7 @@ public class ParametersMode extends AbstractParametersMode
         final ICursorDevice cd = this.model.getCursorDevice ();
         if (!cd.doesExist ())
         {
-            if (buttonID == ButtonID.ROW1_8 && this.model.getSelectedTrack () != null)
+            if (buttonID == ButtonID.ROW1_8 && this.model.getCursorTrack ().doesExist ())
                 return SLMkIIIColorManager.SLMKIII_RED_HALF;
             return SLMkIIIColorManager.SLMKIII_BLACK;
         }
@@ -415,7 +401,7 @@ public class ParametersMode extends AbstractParametersMode
             }
         }
 
-        if (this.model.getSelectedTrack () != null)
+        if (this.model.getCursorTrack ().doesExist ())
         {
             d.setCell (3, 7, "Insert >>");
             d.setPropertyColor (7, 2, SLMkIIIColorManager.SLMKIII_RED);

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.extension;
@@ -24,6 +24,7 @@ import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.UsbTransferType;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 
@@ -134,7 +135,7 @@ public abstract class AbstractControllerExtensionDefinition extends ControllerEx
     @Override
     public void listAutoDetectionMidiPortNames (final AutoDetectionMidiPortNamesList list, final PlatformType platformType)
     {
-        final OperatingSystem os = OperatingSystem.valueOf (platformType.name ().toUpperCase ());
+        final OperatingSystem os = OperatingSystem.valueOf (platformType.name ().toUpperCase (Locale.US));
         for (final Pair<String [], String []> midiDiscoveryPair: this.definition.getMidiDiscoveryPairs (os))
             list.add (midiDiscoveryPair.getKey (), midiDiscoveryPair.getValue ());
     }

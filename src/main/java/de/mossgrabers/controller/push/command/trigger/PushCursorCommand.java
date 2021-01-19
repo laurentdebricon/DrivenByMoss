@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.push.command.trigger;
@@ -78,6 +78,6 @@ public class PushCursorCommand extends CursorCommand<PushControlSurface, PushCon
 
     private boolean isScenePlay ()
     {
-        return this.surface.getViewManager ().isActiveView (Views.SCENE_PLAY);
+        return this.surface.getViewManager ().isActive (Views.SCENE_PLAY);
     }
 }

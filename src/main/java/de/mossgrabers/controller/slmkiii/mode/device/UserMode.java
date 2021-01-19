@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.slmkiii.mode.device;
@@ -33,23 +33,6 @@ public class UserMode extends AbstractParametersMode
         super ("User Parameters", surface, model, model.getUserParameterBank ());
 
         this.setParameters (new BankParameterProvider (model.getUserParameterBank ()));
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public void onKnobValue (final int index, final int value)
-    {
-        // Not used - IParameter is directly mapped
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public int getKnobValue (final int index)
-    {
-        final IParameter item = this.model.getUserParameterBank ().getItem (index);
-        return item != null && item.doesExist () ? item.getValue () : 0;
     }
 
 

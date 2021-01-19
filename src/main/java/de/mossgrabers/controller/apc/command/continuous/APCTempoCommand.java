@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.apc.command.continuous;
@@ -8,8 +8,8 @@ import de.mossgrabers.controller.apc.APCConfiguration;
 import de.mossgrabers.controller.apc.controller.APCControlSurface;
 import de.mossgrabers.framework.command.continuous.TempoCommand;
 import de.mossgrabers.framework.daw.IModel;
+import de.mossgrabers.framework.featuregroup.ViewManager;
 import de.mossgrabers.framework.utils.Timeout;
-import de.mossgrabers.framework.view.ViewManager;
 import de.mossgrabers.framework.view.Views;
 
 
@@ -45,8 +45,8 @@ public class APCTempoCommand extends TempoCommand<APCControlSurface, APCConfigur
         super.execute (value);
 
         final ViewManager viewManager = this.surface.getViewManager ();
-        if (!viewManager.isActiveView (Views.TEMPO))
-            viewManager.setActiveView (Views.TEMPO);
-        this.timeout.delay (viewManager::restoreView);
+        if (!viewManager.isActive (Views.TEMPO))
+            viewManager.setTemporary (Views.TEMPO);
+        this.timeout.delay (viewManager::restore);
     }
 }

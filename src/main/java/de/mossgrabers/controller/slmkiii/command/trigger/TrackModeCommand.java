@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.slmkiii.command.trigger;
@@ -49,6 +49,6 @@ public class TrackModeCommand extends AbstractTriggerCommand<SLMkIIIControlSurfa
         if (browser != null && browser.isActive ())
             browser.stopBrowsing (!this.surface.isShiftPressed ());
 
-        this.modeSelectCommand.execute (ButtonEvent.DOWN, 127);
+        this.modeSelectCommand.execute (ButtonEvent.UP, 127);
     }
 }
