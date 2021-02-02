@@ -209,17 +209,18 @@ public class FootswitchCommand<S extends IControlSurface<C>, C extends Configura
             return;
 
         this.surface.println(event.toString());
-        final ITrack track = this.model.getSelectedTrack ();
-        if (track == null)
+        final ITrack cursorTrack = this.model.getCursorTrack ();
+        if (!cursorTrack.doesExist ())
         {
-            this.surface.getDisplay ().notify ("Please select a track first.");
+            this.surface.getDisplay ().notify ("Please select an Instrument track first.");
             return;
         }
-        if(!track.isRecArm()){
-            this.surface.getDisplay ().notify ("Rec Arm " + track.getIndex() + " !");
+
+        if(!cursorTrack.isRecArm()){
+            this.surface.getDisplay ().notify ("Rec Arm " + cursorTrack.getIndex() + " !");
         }
 
-        final ISlotBank slotBank = track.getSlotBank ();
+        final ISlotBank slotBank = cursorTrack.getSlotBank ();
         final ISlot selectedSlot = slotBank.getSelectedItem ();
         boolean noSelectedSlot = selectedSlot == null;
         ISlot slot = selectedSlot == null ? slotBank.getItem (0) : selectedSlot;
@@ -255,9 +256,9 @@ public class FootswitchCommand<S extends IControlSurface<C>, C extends Configura
                 this.surface.getDisplay ().notify ("Duplicate with no clip");
                 this.surface.println("very long press");
                 // disable record
-                track.setRecArm(false);
-                track.duplicate(); // pas sur de ça, normalement ça va sur la nouvelle
-                int index = track.getIndex();
+                cursorTrack.setRecArm(false);
+                cursorTrack.duplicate(); // pas sur de ça, normalement ça va sur la nouvelle
+                int index = cursorTrack.getIndex();
                 ITrack newTrack = this.model.getTrackBank().getItem(index +1);
                 newTrack.select();
                 // clear all clip of the cloned track
@@ -271,7 +272,7 @@ public class FootswitchCommand<S extends IControlSurface<C>, C extends Configura
                 newTrack.setRecArm(true);
                 // enable record, you can now jam over your loop !
             }else{
-                if(track.canHoldNotes() && noSelectedSlot){                   
+                if(cursorTrack.canHoldNotes() && noSelectedSlot){                   
                     slot = slotBank.getEmptySlot(0);
                     if(slot == null){
                         this.surface.getDisplay ().notify ("No more empty slot in the bank");
@@ -281,7 +282,7 @@ public class FootswitchCommand<S extends IControlSurface<C>, C extends Configura
                 }
 
                 if (slot.hasContent ()){
-                        if(track.canHoldAudioData()){
+                        if(cursorTrack.canHoldAudioData()){
                             // create new clip and record
                             this.surface.getButton (ButtonID.NEW).trigger (ButtonEvent.DOWN);
                         }else{

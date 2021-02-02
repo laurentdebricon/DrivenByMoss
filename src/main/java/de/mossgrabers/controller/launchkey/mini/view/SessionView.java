@@ -168,8 +168,8 @@ public class SessionView extends AbstractSessionView<LaunchkeyMiniMk3ControlSurf
 	@Override
 	public void onGridNoteLongPress (final int note)
 	{
-		final SessionView view = (SessionView) this.surface.getViewManager ().getView (Views.SESSION);
-		final Modes padMode = view.getPadMode ();
+	//	final SessionView view = (SessionView) this.surface.getViewManager ().getView (Views.SESSION);
+		final Modes padMode = this.getPadMode ();
 
 		final Pair<Integer, Integer> padPos = this.getPad (note);
 		final int column = padPos.getKey ().intValue ();
@@ -240,6 +240,7 @@ public class SessionView extends AbstractSessionView<LaunchkeyMiniMk3ControlSurf
 
 
     /** {@inheritDoc} */
+/* désactivé car je crois ma fonction est mieux
     @Override
     public void onGridNoteLongPress (final int note)
     {
@@ -248,7 +249,7 @@ public class SessionView extends AbstractSessionView<LaunchkeyMiniMk3ControlSurf
         if (row == 0 || this.padMode == null)
             super.onGridNoteLongPress (note);
     }
-
+*/
 
     /** {@inheritDoc} */
     @Override

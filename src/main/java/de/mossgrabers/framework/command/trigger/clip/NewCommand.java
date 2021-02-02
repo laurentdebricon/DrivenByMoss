@@ -73,7 +73,7 @@ public class NewCommand<S extends IControlSurface<C>, C extends Configuration> e
             return;
         }
 
-		if(track.canHoldAudioData()){
+		if(cursorTrack.canHoldAudioData()){
             slot.record();
             slot.select();
 		}else{
